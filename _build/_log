@@ -1,0 +1,17 @@
+### Starting build.
+# Target: property.mli.depends, tags: { extension:mli, file:property.mli, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules property.mli > property.mli.depends
+# Target: property.cmi, tags: { byte, compile, extension:mli, file:property.mli, interf, ocaml, quiet }
+ocamlfind ocamlc -c -o property.cmi property.mli
+# Target: property.ml.depends, tags: { extension:ml, file:property.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules property.ml > property.ml.depends
+# Target: property.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:property.cmo, file:property.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -o property.cmo property.ml
++ ocamlfind ocamlc -c -o property.cmo property.ml
+File "property.ml", line 1:
+Error: The implementation property.ml
+       does not match the interface property.cmi:
+       The type `pcolor' is required but not provided
+       File "property.mli", line 1, characters 0-11: Expected declaration
+Command exited with code 2.
+# Compilation unsuccessful.
