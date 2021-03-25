@@ -12,6 +12,7 @@ type property_type =
   | Go
   | FreeParking
   | Railroad
+  | Utilities
   | Chance
   | ComChest
 
@@ -47,18 +48,7 @@ let get_type prop = prop.property_type
 
 let num_for_monopoly prop =
   match get_type prop with
-  | Brown -> 2
-  | LBlue -> 3
-  | Pink -> 3
-  | Orange -> 3
-  | Red -> 3
-  | Yellow -> 3
-  | Green -> 3
-  | DBlue -> 2
-  | Jail -> -1
-  | GoToJail -> -1
-  | Go -> -1
-  | FreeParking -> -1
-  | Railroad -> -1
-  | Chance -> -1
-  | ComChest -> -1
+  | Brown | DBlue | Utilities -> 2
+  | LBlue | Pink | Orange | Red | Yellow | Green -> 3
+  | Railroad -> 4
+  | Jail | GoToJail | Go | FreeParking | Chance | ComChest -> -1

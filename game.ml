@@ -33,7 +33,7 @@ let collect_rent player property game =
   if player_money player >= rent_owed then (
     let owner = find_player (get_owner property) game.players in
     update_player_money owner rent_owed;
-    update_player_money player (-1 * rent_owed) )
+    update_player_money player (-1 * rent_owed))
   else mortgage player property game
 
 let rec has_monopoly_helper plyr owned_properties property_type

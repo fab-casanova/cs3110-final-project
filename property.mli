@@ -12,6 +12,8 @@ val set_owner : t -> string -> unit
 
 val get_price : t -> int
 
+val is_mortaged : t -> bool
+
 val create_mortgage : t -> unit
 
 val unmortgage : t -> unit

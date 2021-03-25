@@ -1,34 +1,34 @@
 ### Starting build.
-# Target: property.mli.depends, tags: { extension:mli, file:property.mli, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules property.mli > property.mli.depends
-# Target: property.cmi, tags: { byte, compile, extension:mli, file:property.mli, interf, ocaml, quiet }
-ocamlfind ocamlc -c -o property.cmi property.mli
-# Target: property.ml.depends, tags: { extension:ml, file:property.ml, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules property.ml > property.ml.depends
-# Target: property.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:property.cmo, file:property.ml, implem, ocaml, quiet }
-ocamlfind ocamlc -c -o property.cmo property.ml
-# Target: player.mli.depends, tags: { extension:mli, file:player.mli, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules player.mli > player.mli.depends
-# Target: player.cmi, tags: { byte, compile, extension:mli, file:player.mli, interf, ocaml, quiet }
-ocamlfind ocamlc -c -o player.cmi player.mli
-# Target: player.ml.depends, tags: { extension:ml, file:player.ml, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules player.ml > player.ml.depends
-# Target: player.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:player.cmo, file:player.ml, implem, ocaml, quiet }
-ocamlfind ocamlc -c -o player.cmo player.ml
-# Target: gameboard.mli.depends, tags: { extension:mli, file:gameboard.mli, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules gameboard.mli > gameboard.mli.depends
-# Target: gameboard.cmi, tags: { byte, compile, extension:mli, file:gameboard.mli, interf, ocaml, quiet }
-ocamlfind ocamlc -c -o gameboard.cmi gameboard.mli
-# Target: gameboard.ml.depends, tags: { extension:ml, file:gameboard.ml, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules gameboard.ml > gameboard.ml.depends
-# Target: gameboard.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:gameboard.cmo, file:gameboard.ml, implem, ocaml, quiet }
-ocamlfind ocamlc -c -o gameboard.cmo gameboard.ml
-# Target: game.mli.depends, tags: { extension:mli, file:game.mli, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules game.mli > game.mli.depends
-# Target: game.cmi, tags: { byte, compile, extension:mli, file:game.mli, interf, ocaml, quiet }
-ocamlfind ocamlc -c -o game.cmi game.mli
-# Target: game.ml.depends, tags: { extension:ml, file:game.ml, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules game.ml > game.ml.depends
-# Target: game.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:game.cmo, file:game.ml, implem, ocaml, quiet }
-ocamlfind ocamlc -c -o game.cmo game.ml
+# Target: property.mli.depends, tags: { package(ANSITerminal), package(ounit2), extension:mli, file:property.mli, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules property.mli > property.mli.depends # cached
+# Target: property.cmi, tags: { package(ANSITerminal), package(ounit2), byte, compile, extension:mli, file:property.mli, interf, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o property.cmi property.mli # cached
+# Target: property.ml.depends, tags: { package(ANSITerminal), package(ounit2), extension:ml, file:property.ml, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules property.ml > property.ml.depends # cached
+# Target: property.cmo, tags: { package(ANSITerminal), package(ounit2), byte, compile, extension:cmo, extension:ml, file:property.cmo, file:property.ml, implem, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o property.cmo property.ml # cached
+# Target: player.mli.depends, tags: { package(ANSITerminal), package(ounit2), extension:mli, file:player.mli, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules player.mli > player.mli.depends # cached
+# Target: player.cmi, tags: { package(ANSITerminal), package(ounit2), byte, compile, extension:mli, file:player.mli, interf, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o player.cmi player.mli # cached
+# Target: player.ml.depends, tags: { package(ANSITerminal), package(ounit2), extension:ml, file:player.ml, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules player.ml > player.ml.depends # cached
+# Target: player.cmo, tags: { package(ANSITerminal), package(ounit2), byte, compile, extension:cmo, extension:ml, file:player.cmo, file:player.ml, implem, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o player.cmo player.ml # cached
+# Target: gameboard.mli.depends, tags: { package(ANSITerminal), package(ounit2), extension:mli, file:gameboard.mli, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules gameboard.mli > gameboard.mli.depends # cached
+# Target: gameboard.cmi, tags: { package(ANSITerminal), package(ounit2), byte, compile, extension:mli, file:gameboard.mli, interf, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o gameboard.cmi gameboard.mli # cached
+# Target: gameboard.ml.depends, tags: { package(ANSITerminal), package(ounit2), extension:ml, file:gameboard.ml, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules gameboard.ml > gameboard.ml.depends # cached
+# Target: gameboard.cmo, tags: { package(ANSITerminal), package(ounit2), byte, compile, extension:cmo, extension:ml, file:gameboard.cmo, file:gameboard.ml, implem, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o gameboard.cmo gameboard.ml # cached
+# Target: game.mli.depends, tags: { package(ANSITerminal), package(ounit2), extension:mli, file:game.mli, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules game.mli > game.mli.depends # cached
+# Target: game.cmi, tags: { package(ANSITerminal), package(ounit2), byte, compile, extension:mli, file:game.mli, interf, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o game.cmi game.mli # cached
+# Target: game.ml.depends, tags: { package(ANSITerminal), package(ounit2), extension:ml, file:game.ml, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package ounit2 -package ANSITerminal -modules game.ml > game.ml.depends # cached
+# Target: game.cmo, tags: { package(ANSITerminal), package(ounit2), byte, compile, extension:cmo, extension:ml, file:game.cmo, file:game.ml, implem, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package ounit2 -package ANSITerminal -o game.cmo game.ml # cached
 # Compilation successful.
