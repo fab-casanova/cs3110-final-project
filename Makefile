@@ -1,4 +1,4 @@
-MODULES= property player
+MODULES= property player gameboard game
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)

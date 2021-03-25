@@ -1,17 +1,42 @@
 ### Starting build.
 # Target: property.mli.depends, tags: { extension:mli, file:property.mli, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules property.mli > property.mli.depends
+ocamlfind ocamldep -modules property.mli > property.mli.depends # cached
 # Target: property.cmi, tags: { byte, compile, extension:mli, file:property.mli, interf, ocaml, quiet }
-ocamlfind ocamlc -c -o property.cmi property.mli
+ocamlfind ocamlc -c -o property.cmi property.mli # cached
 # Target: property.ml.depends, tags: { extension:ml, file:property.ml, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules property.ml > property.ml.depends
+ocamlfind ocamldep -modules property.ml > property.ml.depends # cached
 # Target: property.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:property.cmo, file:property.ml, implem, ocaml, quiet }
-ocamlfind ocamlc -c -o property.cmo property.ml
-+ ocamlfind ocamlc -c -o property.cmo property.ml
-File "property.ml", line 1:
-Error: The implementation property.ml
-       does not match the interface property.cmi:
-       The type `pcolor' is required but not provided
-       File "property.mli", line 1, characters 0-11: Expected declaration
+ocamlfind ocamlc -c -o property.cmo property.ml # cached
+# Target: player.mli.depends, tags: { extension:mli, file:player.mli, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules player.mli > player.mli.depends
+# Target: player.cmi, tags: { byte, compile, extension:mli, file:player.mli, interf, ocaml, quiet }
+ocamlfind ocamlc -c -o player.cmi player.mli
+# Target: player.ml.depends, tags: { extension:ml, file:player.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules player.ml > player.ml.depends
+# Target: player.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:player.cmo, file:player.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -o player.cmo player.ml
+# Target: gameboard.mli.depends, tags: { extension:mli, file:gameboard.mli, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules gameboard.mli > gameboard.mli.depends # cached
+# Target: gameboard.cmi, tags: { byte, compile, extension:mli, file:gameboard.mli, interf, ocaml, quiet }
+ocamlfind ocamlc -c -o gameboard.cmi gameboard.mli
+# Target: gameboard.ml.depends, tags: { extension:ml, file:gameboard.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules gameboard.ml > gameboard.ml.depends # cached
+# Target: gameboard.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:gameboard.cmo, file:gameboard.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -o gameboard.cmo gameboard.ml
+# Target: game.mli.depends, tags: { extension:mli, file:game.mli, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules game.mli > game.mli.depends # cached
+# Target: game.cmi, tags: { byte, compile, extension:mli, file:game.mli, interf, ocaml, quiet }
+ocamlfind ocamlc -c -o game.cmi game.mli # cached
+# Target: game.ml.depends, tags: { extension:ml, file:game.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules game.ml > game.ml.depends
++ ocamlfind ocamldep -modules game.ml > game.ml.depends
+File "game.ml", line 17, characters 37-38:
+17 |     List.find (fun x -> get_name x = )
+                                          ^
+Error: Syntax error: ')' expected
+File "game.ml", line 17, characters 14-15:
+17 |     List.find (fun x -> get_name x = )
+                   ^
+  This '(' might be unmatched
 Command exited with code 2.
 # Compilation unsuccessful.
