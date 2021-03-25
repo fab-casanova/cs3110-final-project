@@ -2,7 +2,7 @@ open Property
 open Player
 open Gameboard
 
-type game = { board : Gameboard.t; players : player list }
+type t = { board : Gameboard.t; players : Player.t list }
 
 let roll_dice () = 2 + Random.int 5 + Random.int 5
 
