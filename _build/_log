@@ -8,35 +8,27 @@ ocamlfind ocamldep -modules property.ml > property.ml.depends # cached
 # Target: property.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:property.cmo, file:property.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -o property.cmo property.ml # cached
 # Target: player.mli.depends, tags: { extension:mli, file:player.mli, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules player.mli > player.mli.depends
+ocamlfind ocamldep -modules player.mli > player.mli.depends # cached
 # Target: player.cmi, tags: { byte, compile, extension:mli, file:player.mli, interf, ocaml, quiet }
-ocamlfind ocamlc -c -o player.cmi player.mli
+ocamlfind ocamlc -c -o player.cmi player.mli # cached
 # Target: player.ml.depends, tags: { extension:ml, file:player.ml, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules player.ml > player.ml.depends
+ocamlfind ocamldep -modules player.ml > player.ml.depends # cached
 # Target: player.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:player.cmo, file:player.ml, implem, ocaml, quiet }
-ocamlfind ocamlc -c -o player.cmo player.ml
+ocamlfind ocamlc -c -o player.cmo player.ml # cached
 # Target: gameboard.mli.depends, tags: { extension:mli, file:gameboard.mli, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules gameboard.mli > gameboard.mli.depends # cached
 # Target: gameboard.cmi, tags: { byte, compile, extension:mli, file:gameboard.mli, interf, ocaml, quiet }
-ocamlfind ocamlc -c -o gameboard.cmi gameboard.mli
+ocamlfind ocamlc -c -o gameboard.cmi gameboard.mli # cached
 # Target: gameboard.ml.depends, tags: { extension:ml, file:gameboard.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules gameboard.ml > gameboard.ml.depends # cached
 # Target: gameboard.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:gameboard.cmo, file:gameboard.ml, implem, ocaml, quiet }
-ocamlfind ocamlc -c -o gameboard.cmo gameboard.ml
+ocamlfind ocamlc -c -o gameboard.cmo gameboard.ml # cached
 # Target: game.mli.depends, tags: { extension:mli, file:game.mli, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules game.mli > game.mli.depends # cached
 # Target: game.cmi, tags: { byte, compile, extension:mli, file:game.mli, interf, ocaml, quiet }
 ocamlfind ocamlc -c -o game.cmi game.mli # cached
 # Target: game.ml.depends, tags: { extension:ml, file:game.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules game.ml > game.ml.depends
-+ ocamlfind ocamldep -modules game.ml > game.ml.depends
-File "game.ml", line 17, characters 37-38:
-17 |     List.find (fun x -> get_name x = )
-                                          ^
-Error: Syntax error: ')' expected
-File "game.ml", line 17, characters 14-15:
-17 |     List.find (fun x -> get_name x = )
-                   ^
-  This '(' might be unmatched
-Command exited with code 2.
-# Compilation unsuccessful.
+# Target: game.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:game.cmo, file:game.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -o game.cmo game.ml
+# Compilation successful.

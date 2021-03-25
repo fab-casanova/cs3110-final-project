@@ -1,0 +1,5 @@
+#directory "_build";;
+#load "property.cmo";;
+#load "player.cmo";;
+#load "gameboard.cmo";;
+#load "game.cmo";;
