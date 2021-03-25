@@ -17,3 +17,5 @@ val create_mortgage : t -> unit
 val unmortgage : t -> unit
 
 val get_type : t -> property_type
+
+val num_for_monopoly : t -> int

@@ -33,23 +33,30 @@ let collect_rent player property game =
   if player_money player >= rent_owed then (
     let owner = find_player (get_owner property) game.players in
     update_player_money owner rent_owed;
-    update_player_money player (-1 * rent_owed))
+    update_player_money player (-1 * rent_owed) )
   else mortgage player property game
 
-let has_monopoly player new_property =
-  (* TODO: IMPLEMENT USING PATTERN MATCHING*)
-  (*let property_type = get_type new_property in let properties_required = if property_type = (Brown or DBlue) then 2 else if property_type =    Pink
-        or Orange
-        or Red
-        or Yellow
-        or Green then 3 else -1 in let owned_properties = get_properties player in let rec monopoly_helper player owned_properties property_type properties_required acc =
-        match owned_properties with |[] -> () |h :: t -> if get_type h = property_type then if acc = properties_required - 1 then add_monopoly player property_type
-        else monopoly_helper player owned_properties property_type properties_required (acc + 1)
-      ()
-    let buy_property player property =
-      update_player_money player (get_price property);
-      set_owner property (get_name player);
-      has_monopoly player property;
-      ()
-  *)
-  ()
+let rec has_monopoly_helper plyr owned_properties property_type
+    properties_required acc =
+  match owned_properties with
+  | [] -> ()
+  | h :: t ->
+      if get_type h = property_type then
+        if acc + 1 = properties_required then add_monopoly plyr property_type
+        else
+          has_monopoly_helper plyr owned_properties property_type
+            properties_required (acc + 1)
+      else
+        has_monopoly_helper plyr owned_properties property_type
+          properties_required acc
+
+let has_monopoly plyr new_property =
+  let property_type = get_type new_property in
+  let properties_required = num_for_monopoly new_property in
+  let owned_properties = get_properties plyr in
+  has_monopoly_helper plyr owned_properties property_type properties_required 0
+
+let buy_property plyr property =
+  update_player_money plyr (get_price property);
+  set_owner property (get_name plyr);
+  has_monopoly plyr property
