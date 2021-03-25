@@ -2,18 +2,18 @@ type property_type
 
 type property_stage
 
-type property
+type t
 
-val calculate_rent : property -> int
+val calculate_rent : t -> int
 
-val get_owner : property -> string
+val get_owner : t -> string
 
-val set_owner : property -> string -> unit
+val set_owner : t -> string -> unit
 
-val get_price : property -> int
+val get_price : t -> int
 
-val create_mortgage : property -> unit
+val create_mortgage : t -> unit
 
-val unmortgage : property -> unit
+val unmortgage : t -> unit
 
-val get_type : property -> property_type
+val get_type : t -> property_type

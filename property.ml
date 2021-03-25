@@ -14,7 +14,7 @@ type property_type =
 
 type property_stage = CannotBuy | Zero | One | Two | Three | Four | Hotel
 
-type property = {
+type t = {
   name : string;
   property_type : property_type;
   mutable owner : string;

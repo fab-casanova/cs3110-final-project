@@ -1,17 +1,15 @@
-open Property
+type t
 
-type player
+val get_name : t -> string
 
-val get_name : player -> string
+val get_properties : t -> Property.t list
 
-val get_properties : player -> Property.property list
+val player_money : t -> int
 
-val player_money : player -> int
+val get_position : t -> Property.t
 
-val get_position : player -> Property.property
+val change_pos : t -> Property.t -> unit
 
-val change_pos : player -> Property.property -> unit
+val update_player_money : t -> int -> unit
 
-val update_player_money : player -> int -> unit
-
-val add_monopoly : player -> property_type -> unit
+val add_monopoly : t -> Property.property_type -> unit

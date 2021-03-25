@@ -2,11 +2,9 @@ open Property
 open Player
 open Gameboard
 
-type game = { board : gameboard; players : player list }
+type t = { board : Gameboard.t; players : Player.t list }
 
 let roll_dice () = 2 + Random.int 5 + Random.int 5
-
-let next_pos board moves pos = 0
 
 let get_new_position plyr the_game =
   let moves = roll_dice () in

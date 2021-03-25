@@ -1,24 +1,22 @@
-open Property
-
-type player = {
+type t = {
   name : string;
-  mutable properties : property list;
+  mutable properties : Property.t list;
   mutable money : int;
-  mutable position : property;
-  mutable monopolies : property_type list;
+  mutable position : Property.t;
+  mutable monopolies : Property.property_type list;
 }
 
-let get_name plyr = plyr.name
+let get_name player = player.name
 
-let get_properties plyr = plyr.properties
+let get_properties player = player.properties
 
-let player_money plyr = plyr.money
+let player_money player = player.money
 
-let get_position plyr = plyr.position
+let get_position player = player.position
 
-let change_pos plyr new_pos = plyr.position <- new_pos
+let change_pos player new_pos = player.position <- new_pos
 
-let update_player_money plyr update = plyr.money <- plyr.money + update
+let update_player_money player update = player.money <- player.money + update
 
-let add_monopoly plyr property_type =
-  plyr.monopolies <- property_type :: plyr.monopolies
+let add_monopoly player property_type =
+  player.monopolies <- property_type :: player.monopolies

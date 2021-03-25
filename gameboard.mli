@@ -1,7 +1,5 @@
-open Player
+type t
 
-type gameboard
+val get_index : t -> Property.t -> int
 
-val get_index : gameboard -> Property.property -> int
-
-val get_prop_at_index : int -> gameboard -> Property.property
+val get_prop_at_index : int -> t -> Property.t

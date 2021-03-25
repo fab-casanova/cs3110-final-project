@@ -31,4 +31,10 @@ ocamlfind ocamlc -c -o game.cmi game.mli # cached
 ocamlfind ocamldep -modules game.ml > game.ml.depends
 # Target: game.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:game.cmo, file:game.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -o game.cmo game.ml
-# Compilation successful.
++ ocamlfind ocamlc -c -o game.cmo game.ml
+File "game.ml", line 5, characters 45-51:
+5 | type game = { board : Gameboard.t; players : player list }
+                                                 ^^^^^^
+Error: Unbound type constructor player
+Command exited with code 2.
+# Compilation unsuccessful.
