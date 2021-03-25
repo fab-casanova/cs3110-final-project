@@ -19,3 +19,6 @@ let get_position plyr = plyr.position
 let change_pos plyr new_pos = plyr.position <- new_pos
 
 let update_player_money plyr update = plyr.money <- plyr.money + update
+
+let add_monopoly plyr property_type =
+  plyr.monopolies <- property_type :: plyr.monopolies
