@@ -10,3 +10,12 @@ default: build
 
 build:
 	$(OCAMLBUILD) $(OBJECTS)
+
+test:
+	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST) -runner sequential
+
+zip:
+	zip monopoly.zip *.ml* _tags .merlin .ocamlformat .ocamlinit LICENSE Makefile
+
+play:
+	$(OCAMLBUILD) -tag 'debug' $(MAIN) && OCAMLRUNPARAM=b ./$(MAIN)
