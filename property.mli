@@ -24,8 +24,8 @@ val unmortgage : t -> unit
 
 val get_type : t -> space_type
 
-val upgrade_prop : t -> int -> t
+val upgrade_property : t -> unit
 
-val downgrade_prop : t -> int -> t
+val downgrade_property : t -> unit
 
 val num_for_monopoly : t -> int
