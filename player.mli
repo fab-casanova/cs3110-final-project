@@ -12,4 +12,4 @@ val change_pos : t -> Property.t -> unit
 
 val update_player_money : t -> int -> unit
 
-val add_monopoly : t -> Property.property_type -> unit
+val add_monopoly : t -> Property.space_type -> unit

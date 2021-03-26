@@ -1,8 +1,12 @@
-type property_type
+type space_type
 
 type property_stage
 
 type t
+
+val create_buyable_card : string -> string -> int array -> int -> t
+
+val create_unbuyable_card : string -> string -> int -> t
 
 val calculate_rent : t -> int
 
@@ -18,7 +22,7 @@ val create_mortgage : t -> unit
 
 val unmortgage : t -> unit
 
-val get_type : t -> property_type
+val get_type : t -> space_type
 
 val upgrade_prop : t -> int -> t
 

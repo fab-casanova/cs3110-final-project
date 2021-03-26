@@ -3,7 +3,7 @@ type t = {
   mutable properties : Property.t list;
   mutable money : int;
   mutable position : Property.t;
-  mutable monopolies : Property.property_type list;
+  mutable monopolies : Property.space_type list;
 }
 
 let get_name player = player.name
