@@ -12,7 +12,6 @@ type property_type =
   | Go
   | FreeParking
   | Railroad
-  | Utilities
   | Chance
   | ComChest
 
@@ -36,6 +35,8 @@ let set_owner prop owner = prop.owner <- owner
 
 let get_price prop = prop.price
 
+let is_mortaged prop = prop.mortgaged
+
 let current_stage prop = prop.stage
 
 let create_mortgage prop = prop.mortgaged <- true
@@ -48,7 +49,6 @@ let get_type prop = prop.property_type
 
 let num_for_monopoly prop =
   match get_type prop with
-  | Brown | DBlue | Utilities -> 2
+  | Brown | DBlue -> 2
   | LBlue | Pink | Orange | Red | Yellow | Green -> 3
-  | Railroad -> 4
-  | Jail | GoToJail | Go | FreeParking | Chance | ComChest -> -1
+  | Jail | GoToJail | Go | FreeParking | Chance | Railroad | ComChest -> -1
