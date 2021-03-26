@@ -18,6 +18,12 @@ type space_type =
   | IncomeTax
   | OtherNonpurchase of string
 
+let can_purchase_type = function
+  | Brown | LBlue | Pink | Orange | Red | Yellow | Green | DBlue | Railroad
+  | OtherColor _ ->
+      true
+  | _ -> false
+
 type property_stage =
   | CannotBuy
   | Other
@@ -36,6 +42,7 @@ type t = {
   mutable mortgaged : bool;
   rent_prices : (property_stage * int) list;
   price : int;
+  house_price : int;
 }
 
 let assign_purchaseable = function
@@ -60,21 +67,18 @@ let assign_non_purchaseable = function
   | "income tax" -> IncomeTax
   | str -> OtherNonpurchase str
 
-let can_purchase = function
-  | Brown | LBlue | Pink | Orange | Red | Yellow | Green | DBlue | Railroad
-  | OtherColor _ ->
-      true
-  | _ -> false
+let can_be_purchased card = can_purchase_type card.property_type
 
-let create_t str color own prices cost =
+let create_t str color own prices cost house =
   {
     name = str;
     property_type = color;
     owner = own;
-    stage = (if can_purchase color then Zero else CannotBuy);
+    stage = (if can_purchase_type color then Zero else CannotBuy);
     mortgaged = false;
     price = cost;
     rent_prices = prices;
+    house_price = house;
   }
 
 let create_rent_list (arr : int array) = function
@@ -101,14 +105,14 @@ let create_rent_list (arr : int array) = function
   | Railroad -> [ (Other, arr.(0)) ]
   | _ -> failwith "Card that cannot be purchased"
 
-let create_buyable_card name card_type prices price =
+let create_buyable_card name card_type prices price house =
   let space = assign_purchaseable card_type in
-  create_t name space "" (create_rent_list prices space) price
+  create_t name space "" (create_rent_list prices space) price house
 
 let create_unbuyable_card name card_type rent =
   create_t name
     (assign_non_purchaseable card_type)
-    "notforsale" [ (CannotBuy, rent) ] (-1)
+    "notforsale" [ (CannotBuy, rent) ] (-1) (-1)
 
 let calculate_rent prop = List.assoc prop.stage prop.rent_prices
 

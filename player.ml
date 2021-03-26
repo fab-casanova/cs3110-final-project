@@ -6,6 +6,15 @@ type t = {
   mutable monopolies : Property.space_type list;
 }
 
+let create_player player_name start =
+  {
+    name = player_name;
+    properties = [];
+    money = 0;
+    position = start;
+    monopolies = [];
+  }
+
 let get_name player = player.name
 
 let get_properties player = player.properties

@@ -1,5 +1,7 @@
 type t
 
+val create_player : string -> Property.t -> t
+
 val get_name : t -> string
 
 val get_properties : t -> Property.t list

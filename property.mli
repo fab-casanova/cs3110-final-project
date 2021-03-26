@@ -4,7 +4,7 @@ type property_stage
 
 type t
 
-val create_buyable_card : string -> string -> int array -> int -> t
+val create_buyable_card : string -> string -> int array -> int -> int -> t
 
 val create_unbuyable_card : string -> string -> int -> t
 
