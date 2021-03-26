@@ -20,4 +20,8 @@ val unmortgage : t -> unit
 
 val get_type : t -> property_type
 
+val upgrade_prop : t -> int -> t
+
+val downgrade_prop : t -> int -> t
+
 val num_for_monopoly : t -> int

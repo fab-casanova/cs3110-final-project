@@ -2,6 +2,7 @@ MODULES= property player gameboard game main
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
+MAIN=main.byte
 TEST=test.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind
 
@@ -19,3 +20,7 @@ zip:
 
 play:
 	$(OCAMLBUILD) -tag 'debug' $(MAIN) && OCAMLRUNPARAM=b ./$(MAIN)
+
+clean: 	
+	ocamlbuild -clean
+	rm -rf monopoly.zip
