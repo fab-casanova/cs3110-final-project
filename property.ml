@@ -42,7 +42,7 @@ type t = {
   mutable mortgaged : bool;
   rent_prices : (property_stage * int) list;
   price : int;
-  house_price : int;
+  per_house_cost : int;
 }
 
 let assign_purchaseable = function
@@ -69,7 +69,7 @@ let assign_non_purchaseable = function
 
 let can_be_purchased card = can_purchase_type card.property_type
 
-let create_t str color own prices cost house =
+let create_t str color own prices cost house_price =
   {
     name = str;
     property_type = color;
@@ -78,7 +78,7 @@ let create_t str color own prices cost house =
     mortgaged = false;
     price = cost;
     rent_prices = prices;
-    house_price = house;
+    per_house_cost = house_price;
   }
 
 let create_rent_list (arr : int array) = function
@@ -105,9 +105,9 @@ let create_rent_list (arr : int array) = function
   | Railroad -> [ (Other, arr.(0)) ]
   | _ -> failwith "Card that cannot be purchased"
 
-let create_buyable_card name card_type prices price house =
+let create_buyable_card name card_type prices price house_price =
   let space = assign_purchaseable card_type in
-  create_t name space "" (create_rent_list prices space) price house
+  create_t name space "" (create_rent_list prices space) price house_price
 
 let create_unbuyable_card name card_type rent =
   create_t name
@@ -116,11 +116,13 @@ let create_unbuyable_card name card_type rent =
 
 let calculate_rent prop = List.assoc prop.stage prop.rent_prices
 
+let purchase_price prop = prop.price
+
+let house_cost prop = prop.per_house_cost
+
 let get_owner prop = prop.owner
 
 let set_owner prop owner = prop.owner <- owner
-
-let get_price prop = prop.price
 
 let is_mortaged prop = prop.mortgaged
 
@@ -130,7 +132,7 @@ let create_mortgage prop = prop.mortgaged <- true
 
 let unmortgage prop = prop.mortgaged <- false
 
-let is_mortaged prop = prop.mortgaged
+let is_mortgaged prop = prop.mortgaged
 
 let get_type prop = prop.property_type
 

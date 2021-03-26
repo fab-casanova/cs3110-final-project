@@ -56,7 +56,7 @@ let check_monopoly player new_property =
     properties_required 0
 
 let buy_property player prop =
-  let price = Property.get_price prop in
+  let price = Property.purchase_price prop in
   if player.money >= price then (
     player.money <- player.money - price;
     player.properties <- prop :: player.properties;

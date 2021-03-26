@@ -4,19 +4,25 @@ type property_stage
 
 type t
 
+val can_be_purchased : t -> bool
+
 val create_buyable_card : string -> string -> int array -> int -> int -> t
 
 val create_unbuyable_card : string -> string -> int -> t
 
 val calculate_rent : t -> int
 
+val purchase_price : t -> int
+
+val house_cost : t -> int
+
 val get_owner : t -> string
 
 val set_owner : t -> string -> unit
 
-val get_price : t -> int
+val is_mortgaged : t -> bool
 
-val is_mortaged : t -> bool
+val current_stage : t -> property_stage
 
 val create_mortgage : t -> unit
 
