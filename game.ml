@@ -31,10 +31,16 @@ let find_player player_name (lst : players) =
 
 let mortgage player property game = failwith "Unimplemented"
 
-let collect_rent player property game =
+let collect_rent player owner property game =
   let rent_owed = calculate_rent property in
   if player_money player >= rent_owed then (
-    let owner = find_player (get_owner property) (get_players game) in
     update_player_money owner rent_owed;
     update_player_money player (-1 * rent_owed))
   else mortgage player property game
+
+let current_property_effects player game =
+  let pos = get_position player in
+  let owner = find_player (get_owner pos) (get_players game) in
+  if is_owned pos && owner <> player then collect_rent player owner pos game
+
+let single_player_turn player game = move_player player game
