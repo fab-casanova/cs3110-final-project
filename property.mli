@@ -4,6 +4,12 @@ type property_stage
 
 type t
 
+val is_owned : t -> bool
+
+val is_utilities : t -> bool
+
+val is_railroad : t -> bool
+
 val can_be_purchased : t -> bool
 
 val create_buyable_card : string -> string -> int array -> int -> int -> t

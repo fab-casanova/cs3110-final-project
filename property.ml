@@ -7,8 +7,9 @@ type space_type =
   | Yellow
   | Green
   | DBlue
-  | OtherColor of string
   | Railroad
+  | Utilities
+  | OtherColor of string
   | Jail
   | GoToJail
   | Go
@@ -55,6 +56,7 @@ let assign_purchaseable = function
   | "green" -> Green
   | "dark blue" -> DBlue
   | "railroad" -> Railroad
+  | "utilities" -> Utilities
   | str -> OtherColor str
 
 let assign_non_purchaseable = function
@@ -66,6 +68,14 @@ let assign_non_purchaseable = function
   | "community chest" -> ComChest
   | "income tax" -> IncomeTax
   | str -> OtherNonpurchase str
+
+let is_owned prop = prop.owner <> ""
+
+let is_utilities prop =
+  match prop.property_type with Utilities -> true | _ -> false
+
+let is_railroad prop =
+  match prop.property_type with Railroad -> true | _ -> false
 
 let can_be_purchased card = can_purchase_type card.property_type
 
@@ -103,6 +113,7 @@ let create_rent_list (arr : int array) = function
           (Hotel, 550);
         ]
   | Railroad -> [ (Other, arr.(0)) ]
+  | Utilities -> [ (Other, arr.(0)) ]
   | _ -> failwith "Card that cannot be purchased"
 
 let create_buyable_card name card_type prices price house_price =
@@ -159,5 +170,5 @@ let num_for_monopoly prop =
   | Brown | DBlue -> 2
   | LBlue | Pink | Orange | Red | Yellow | Green | OtherColor _ -> 3
   | Jail | GoToJail | Go | FreeParking | Chance | Railroad | ComChest
-  | IncomeTax | OtherNonpurchase _ ->
+  | IncomeTax | OtherNonpurchase _ | Utilities ->
       -1
