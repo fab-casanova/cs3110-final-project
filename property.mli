@@ -8,15 +8,19 @@ val is_owned : t -> bool
 
 val is_utilities : t -> bool
 
+val is_tax : t -> bool
+
 val is_railroad : t -> bool
 
 val can_be_purchased : t -> bool
+
+val can_have_houses : t -> bool
 
 val create_buyable_card : string -> string -> int array -> int -> int -> t
 
 val create_unbuyable_card : string -> string -> int -> t
 
-val calculate_rent : t -> int
+val calculate_color_rent : t -> int
 
 val purchase_price : t -> int
 
@@ -41,3 +45,7 @@ val upgrade_property : t -> unit
 val downgrade_property : t -> unit
 
 val num_for_monopoly : t -> int
+
+val num_houses : t -> int
+
+val get_name : t -> string

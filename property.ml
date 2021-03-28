@@ -21,7 +21,7 @@ type space_type =
 
 let can_purchase_type = function
   | Brown | LBlue | Pink | Orange | Red | Yellow | Green | DBlue | Railroad
-  | OtherColor _ ->
+  | Utilities | OtherColor _ ->
       true
   | _ -> false
 
@@ -45,6 +45,13 @@ type t = {
   price : int;
   per_house_cost : int;
 }
+
+let can_be_purchased card = can_purchase_type card.property_type
+
+let can_have_houses prop =
+  match prop.property_type with
+  | Brown | LBlue | Pink | Orange | Red | Yellow | Green | DBlue -> true
+  | _ -> false
 
 let assign_purchaseable = function
   | "brown" -> Brown
@@ -77,7 +84,7 @@ let is_utilities prop =
 let is_railroad prop =
   match prop.property_type with Railroad -> true | _ -> false
 
-let can_be_purchased card = can_purchase_type card.property_type
+let is_tax prop = match prop.property_type with IncomeTax -> true | _ -> false
 
 let create_t str color own prices cost house_price =
   {
@@ -112,8 +119,7 @@ let create_rent_list (arr : int array) = function
           (Four, 400);
           (Hotel, 550);
         ]
-  | Railroad -> [ (Other, arr.(0)) ]
-  | Utilities -> [ (Other, arr.(0)) ]
+  | Railroad | Utilities -> [ (Other, arr.(0)) ]
   | _ -> failwith "Card that cannot be purchased"
 
 let create_buyable_card name card_type prices price house_price =
@@ -125,7 +131,7 @@ let create_unbuyable_card name card_type rent =
     (assign_non_purchaseable card_type)
     "notforsale" [ (CannotBuy, rent) ] (-1) (-1)
 
-let calculate_rent prop = List.assoc prop.stage prop.rent_prices
+let calculate_color_rent prop = List.assoc prop.stage prop.rent_prices
 
 let purchase_price prop = prop.price
 
@@ -172,3 +178,16 @@ let num_for_monopoly prop =
   | Jail | GoToJail | Go | FreeParking | Chance | Railroad | ComChest
   | IncomeTax | OtherNonpurchase _ | Utilities ->
       -1
+
+let num_houses prop =
+  match prop.stage with
+  | CannotBuy -> -1
+  | Other -> -1
+  | Zero -> 0
+  | One -> 1
+  | Two -> 2
+  | Three -> 3
+  | Four -> 4
+  | Hotel -> 5
+
+let get_name prop = prop.name

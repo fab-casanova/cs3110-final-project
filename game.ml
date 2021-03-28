@@ -2,45 +2,89 @@ open Property
 open Player
 open Gameboard
 
+type gameboard = Property.t list
+
 type players = Player.t list
 
-type t = { board : Gameboard.t; player_list : players }
+type t = { board : gameboard; mutable player_list : players }
+
+let create_list_of_players (lst : Player.t list) : players = lst
+
+let create_gameboard (lst : Property.t list) : gameboard = lst
+
+let create_game (board : gameboard) (players : players) =
+  { board; player_list = players }
+
+let get_start_pos game = List.hd game.board
+
+let num_players game = List.length game.player_list
+
+let add_a_player game player =
+  if List.length game.player_list < 4 then
+    game.player_list <- game.player_list @ [ player ]
+  else print_endline "Max number of players reached"
+
+let rec get_index_helper board (prop : Property.t) acc =
+  match board with
+  | [] -> raise Not_found
+  | h :: t -> if prop = h then acc else get_index_helper t prop (acc + 1)
+
+let get_index (the_game : t) (prop : Property.t) =
+  get_index_helper the_game.board prop 0
+
+let rec get_prop_at_index_helper index (board : gameboard) =
+  match board with
+  | [] -> raise Not_found
+  | h :: t -> if index = 0 then h else get_prop_at_index_helper (index - 1) t
+
+let get_prop_at_index index the_game =
+  get_prop_at_index_helper index the_game.board
 
 let roll_dice () = 2 + Random.int 5 + Random.int 5
 
 let get_new_position player the_game =
   let moves = roll_dice () in
-  player |> get_position |> get_index the_game.board |> ( + ) moves
+  player |> get_position |> get_index the_game |> ( + ) moves
 
 let move_player player game =
   let new_index = get_new_position player game mod 40 in
-  let new_position = get_prop_at_index new_index game.board in
+  let new_position = get_prop_at_index new_index game in
   change_pos player new_position
 
-(* 1: check position of player
-      a: get_position player (gets us property)
-      b: get index of current_pos
-   2: add dice roll mod 40
-   3: Find position where index is located
-   4: Move player here
- *)
 let get_players game = game.player_list
 
 let find_player player_name (lst : players) =
   List.find (fun x -> get_name x = player_name) lst
 
-let mortgage player property game = failwith "Unimplemented"
-
-let collect_rent player owner property game =
-  let rent_owed = calculate_rent property in
-  if player_money player >= rent_owed then (
-    update_player_money owner rent_owed;
-    update_player_money player (-1 * rent_owed))
-  else mortgage player property game
-
 let current_property_effects player game =
   let pos = get_position player in
   let owner = find_player (get_owner pos) (get_players game) in
-  if is_owned pos && owner <> player then collect_rent player owner pos game
+  if (is_owned pos && owner <> player) || is_tax pos then
+    Player.collect_rent player owner pos
 
-let single_player_turn player game = move_player player game
+let single_player_turn player game =
+  move_player player game;
+  current_property_effects player game
+
+(*TODO: Finish auction*)
+(*
+let rec auction highest_bidder prop bid_price player_list=
+  let curr_player = match player_list with 
+    | [] ->  auction highest_bidder prop bid_price (*Doesn't matter what happens here*)
+    | h :: t ->  in
+    if bid_price > 0 && h == highest_bidder
+      let price = bid_price in
+      if h.money >= price then (
+        h.money <- h.money - price;
+        h.properties <- prop :: h.properties;
+        Property.set_owner prop h.name;
+        check_monopoly h prop)
+    else
+      (*
+      new_bid = ??? (*ask for bid*)
+      if (new_bid > bid_price)
+        let bid_price = new_bid (*set bid price to new bid*)
+        highest_bidder = h (*Set highest bidder to current highest bidder*)
+        auction highest_bidder prop bid_price (t @ [h]) (*Recursively call
+        auction with new data*)
+*) *)
