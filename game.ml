@@ -6,23 +6,34 @@ type gameboard = Property.t list
 
 type players = Player.t list
 
-type t = { board : gameboard; mutable player_list : players }
+type t = {
+  board : gameboard;
+  mutable player_list : players;
+  mutable current_player : string;
+}
 
 let create_list_of_players (lst : Player.t list) : players = lst
 
 let create_gameboard (lst : Property.t list) : gameboard = lst
 
 let create_game (board : gameboard) (players : players) =
-  { board; player_list = players }
+  { board; player_list = players; current_player = "" }
 
 let get_start_pos game = List.hd game.board
 
 let num_players game = List.length game.player_list
 
+let current_player_name game = game.current_player
+
 let add_a_player game player =
-  if List.length game.player_list < 4 then
-    game.player_list <- game.player_list @ [ player ]
-  else print_endline "Max number of players reached"
+  if List.length game.player_list > 3 then
+    print_endline "Max number of players reached, cannot add more\n"
+  else
+    let name_lst = List.map get_name game.player_list in
+    if List.mem (get_name player) name_lst then
+      print_endline "This name is already taken\n"
+    else game.player_list <- game.player_list @ [ player ];
+    if game.current_player = "" then game.current_player <- get_name player
 
 let rec get_index_helper board (prop : Property.t) acc =
   match board with
@@ -62,9 +73,13 @@ let current_property_effects player game =
   if (is_owned pos && owner <> player) || is_tax pos then
     Player.collect_rent player owner pos
 
-let single_player_turn player game =
+let play_a_turn game player =
   move_player player game;
-  current_property_effects player game
+  print_endline
+    ("Current position of" ^ get_name player ^ "is "
+    ^ prop_name (get_position player))
+
+(*current_property_effects player game*)
 
 (*TODO: Finish auction*)
 (*

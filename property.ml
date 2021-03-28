@@ -46,6 +46,8 @@ type t = {
   per_house_cost : int;
 }
 
+let prop_name prop = prop.name
+
 let can_be_purchased card = can_purchase_type card.property_type
 
 let can_have_houses prop =
@@ -191,3 +193,5 @@ let num_houses prop =
   | Hotel -> 5
 
 let get_name prop = prop.name
+
+let get_value prop = purchase_price prop / (1 + Bool.to_int (is_mortgaged prop))

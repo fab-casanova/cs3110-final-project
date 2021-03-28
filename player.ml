@@ -12,7 +12,7 @@ let create_player player_name start =
   {
     name = player_name;
     properties = [];
-    money = 0;
+    money = 1000;
     position = start;
     monopolies = [];
   }
@@ -112,15 +112,15 @@ let build_houses_hotel player prop =
 
 let out_of_cash amount_owed player = amount_owed > player.money
 
+let get_value h = failwith "Unimplemented"
+
 let is_bankrupt amount_owed player =
   let rec property_value player properties total_value =
     match properties with
     | [] -> total_value
     | h :: t ->
         property_value player t
-          (total_value
-          + (purchase_price h / (1 + Bool.to_int (is_mortgaged h)))
-          + (num_houses h * house_cost h / 2))
+          (total_value + get_value h + (num_houses h * house_cost h / 2))
   in
   amount_owed > player.money + property_value player player.properties 0
 
@@ -130,22 +130,30 @@ let rec no_houses_on_monopoly monopoly prop =
   | h :: t ->
       if num_houses prop > 0 then false else no_houses_on_monopoly t prop
 
+let owns_property player prop =
+  List.exists (fun x -> x = prop) player.properties
+
 let rec mortgage_allowed player prop =
   let monopoly =
     List.find_all (fun x -> get_type x = get_type prop) player.properties
   in
-  List.exists (fun x -> x = prop) player.properties
-  && is_mortgaged prop
+  owns_property player prop && is_mortgaged prop
   && no_houses_on_monopoly monopoly prop
 
+let get_prop_of_name player prop_name =
+  match player.properties with [] -> None | h :: t -> None
+
+let rec collect_nonmonetary_rent player owner rent_owed = failwith ""
+
+(*
 let rec collect_nonmonetary_rent player owner rent_owed =
   print_string
     "\n\
      Would you like to pay with cash, mortgage, sell buildings, or transfer \
      properties?\n";
   print_string "> ";
-  match read_line () with
-  | "pay with cash" ->
+  let input = read_line() in
+  if input = "pay with cash" then
       if not (out_of_cash rent_owed player) then
         update_player_money owner rent_owed
       else
@@ -153,32 +161,28 @@ let rec collect_nonmonetary_rent player owner rent_owed =
           "Invalid choice, not enough money. You can pay with cash, mortgage, \
            sell buildings, transfer properties";
       collect_nonmonetary_rent player owner rent_owed
-  | "mortgage" ->
-      ()
-      (*print_string "What property do you want to mortgage?";
-        prop = read_input();
+  else if input = "mortgage" then print_string "What property do you want to mortgage?";
+        let prop = read_line() in
         if mortgage_allowed player prop then player.money <- player.money - (purchase_price prop)/2; create_mortgage prop else print_string "Can't mortgage this property"; collect_nonmonetary_rent player owner rent_owed
-      *)
-  | "sell buildings" ->
-      ()
-      (*print_string "What property do you want to sell buildings on?";
-        prop = read_input();
-        if num_houses prop > 0 && buiding_evenly player prop ( - ) then
+      
+  else if input = "sell buildings" then print_string "What property do you want to sell buildings on?";
+        let prop = read_line() in
+        if (owns_property player prop) && (num_houses prop) > 0 && buiding_evenly player prop ( - ) then
         player.money <- player.money + (house_cout prop)/2
         downgrade_property prop
-        else print_string "Cannot sell buildings on this property"; collect_nonmonetary_rent player owner rent_owed*)
-  | "transfer properties" ->
-      ()
-      (* print_string "What property do you want to sell buildings on?";
-         prop = read_input();
-         if no_houses_on_monopoly monopoly prop then (sell) else *)
-  | _ ->
+        else print_string "Cannot sell buildings on this property"; collect_nonmonetary_rent player owner rent_owed
+  else if input = "transfer properties" then print_string "What property do you want to sell?";
+         let prop = read_line() in
+         if (owns_property player prop) && (no_houses_on_monopoly monopoly prop)
+         then set_owner prop owner; let rent_owed = rent_owed - get_value prop
+         else print_string "Can't sell this property"; collect_nonmonetary_rent player owner rent_owed
+  else
       print_string
         "\n\
          Invalid choice. You can pay with cash, mortgage, sell buildings, \
          transfer properties\n";
       collect_nonmonetary_rent player owner rent_owed
-
+*)
 let bankruptcy player = failwith "Unimplemented"
 
 let collect_rent player owner property =

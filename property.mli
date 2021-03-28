@@ -4,6 +4,8 @@ type property_stage
 
 type t
 
+val prop_name : t -> string
+
 val is_owned : t -> bool
 
 val is_utilities : t -> bool
@@ -49,3 +51,5 @@ val num_for_monopoly : t -> int
 val num_houses : t -> int
 
 val get_name : t -> string
+
+val get_value : t -> int
