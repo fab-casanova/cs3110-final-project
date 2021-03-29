@@ -74,29 +74,6 @@ let get_players game = game.player_list
 let find_player player_name plyr_lst =
   List.find (fun x -> get_name x = player_name) plyr_lst
 
-let current_property_effects player game start_index =
-  let pos = get_position player in
-  print_endline ("Position " ^ string_of_int (get_index game pos) ^ " of 40");
-  if is_tax pos then (
-    print_endline "Tax will be collected";
-    Player.collect_tax player pos)
-  else if is_owned pos then (
-    print_endline (prop_name pos ^ " is owned");
-    let owner = find_player (get_owner pos) (get_players game) in
-    print_endline ("The owner of " ^ prop_name pos ^ " is " ^ get_name owner);
-    if owner = player then print_endline "This is your property"
-    else Player.collect_rent player owner pos)
-  else if can_be_purchased pos then
-    print_endline (prop_name pos ^ " can be purchased")
-
-let play_a_turn game player =
-  let start_index = get_index game (get_position player) in
-  move_player player game;
-  print_endline (get_name player ^ " is at: " ^ prop_name (get_position player));
-  current_property_effects player game start_index;
-  print_endline
-    (get_name player ^ "'s money: $" ^ string_of_int (player_money player))
-
 (*TODO: Finish auction*)
 (*
 let rec auction highest_bidder prop bid_price player_list=

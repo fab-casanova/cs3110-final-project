@@ -28,6 +28,4 @@ val find_player : string -> players -> Player.t
 
 val move_player : Player.t -> t -> unit
 
-val play_a_turn : t -> Player.t -> unit
-
 (*TODO: Add auction*)
