@@ -8,8 +8,8 @@ let med_ave =
     [| 2; 10; 30; 90; 160; 250 |]
     60 50
 
-let community_chest =
-  create_unbuyable_card "Community Chest" "community chest" 0
+let community_chest_one =
+  create_unbuyable_card "Community Chest No. 1" "community chest" 0
 
 let baltic_ave =
   create_buyable_card "Baltic Avenue" "brown"
@@ -26,7 +26,7 @@ let oriental_ave =
     [| 6; 30; 90; 270; 400; 550 |]
     100 50
 
-let chance = create_unbuyable_card "Chance" "chance" 0
+let chance_one = create_unbuyable_card "Chance No. 1" "chance" 0
 
 let vermont_ave =
   create_buyable_card "Vermont Avenue" "light blue"
@@ -66,6 +66,9 @@ let st_j_place =
     [| 14; 70; 200; 250; 750; 950 |]
     180 100
 
+let community_chest_two =
+  create_unbuyable_card "Community Chest No. 2" "community chest" 0
+
 let tenns_ave =
   create_buyable_card "Tennessee Avenue" "orange"
     [| 14; 70; 200; 250; 750; 950 |]
@@ -82,6 +85,8 @@ let ktcy_ave =
   create_buyable_card "Kentucky Avenue" "red"
     [| 18; 90; 250; 700; 875; 1050 |]
     220 150
+
+let chance_two = create_unbuyable_card "Chance No. 2" "chance" 0
 
 let indi_ave =
   create_buyable_card "Indiana Avenue" "red"
@@ -124,6 +129,9 @@ let nc_ave =
     [| 26; 130; 390; 900; 1100; 1275 |]
     300 200
 
+let community_chest_three =
+  create_unbuyable_card "Community Chest No. 3" "community chest" 0
+
 let pennsly_ave =
   create_buyable_card "Pennsylvania Avenue" "green"
     [| 28; 150; 450; 1000; 1200; 1400 |]
@@ -131,6 +139,8 @@ let pennsly_ave =
 
 let st_line_rail =
   create_buyable_card "Short Line Railroad" "railroad" [| 25 |] 200 0
+
+let chance_three = create_unbuyable_card "Chance No. 3" "chance" 0
 
 let pk_place =
   create_buyable_card "Park Place" "blue"
@@ -149,12 +159,12 @@ let standard_board =
     [
       go;
       med_ave;
-      community_chest;
+      community_chest_one;
       baltic_ave;
       income_tax;
       reading_rail;
       oriental_ave;
-      chance;
+      chance_one;
       vermont_ave;
       connecticut_ave;
       jail;
@@ -164,12 +174,12 @@ let standard_board =
       virginia_ave;
       pennsyl_rail;
       st_j_place;
-      community_chest;
+      community_chest_two;
       tenns_ave;
       ny_ave;
       free_park;
       ktcy_ave;
-      chance;
+      chance_two;
       indi_ave;
       illi_ave;
       bo_rail;
@@ -180,10 +190,10 @@ let standard_board =
       go_jail;
       pafc_ave;
       nc_ave;
-      community_chest;
+      community_chest_three;
       pennsly_ave;
       st_line_rail;
-      chance;
+      chance_three;
       pk_place;
       luxury_tax;
       bdwalk;

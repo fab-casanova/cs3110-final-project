@@ -72,6 +72,8 @@ let find_player player_name plyr_lst =
 
 let current_property_effects player game start_index =
   let pos = get_position player in
+  print_endline (string_of_int start_index);
+  print_endline (string_of_int (get_index game pos));
   if get_index game pos - start_index < 0 then (
     print_endline "Passed go, collect $200";
     update_player_money player 200);
@@ -85,16 +87,16 @@ let current_property_effects player game start_index =
     if owner = player then print_endline "This is your property"
     else Player.collect_rent player owner pos)
   else if can_be_purchased pos then
-    print_endline (prop_name pos ^ " can be purchased");
-  print_endline
-    (get_name player ^ "'s money : $" ^ string_of_int (player_money player))
+    print_endline (prop_name pos ^ " can be purchased")
 
 let play_a_turn game player =
   let start_index = get_index game (get_position player) in
   move_player player game;
   print_endline
     (get_name player ^ "'s current position: " ^ prop_name (get_position player));
-  current_property_effects player game start_index
+  current_property_effects player game start_index;
+  print_endline
+    (get_name player ^ "'s money : $" ^ string_of_int (player_money player))
 
 (*TODO: Finish auction*)
 (*
