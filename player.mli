@@ -6,6 +6,8 @@ val get_name : t -> string
 
 val get_properties : t -> Property.t list
 
+val pp_properties : t -> string
+
 val player_money : t -> int
 
 val get_position : t -> Property.t

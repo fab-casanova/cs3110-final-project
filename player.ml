@@ -21,6 +21,13 @@ let get_name player = player.name
 
 let get_properties player = player.properties
 
+let rec pp_properties_helper = function
+  | [] -> ""
+  | h :: t when List.length t > 0 -> prop_name h ^ ", " ^ pp_properties_helper t
+  | h :: _ -> prop_name h
+
+let pp_properties player = pp_properties_helper (get_properties player)
+
 let player_money player = player.money
 
 let get_position player = player.position

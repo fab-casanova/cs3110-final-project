@@ -52,7 +52,9 @@ let play_a_turn game =
   ANSITerminal.print_string [ ANSITerminal.yellow ]
     (get_name player ^ "'s money: $"
     ^ string_of_int (player_money player)
-    ^ "\n")
+    ^ "\n");
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    (get_name player ^ "'s properties: " ^ pp_properties player ^ "\n ")
 
 let rec current_turn game =
   play_a_turn game;
