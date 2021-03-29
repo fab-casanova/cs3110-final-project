@@ -21,12 +21,17 @@ let get_name player = player.name
 
 let get_properties player = player.properties
 
-let rec pp_properties_helper = function
+let rec pp_properties_helper acc = function
   | [] -> ""
-  | h :: t when List.length t > 0 -> prop_name h ^ ", " ^ pp_properties_helper t
+  | h :: t when List.length t > 0 && acc <= 0 ->
+      prop_name h ^ ",\n" ^ pp_properties_helper 5 t
+  | h :: t when List.length t > 0 ->
+      prop_name h ^ ", " ^ pp_properties_helper (acc - 1) t
   | h :: _ -> prop_name h
 
-let pp_properties player = pp_properties_helper (get_properties player)
+let pp_properties player =
+  let properties = get_properties player in
+  pp_properties_helper 5 properties
 
 let player_money player = player.money
 
