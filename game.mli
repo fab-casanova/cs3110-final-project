@@ -10,6 +10,8 @@ val create_gameboard : Property.t list -> gameboard
 
 val current_player_name : t -> string
 
+val current_player : t -> Player.t
+
 val create_game : gameboard -> players -> t
 
 val num_players : t -> int
@@ -28,4 +30,7 @@ val find_player : string -> players -> Player.t
 
 val move_player : Player.t -> t -> unit
 
+(*
+val buying_prompt : 
+*)
 (*TODO: Add auction*)

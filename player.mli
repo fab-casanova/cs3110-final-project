@@ -14,6 +14,8 @@ val change_pos : t -> Property.t -> unit
 
 val add_property : t -> Property.t -> unit
 
+val buy_property : t -> Property.t -> unit
+
 val update_player_money : t -> int -> unit
 
 val collect_rent : t -> t -> Property.t -> unit

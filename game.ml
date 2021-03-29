@@ -24,6 +24,14 @@ let num_players game = List.length game.player_list
 
 let current_player_name game = game.current_player
 
+let get_players game = game.player_list
+
+let find_player player_name plyr_lst =
+  List.find (fun x -> get_name x = player_name) plyr_lst
+
+let current_player game =
+  find_player (current_player_name game) (get_players game)
+
 let add_a_player game player =
   if List.length game.player_list > 3 then
     print_endline "Max number of players reached, cannot add more\n"
@@ -68,11 +76,6 @@ let move_player player game =
   if new_index - get_index game old_pos < 0 then (
     print_endline "Passed go, collect $200";
     update_player_money player 200)
-
-let get_players game = game.player_list
-
-let find_player player_name plyr_lst =
-  List.find (fun x -> get_name x = player_name) plyr_lst
 
 (*TODO: Finish auction*)
 (*

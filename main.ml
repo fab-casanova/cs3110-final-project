@@ -2,7 +2,23 @@ open Property
 open Player
 open Game
 
-let current_property_effects player game =
+let rec prompt_buy game player pos =
+  print_endline
+    ("You currently have "
+    ^ string_of_int (player_money player)
+    ^ ".\nWould you like to purchase " ^ prop_name pos ^ " for $"
+    ^ string_of_int (purchase_price pos)
+    ^ "? Type 'y' if yes, 'n' for no");
+  match read_line () with
+  | "y" ->
+      buy_property player pos;
+      print_endline (get_name player ^ " now owns " ^ prop_name pos)
+  | "n" -> print_endline (prop_name pos ^ " was not bought")
+  | _ ->
+      print_endline "Please respond with 'yes' or no";
+      prompt_buy game player pos
+
+let current_property_effects game player =
   let pos = get_position player in
   print_endline ("Position " ^ string_of_int (get_index game pos) ^ " of 40");
   if is_tax pos then (
@@ -14,20 +30,23 @@ let current_property_effects player game =
     print_endline ("The owner of " ^ prop_name pos ^ " is " ^ get_name owner);
     if owner = player then print_endline "This is your property"
     else collect_rent player owner pos)
-  else if can_be_purchased pos then
-    print_endline (prop_name pos ^ " can be purchased")
+  else if can_be_purchased pos then (
+    print_endline (prop_name pos ^ " can be purchased\n");
+    if player_money player > purchase_price pos then prompt_buy game player pos
+    else print_endline "Not enough funds to purchase\n")
 
-let play_a_turn game player =
+let play_a_turn game =
+  let player = current_player game in
   move_player player game;
   print_endline (get_name player ^ " is at: " ^ prop_name (get_position player));
-  current_property_effects player game;
+  current_property_effects game player;
   print_endline
     (get_name player ^ "'s money: $" ^ string_of_int (player_money player))
 
 let rec current_turn game =
-  play_a_turn game (find_player (current_player_name game) (get_players game));
+  play_a_turn game;
   ANSITerminal.print_string [ ANSITerminal.green ]
-    "\nContinue rolling? Type 'y' if yes\n";
+    "\nContinue rolling? Type 'y' if yes, and anything else for no\n";
   match read_line () with
   | "y" -> current_turn game
   | _ -> ANSITerminal.print_string [ ANSITerminal.green ] "Bye!\n"

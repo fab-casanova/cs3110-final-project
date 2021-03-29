@@ -61,7 +61,7 @@ let buy_property player prop =
     player.money <- player.money - price;
     player.properties <- prop :: player.properties;
     Property.set_owner prop player.name;
-    check_monopoly player prop)
+    if can_have_houses prop then check_monopoly player prop)
 
 let num_of_prop is_prop player =
   List.length (List.filter (fun x -> is_prop x) (get_properties player))
