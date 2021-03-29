@@ -60,7 +60,7 @@ let rec current_turn game =
     "\nContinue rolling? Type 'y' if yes, and anything else for no\n";
   match read_line () with
   | "y" -> current_turn game
-  | _ -> ANSITerminal.print_string [ ANSITerminal.green ] "Bye!\n"
+  | _ -> ANSITerminal.print_string [ ANSITerminal.green ] "Bye!\n\n"
 
 let first_player game =
   ANSITerminal.print_string [ ANSITerminal.blue ]
