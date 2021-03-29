@@ -67,7 +67,7 @@ let st_j_place =
     180 100
 
 let tenns_ave =
-  create_buyable_card "Tennessee Avenue" "orange"
+  create_buyable_card "Tennessee" "orange"
     [| 14; 70; 200; 250; 750; 950 |]
     180 100
 
