@@ -14,6 +14,8 @@ val is_tax : t -> bool
 
 val is_railroad : t -> bool
 
+val is_com_or_chance : t -> bool
+
 val can_be_purchased : t -> bool
 
 val can_have_houses : t -> bool
@@ -50,6 +52,6 @@ val num_for_monopoly : t -> int
 
 val num_houses : t -> int
 
-val get_name : t -> string
+val prop_name : t -> string
 
 val get_value : t -> int

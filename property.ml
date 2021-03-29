@@ -80,6 +80,9 @@ let assign_non_purchaseable = function
 
 let is_owned prop = prop.owner <> ""
 
+let is_com_or_chance prop =
+  match prop.property_type with Chance | ComChest -> true | _ -> false
+
 let is_utilities prop =
   match prop.property_type with Utilities -> true | _ -> false
 
@@ -131,7 +134,7 @@ let create_buyable_card name card_type prices price house_price =
 let create_unbuyable_card name card_type rent =
   create_t name
     (assign_non_purchaseable card_type)
-    "notforsale" [ (CannotBuy, rent) ] (-1) (-1)
+    "" [ (CannotBuy, rent) ] (-1) (-1)
 
 let calculate_color_rent prop = List.assoc prop.stage prop.rent_prices
 
@@ -183,15 +186,12 @@ let num_for_monopoly prop =
 
 let num_houses prop =
   match prop.stage with
-  | CannotBuy -> -1
-  | Other -> -1
+  | CannotBuy | Other -> -1
   | Zero -> 0
   | One -> 1
   | Two -> 2
   | Three -> 3
   | Four -> 4
   | Hotel -> 5
-
-let get_name prop = prop.name
 
 let get_value prop = purchase_price prop / (1 + Bool.to_int (is_mortgaged prop))

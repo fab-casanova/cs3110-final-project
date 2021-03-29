@@ -176,7 +176,7 @@ let rec collect_nonmonetary_rent player owner rent_owed =
          if (owns_property player prop) && (no_houses_on_monopoly monopoly prop)
          then set_owner prop owner; let rent_owed = rent_owed - get_value prop
          else print_string "Can't sell this property"; collect_nonmonetary_rent player owner rent_owed
-  else
+  els
       print_string
         "\n\
          Invalid choice. You can pay with cash, mortgage, sell buildings, \
@@ -192,3 +192,6 @@ let collect_rent player owner property =
     update_player_money player (-1 * rent_owed))
   else if is_bankrupt rent_owed player then bankruptcy player
   else collect_nonmonetary_rent player owner rent_owed
+
+let collect_tax player property =
+  update_player_money player (-1 * calculate_color_rent property)
