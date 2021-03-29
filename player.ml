@@ -23,15 +23,14 @@ let get_properties player = player.properties
 
 let rec pp_properties_helper acc = function
   | [] -> ""
-  | h :: t when List.length t > 0 && acc <= 0 ->
-      prop_name h ^ ",\n" ^ pp_properties_helper 5 t
   | h :: t when List.length t > 0 ->
-      prop_name h ^ ", " ^ pp_properties_helper (acc - 1) t
+      if acc <= 0 then prop_name h ^ ",\n" ^ pp_properties_helper 5 t
+      else prop_name h ^ ", " ^ pp_properties_helper (acc - 1) t
   | h :: _ -> prop_name h
 
 let pp_properties player =
   let properties = get_properties player in
-  pp_properties_helper 5 properties
+  pp_properties_helper 5 (List.rev properties)
 
 let player_money player = player.money
 
@@ -71,7 +70,7 @@ let buy_property player prop =
   let price = purchase_price prop in
   if player.money >= price then (
     player.money <- player.money - price;
-    player.properties <- prop :: player.properties;
+    add_property player prop;
     set_owner prop player.name;
     if can_have_houses prop then check_monopoly player prop)
 
