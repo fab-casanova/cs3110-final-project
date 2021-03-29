@@ -182,16 +182,3 @@ let rec collect_nonmonetary_rent player owner rent_owed =
       collect_nonmonetary_rent player owner rent_owed
 *)
 let bankruptcy player = failwith "Unimplemented"
-
-let collect_rent player owner property =
-  let rent_owed = calculate_rent property owner in
-  if not (out_of_cash rent_owed player) then (
-    if is_owned property then update_player_money owner rent_owed;
-    update_player_money player (-1 * rent_owed))
-  else if is_bankrupt rent_owed player then bankruptcy player
-  else collect_nonmonetary_rent player owner rent_owed
-
-let collect_tax player property =
-  let tax = calculate_rent_or_tax property in
-  if not (out_of_cash tax player) then update_player_money player (-1 * tax)
-  else if is_bankrupt tax player then bankruptcy player

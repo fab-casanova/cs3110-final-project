@@ -27,13 +27,13 @@ let current_property_effects game player =
   print_endline ("Position " ^ string_of_int (get_index game pos) ^ " of 40");
   if is_tax pos then (
     print_endline "Tax will be collected";
-    collect_tax player pos)
+    collect_tax player pos game)
   else if is_owned pos then (
     print_endline (prop_name pos ^ " is owned");
     let owner = find_player (get_owner pos) (get_players game) in
     print_endline ("The owner of " ^ prop_name pos ^ " is " ^ get_name owner);
     if owner = player then print_endline "This is your property"
-    else collect_rent player owner pos)
+    else collect_rent player owner pos game)
   else if can_be_purchased pos then (
     print_endline
       (prop_name pos ^ " can be purchased for $"

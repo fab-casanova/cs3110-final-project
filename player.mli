@@ -20,10 +20,6 @@ val update_player_money : t -> int -> unit
 
 val calculate_rent : Property.t -> t -> int
 
-val collect_rent : t -> t -> Property.t -> unit
-
-val collect_tax : t -> Property.t -> unit
-
 val add_monopoly : t -> Property.space_type -> unit
 
 val has_monopoly : t -> Property.t -> bool

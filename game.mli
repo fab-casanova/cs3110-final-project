@@ -30,6 +30,10 @@ val find_player : string -> players -> Player.t
 
 val move_player : Player.t -> t -> unit
 
+val collect_rent : Player.t -> Player.t -> Property.t -> t -> unit
+
+val collect_tax : Player.t -> Property.t -> t -> unit
+
 (*
 val buying_prompt : 
 *)
