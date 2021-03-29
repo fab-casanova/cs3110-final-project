@@ -30,7 +30,7 @@ let rec pp_properties_helper acc = function
 
 let pp_properties player =
   let properties = get_properties player in
-  pp_properties_helper 5 (List.rev properties)
+  pp_properties_helper 4 (List.rev properties)
 
 let player_money player = player.money
 
