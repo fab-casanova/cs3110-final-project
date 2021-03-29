@@ -77,9 +77,9 @@ let move_player player game =
     print_endline "Passed go, collect $200";
     update_player_money player 200)
 
-(*TODO: Finish auction*)
+(*TODO: Finish auction, should take game in as parameter*)
 (*
-let rec auction highest_bidder prop bid_price player_list=
+let rec auction highest_bidder prop bid_price player_list game=
   let curr_player = match player_list with 
     | [] ->  auction highest_bidder prop bid_price (*Doesn't matter what happens here*)
     | h :: t ->  in
@@ -102,7 +102,7 @@ let rec auction highest_bidder prop bid_price player_list=
 
 (*TODO: finish collect nonmonetary rent*)
 (*
-let rec collect_nonmonetary_rent player owner rent_owed =
+let rec collect_nonmonetary_rent player owner rent_owed game=
   print_string
     "\n\
      Would you like to pay with cash, mortgage, sell buildings, or transfer \
@@ -137,7 +137,7 @@ let rec collect_nonmonetary_rent player owner rent_owed =
         "\n\
          Invalid choice. You can pay with cash, mortgage, sell buildings, \
          transfer properties\n";
-      collect_nonmonetary_rent player owner rent_owed
+      collect_nonmonetary_rent player owner rent_owed game
 *)
 
 let rec collect_nonmonetary_rent player owner rent_owed = failwith ""
