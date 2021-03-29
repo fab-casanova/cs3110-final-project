@@ -24,7 +24,7 @@ val create_buyable_card : string -> string -> int array -> int -> int -> t
 
 val create_unbuyable_card : string -> string -> int -> t
 
-val calculate_color_rent : t -> int
+val calculate_rent_or_tax : t -> int
 
 val purchase_price : t -> int
 

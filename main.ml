@@ -3,17 +3,21 @@ open Player
 open Game
 
 let rec prompt_buy game player pos =
-  print_endline
-    ("You currently have "
-    ^ string_of_int (player_money player)
-    ^ ".\nWould you like to purchase " ^ prop_name pos ^ " for $"
-    ^ string_of_int (purchase_price pos)
-    ^ "? Type 'y' if yes, 'n' for no");
+  ANSITerminal.print_string [ ANSITerminal.blue ] "You currently have ";
+  ANSITerminal.print_string [ ANSITerminal.yellow ]
+    ("$" ^ string_of_int (player_money player));
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    (".\nWould you like to purchase " ^ prop_name pos ^ " for ");
+  ANSITerminal.print_string [ ANSITerminal.yellow ]
+    ("$" ^ string_of_int (purchase_price pos));
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    "? Type 'y' if yes, 'n' for no\n";
   match read_line () with
   | "y" ->
       buy_property player pos;
-      print_endline (get_name player ^ " now owns " ^ prop_name pos)
-  | "n" -> print_endline (prop_name pos ^ " was not bought")
+      ANSITerminal.print_string [ ANSITerminal.green ]
+        ("\n" ^ get_name player ^ " now owns " ^ prop_name pos ^ "\n")
+  | "n" -> print_endline ("\n" ^ prop_name pos ^ " was not bought")
   | _ ->
       print_endline "Please respond with 'yes' or no";
       prompt_buy game player pos
@@ -23,7 +27,7 @@ let current_property_effects game player =
   print_endline ("Position " ^ string_of_int (get_index game pos) ^ " of 40");
   if is_tax pos then (
     print_endline "Tax will be collected";
-    Player.collect_tax player pos)
+    collect_tax player pos)
   else if is_owned pos then (
     print_endline (prop_name pos ^ " is owned");
     let owner = find_player (get_owner pos) (get_players game) in
@@ -31,17 +35,24 @@ let current_property_effects game player =
     if owner = player then print_endline "This is your property"
     else collect_rent player owner pos)
   else if can_be_purchased pos then (
-    print_endline (prop_name pos ^ " can be purchased\n");
+    print_endline
+      (prop_name pos ^ " can be purchased for $"
+      ^ string_of_int (purchase_price pos)
+      ^ "\n");
     if player_money player > purchase_price pos then prompt_buy game player pos
-    else print_endline "Not enough funds to purchase\n")
+    else
+      ANSITerminal.print_string [ ANSITerminal.red ]
+        "Not enough funds to purchase\n\n")
 
 let play_a_turn game =
   let player = current_player game in
   move_player player game;
   print_endline (get_name player ^ " is at: " ^ prop_name (get_position player));
   current_property_effects game player;
-  print_endline
-    (get_name player ^ "'s money: $" ^ string_of_int (player_money player))
+  ANSITerminal.print_string [ ANSITerminal.yellow ]
+    (get_name player ^ "'s money: $"
+    ^ string_of_int (player_money player)
+    ^ "\n")
 
 let rec current_turn game =
   play_a_turn game;

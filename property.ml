@@ -136,7 +136,7 @@ let create_unbuyable_card name card_type rent =
     (assign_non_purchaseable card_type)
     "" [ (CannotBuy, rent) ] (-1) (-1)
 
-let calculate_color_rent prop = List.assoc prop.stage prop.rent_prices
+let calculate_rent_or_tax prop = List.assoc prop.stage prop.rent_prices
 
 let purchase_price prop = prop.price
 

@@ -99,3 +99,20 @@ let rec auction highest_bidder prop bid_price player_list=
         auction highest_bidder prop bid_price (t @ [h]) (*Recursively call
         auction with new data*)
 *) *)
+
+let rec collect_nonmonetary_rent player owner rent_owed = failwith ""
+
+let bankruptcy player game = failwith "Unimplemented"
+
+let collect_rent player owner property game =
+  let rent_owed = calculate_rent property owner in
+  if not (out_of_cash rent_owed player) then (
+    if is_owned property then update_player_money owner rent_owed;
+    update_player_money player (-1 * rent_owed))
+  else if is_bankrupt rent_owed player then bankruptcy player game
+  else collect_nonmonetary_rent player owner rent_owed
+
+let collect_tax player property game =
+  let tax = calculate_rent_or_tax property in
+  if not (out_of_cash tax player) then update_player_money player (-1 * tax)
+  else if is_bankrupt tax player then bankruptcy player game

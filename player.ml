@@ -77,11 +77,11 @@ let util_rent player =
   (1 + (3 * utils_owned)) * roll_dice ()
 
 let calculate_rent prop owner =
+  let rent = calculate_rent_or_tax prop in
   if is_utilities prop then util_rent owner
   else if is_railroad prop then
-    int_of_float
-      (2. ** float_of_int (calculate_color_rent prop * num_of_rail owner))
-  else calculate_color_rent prop
+    int_of_float (2. ** float_of_int (rent * num_of_rail owner))
+  else rent
 
 let has_monopoly player prop =
   let color = get_type prop in
@@ -192,4 +192,6 @@ let collect_rent player owner property =
   else collect_nonmonetary_rent player owner rent_owed
 
 let collect_tax player property =
-  update_player_money player (-1 * calculate_color_rent property)
+  let tax = calculate_rent_or_tax property in
+  if not (out_of_cash tax player) then update_player_money player (-1 * tax)
+  else if is_bankrupt tax player then bankruptcy player

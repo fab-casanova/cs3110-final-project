@@ -18,6 +18,8 @@ val buy_property : t -> Property.t -> unit
 
 val update_player_money : t -> int -> unit
 
+val calculate_rent : Property.t -> t -> int
+
 val collect_rent : t -> t -> Property.t -> unit
 
 val collect_tax : t -> Property.t -> unit
