@@ -61,9 +61,13 @@ let get_new_position player the_game =
   player |> get_position |> get_index the_game |> ( + ) moves
 
 let move_player player game =
+  let old_pos = get_position player in
   let new_index = get_new_position player game mod 40 in
   let new_position = get_prop_at_index new_index game in
-  change_pos player new_position
+  change_pos player new_position;
+  if new_index - get_index game old_pos < 0 then (
+    print_endline "Passed go, collect $200";
+    update_player_money player 200)
 
 let get_players game = game.player_list
 
@@ -72,17 +76,13 @@ let find_player player_name plyr_lst =
 
 let current_property_effects player game start_index =
   let pos = get_position player in
-  print_endline (string_of_int start_index);
-  print_endline (string_of_int (get_index game pos));
-  if get_index game pos - start_index < 0 then (
-    print_endline "Passed go, collect $200";
-    update_player_money player 200);
+  print_endline ("Position " ^ string_of_int (get_index game pos) ^ " of 40");
   if is_tax pos then (
     print_endline "Tax will be collected";
     Player.collect_tax player pos)
   else if is_owned pos then (
     print_endline (prop_name pos ^ " is owned");
-    let owner = find_player (get_owner pos) game.player_list in
+    let owner = find_player (get_owner pos) (get_players game) in
     print_endline ("The owner of " ^ prop_name pos ^ " is " ^ get_name owner);
     if owner = player then print_endline "This is your property"
     else Player.collect_rent player owner pos)
@@ -92,11 +92,10 @@ let current_property_effects player game start_index =
 let play_a_turn game player =
   let start_index = get_index game (get_position player) in
   move_player player game;
-  print_endline
-    (get_name player ^ "'s current position: " ^ prop_name (get_position player));
+  print_endline (get_name player ^ " is at: " ^ prop_name (get_position player));
   current_property_effects player game start_index;
   print_endline
-    (get_name player ^ "'s money : $" ^ string_of_int (player_money player))
+    (get_name player ^ "'s money: $" ^ string_of_int (player_money player))
 
 (*TODO: Finish auction*)
 (*
