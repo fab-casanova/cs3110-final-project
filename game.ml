@@ -70,28 +70,11 @@ let get_players game = game.player_list
 let find_player player_name plyr_lst =
   List.find (fun x -> get_name x = player_name) plyr_lst
 
-let current_property_effects player game =
+let current_property_effects player game start_index =
   let pos = get_position player in
-  let owner_name = get_owner pos in
-  let lst = game.player_list in
-  let owner = find_player owner_name lst in
-  if (is_owned pos && owner <> player) || is_tax pos then
-    Player.collect_rent player owner pos
-
-let current_property_effects player game =
-  let pos = get_position player in
-  if not (is_owned pos) then (
-    print_endline (prop_name pos ^ " is unowned");
-    if is_tax pos then Player.collect_tax player pos
-    else if can_be_purchased pos then
-      print_endline (prop_name pos ^ " can be purchased"))
-  else
-    let owner = find_player (get_owner pos) game.player_list in
-    print_endline ("The owner of " ^ prop_name pos ^ " is " ^ get_name owner);
-    if owner <> player || is_tax pos then Player.collect_rent player owner pos
-
-let current_property_effects player game =
-  let pos = get_position player in
+  if get_index game pos - start_index < 0 then (
+    print_endline "Passed go, collect $200";
+    update_player_money player 200);
   if is_tax pos then (
     print_endline "Tax will be collected";
     Player.collect_tax player pos)
@@ -102,14 +85,16 @@ let current_property_effects player game =
     if owner = player then print_endline "This is your property"
     else Player.collect_rent player owner pos)
   else if can_be_purchased pos then
-    print_endline (prop_name pos ^ " can be purchased")
+    print_endline (prop_name pos ^ " can be purchased");
+  print_endline
+    (get_name player ^ "'s money : $" ^ string_of_int (player_money player))
 
 let play_a_turn game player =
+  let start_index = get_index game (get_position player) in
   move_player player game;
   print_endline
-    ("Current position of " ^ get_name player ^ " is "
-    ^ prop_name (get_position player));
-  current_property_effects player game
+    (get_name player ^ "'s current position: " ^ prop_name (get_position player));
+  current_property_effects player game start_index
 
 (*TODO: Finish auction*)
 (*

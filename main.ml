@@ -4,9 +4,9 @@ open Game
 let rec current_turn game =
   play_a_turn game (find_player (current_player_name game) (get_players game));
   ANSITerminal.print_string [ ANSITerminal.green ]
-    "\nContinue rolling? Type 'yes' if yes\n";
+    "\nContinue rolling? Type 'y' if yes\n";
   match read_line () with
-  | "yes" -> current_turn game
+  | "y" -> current_turn game
   | _ -> ANSITerminal.print_string [ ANSITerminal.green ] "Bye!\n"
 
 let first_player game =
