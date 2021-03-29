@@ -34,6 +34,8 @@ val get_owner : t -> string
 
 val set_owner : t -> string -> unit
 
+val return_prop_to_bank : t -> unit
+
 val is_mortgaged : t -> bool
 
 val current_stage : t -> property_stage
@@ -45,8 +47,6 @@ val unmortgage : t -> unit
 val get_type : t -> space_type
 
 val upgrade_property : t -> unit
-
-val downgrade_property : t -> unit
 
 val num_for_monopoly : t -> int
 

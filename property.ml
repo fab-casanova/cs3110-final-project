@@ -146,6 +146,15 @@ let get_owner prop = prop.owner
 
 let set_owner prop owner = prop.owner <- owner
 
+let reset_stage prop =
+  match prop.stage with
+  | CannotBuy | Other | Zero -> ()
+  | One | Two | Three | Four | Hotel -> prop.stage <- Zero
+
+let return_prop_to_bank prop =
+  prop.owner <- "";
+  reset_stage prop
+
 let is_mortaged prop = prop.mortgaged
 
 let current_stage prop = prop.stage
@@ -166,15 +175,6 @@ let upgrade_property prop =
   | Three -> prop.stage <- Four
   | Four -> prop.stage <- Hotel
   | Hotel | CannotBuy | Other -> ()
-
-let downgrade_property prop =
-  match prop.stage with
-  | CannotBuy | Other | Zero -> ()
-  | One -> prop.stage <- Zero
-  | Two -> prop.stage <- One
-  | Three -> prop.stage <- Two
-  | Four -> prop.stage <- Three
-  | Hotel -> prop.stage <- Four
 
 let num_for_monopoly prop =
   match get_type prop with

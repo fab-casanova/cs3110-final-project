@@ -100,8 +100,50 @@ let rec auction highest_bidder prop bid_price player_list=
         auction with new data*)
 *) *)
 
+(*TODO: finish collect nonmonetary rent*)
+(*
+let rec collect_nonmonetary_rent player owner rent_owed =
+  print_string
+    "\n\
+     Would you like to pay with cash, mortgage, sell buildings, or transfer \
+     properties?\n";
+  print_string "> ";
+  let input = read_line() in
+  if input = "pay with cash" then
+      if not (out_of_cash rent_owed player) then
+        update_player_money owner rent_owed
+      else
+        print_string
+          "Invalid choice, not enough money. You can pay with cash, mortgage, \
+           sell buildings, transfer properties";
+      collect_nonmonetary_rent player owner rent_owed
+  else if input = "mortgage" then print_string "What property do you want to mortgage?";
+        let prop = read_line() in
+        if mortgage_allowed player prop then player.money <- player.money - (purchase_price prop)/2; create_mortgage prop else print_string "Can't mortgage this property"; collect_nonmonetary_rent player owner rent_owed
+      
+  else if input = "sell buildings" then print_string "What property do you want to sell buildings on?";
+        let prop = read_line() in
+        if (owns_property player prop) && (num_houses prop) > 0 && buiding_evenly player prop ( - ) then
+        player.money <- player.money + (house_cout prop)/2
+        downgrade_property prop
+        else print_string "Cannot sell buildings on this property"; collect_nonmonetary_rent player owner rent_owed
+  else if input = "transfer properties" then print_string "What property do you want to sell?";
+         let prop = read_line() in
+         if (owns_property player prop) && (no_houses_on_monopoly monopoly prop)
+         then set_owner prop owner; let rent_owed = rent_owed - get_value prop
+         else print_string "Can't sell this property"; collect_nonmonetary_rent player owner rent_owed
+        else
+      print_string
+        "\n\
+         Invalid choice. You can pay with cash, mortgage, sell buildings, \
+         transfer properties\n";
+      collect_nonmonetary_rent player owner rent_owed
+*)
+
 let rec collect_nonmonetary_rent player owner rent_owed = failwith ""
 
+(* TODO: bankruptcy should remove the player from player_list and return
+  their properties to unowned,*)
 let bankruptcy player game = failwith "Unimplemented"
 
 let collect_rent player owner property game =
