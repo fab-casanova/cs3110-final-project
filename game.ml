@@ -71,7 +71,7 @@ let move_player player game =
   change_pos player new_position;
   if new_index - get_index game old_pos < 0 then (
     print_endline "Passed go, collect $200";
-    update_player_money player 200)
+    update_player_money player 200 )
 
 (*TODO: Finish auction, should take game in as parameter*)
 (*
@@ -97,15 +97,16 @@ let rec auction highest_bidder prop bid_price player_list game=
 *) *)
 
 (*TODO: finish collect nonmonetary rent*)
-(*
-let rec collect_nonmonetary_rent player owner rent_owed game=
+
+let rec collect_nonmonetary_rent player owner rent_owed =
   print_string
     "\n\
      Would you like to pay with cash, mortgage, sell buildings, or transfer \
      properties?\n";
   print_string "> ";
-  let input = read_line() in
-  if input = "pay with cash" then
+  let input = read_line () in
+  match input with
+  | "pay with cash" ->
       if not (out_of_cash rent_owed player) then
         update_player_money owner rent_owed
       else
@@ -113,28 +114,42 @@ let rec collect_nonmonetary_rent player owner rent_owed game=
           "Invalid choice, not enough money. You can pay with cash, mortgage, \
            sell buildings, transfer properties";
       collect_nonmonetary_rent player owner rent_owed
-  else if input = "mortgage" then print_string "What property do you want to mortgage?";
-        let prop = read_line() in
-        if mortgage_allowed player prop then player.money <- player.money - (purchase_price prop)/2; create_mortgage prop else print_string "Can't mortgage this property"; collect_nonmonetary_rent player owner rent_owed
-      
-  else if input = "sell buildings" then print_string "What property do you want to sell buildings on?";
-        let prop = read_line() in
-        if (owns_property player prop) && (num_houses prop) > 0 && buiding_evenly player prop ( - ) then
-        player.money <- player.money + (house_cout prop)/2
-        downgrade_property prop
-        else print_string "Cannot sell buildings on this property"; collect_nonmonetary_rent player owner rent_owed
-  else if input = "transfer properties" then print_string "What property do you want to sell?";
-         let prop = read_line() in
-         if (owns_property player prop) && (no_houses_on_monopoly monopoly prop)
-         then set_owner prop owner; let rent_owed = rent_owed - get_value prop
-         else print_string "Can't sell this property"; collect_nonmonetary_rent player owner rent_owed
-        else
-      print_string
-        "\n\
-         Invalid choice. You can pay with cash, mortgage, sell buildings, \
-         transfer properties\n";
-      collect_nonmonetary_rent player owner rent_owed game
-*)
+  | "mortgage" ->
+      let prop = get_prop_of_name player (read_line ()) in
+      let can_mortgage = mortgage_allowed player prop in
+      if can_mortgage then update_player_money player (purchase_price prop / 2);
+      if can_mortgage then create_mortgage prop;
+      if not can_mortgage then print_string "\nCan't mortgage this property\n";
+      collect_nonmonetary_rent player owner rent_owed
+  | "sell buildings" ->
+      print_string "What property do you want to sell buildings on?";
+      let prop = get_prop_of_name player (read_line ()) in
+      let selling_allowed =
+        owns_property player (prop_name prop)
+        && num_houses prop > 0
+        && building_evenly player prop ( - )
+      in
+      if selling_allowed then update_player_money player (house_cost prop / 2);
+      if selling_allowed then update_player_money player (house_cost prop / 2);
+      if selling_allowed then downgrade_property prop;
+      if not selling_allowed then
+        print_string "Cannot sell buildings on this property";
+      collect_nonmonetary_rent player owner rent_owed
+  | "transfer properties" ->
+      print_string "What property do you want to sell?";
+      let prop = get_prop_of_name player (read_line ()) in
+      let can_transfer =
+        owns_property player (prop_name prop)
+        && no_houses_on_monopoly player prop
+      in
+      if can_transfer then set_owner prop (get_name owner);
+      if can_transfer then
+        collect_nonmonetary_rent player owner (rent_owed - get_value prop);
+      if not can_transfer then print_string "Can't sell this property";
+      if not can_transfer then collect_nonmonetary_rent player owner rent_owed
+  | _ ->
+      print_string "\nInvalid input, please try again\n";
+      collect_nonmonetary_rent player owner rent_owed
 
 let rec collect_nonmonetary_rent player owner rent_owed = failwith ""
 
@@ -146,7 +161,7 @@ let collect_rent player owner property game =
   let rent_owed = calculate_rent property owner in
   if not (out_of_cash rent_owed player) then (
     if is_owned property then update_player_money owner rent_owed;
-    update_player_money player (-1 * rent_owed))
+    update_player_money player (-1 * rent_owed) )
   else if is_bankrupt rent_owed player then bankruptcy player game
   else collect_nonmonetary_rent player owner rent_owed
 

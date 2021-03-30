@@ -212,6 +212,16 @@ let upgrade_property prop =
   | Four -> prop.stage <- Hotel
   | Hotel | CannotBuy | Other -> ()
 
+let downgrade_property prop =
+  match prop.stage with
+  | Zero -> prop.stage <- Zero
+  | One -> prop.stage <- Zero
+  | Two -> prop.stage <- One
+  | Three -> prop.stage <- Two
+  | Four -> prop.stage <- Three
+  | Hotel -> prop.stage <- Four
+  | CannotBuy | Other -> ()
+
 let num_for_monopoly prop =
   match get_type prop with
   | Brown | DBlue -> 2

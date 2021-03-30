@@ -35,3 +35,11 @@ val out_of_cash : int -> t -> bool
 val is_bankrupt : int -> t -> bool
 
 val can_build_houses_hotel : t -> Property.t -> bool
+
+val mortgage_allowed : t -> Property.t -> bool
+
+val no_houses_on_monopoly : t -> Property.t -> bool
+
+val owns_property : t -> string -> bool
+
+val get_prop_of_name : t -> string -> Property.t

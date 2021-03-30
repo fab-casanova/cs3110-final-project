@@ -54,6 +54,8 @@ val get_type : t -> space_type
 
 val upgrade_property : t -> unit
 
+val downgrade_property : t -> unit
+
 val num_for_monopoly : t -> int
 
 val num_houses : t -> int

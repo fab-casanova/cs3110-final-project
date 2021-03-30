@@ -78,7 +78,7 @@ let buy_property player prop =
     player.money <- player.money - price;
     add_property player prop;
     set_owner prop player.name;
-    if can_have_houses prop then check_monopoly player prop)
+    if can_have_houses prop then check_monopoly player prop )
 
 let num_of_prop is_prop player =
   List.length (List.filter (fun x -> is_prop x) (get_properties player))
@@ -148,21 +148,21 @@ let is_bankrupt amount_owed player =
   in
   amount_owed > player.money + property_value player player.properties 0
 
-let rec no_houses_on_monopoly monopoly prop =
+let rec no_houses_on_monopoly player prop =
+  let monopoly =
+    List.find_all (fun x -> get_type x = get_type prop) player.properties
+  in
   match monopoly with
   | [] -> true
   | h :: t ->
-      if num_houses prop > 0 then false else no_houses_on_monopoly t prop
+      if num_houses prop > 0 then false else no_houses_on_monopoly player prop
 
 let owns_property player prop =
   List.exists (fun x -> x = prop) player.properties
 
 let rec mortgage_allowed player prop =
-  let monopoly =
-    List.find_all (fun x -> get_type x = get_type prop) player.properties
-  in
   owns_property player prop && is_mortgaged prop
-  && no_houses_on_monopoly monopoly prop
+  && no_houses_on_monopoly player prop
 
-let get_prop_of_name player prop_name =
-  match player.properties with [] -> None | h :: t -> None
+let get_prop_of_name player name =
+  List.find (fun x -> prop_name x = name) player.properties
