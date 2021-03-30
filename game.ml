@@ -151,8 +151,6 @@ let rec collect_nonmonetary_rent player owner rent_owed =
       print_string "\nInvalid input, please try again\n";
       collect_nonmonetary_rent player owner rent_owed
 
-let rec collect_nonmonetary_rent player owner rent_owed = failwith ""
-
 (* TODO: bankruptcy should remove the player from player_list and return
   their properties to unowned,*)
 let bankruptcy player game = failwith "Unimplemented"
