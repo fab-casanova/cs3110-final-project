@@ -110,10 +110,10 @@ let first_player game =
     \ Empty names will default to 'playern' where playern is the nth player: \n\n";
   match read_line () with
   | str -> (
-      let new_plyr =
-        create_player (if str = "" then "player1" else str) (get_start_pos game)
-      in
-      add_a_player game new_plyr;
+      add_a_player game
+        (create_player
+           (if str = "" then "player1" else str)
+           (get_start_pos game));
       ANSITerminal.print_string [ ANSITerminal.green ]
         ("\nFirst player is: "
         ^ get_name (current_player game)
