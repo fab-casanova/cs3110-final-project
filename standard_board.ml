@@ -143,14 +143,14 @@ let st_line_rail =
 let chance_three = create_unbuyable_card "Chance No. 3" "chance" 0
 
 let pk_place =
-  create_buyable_card "Park Place" "blue"
+  create_buyable_card "Park Place" "dark blue"
     [| 35; 175; 500; 1100; 1300; 1500 |]
     350 200
 
 let luxury_tax = create_unbuyable_card "Pay $100 Luxury Tax" "income tax" 100
 
 let bdwalk =
-  create_buyable_card "Boardwalk" "blue"
+  create_buyable_card "Boardwalk" "dark blue"
     [| 50; 200; 600; 1400; 1700; 2000 |]
     400 200
 
