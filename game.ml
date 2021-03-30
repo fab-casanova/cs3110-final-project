@@ -125,7 +125,7 @@ let rec collect_nonmonetary_rent player owner rent_owed =
       print_string "What property do you want to sell buildings on?";
       let prop = get_prop_of_name player (read_line ()) in
       let selling_allowed =
-        owns_property player (prop_name prop)
+        owns_property player prop
         && num_houses prop > 0
         && building_evenly player prop ( - )
       in
@@ -139,8 +139,7 @@ let rec collect_nonmonetary_rent player owner rent_owed =
       print_string "What property do you want to sell?";
       let prop = get_prop_of_name player (read_line ()) in
       let can_transfer =
-        owns_property player (prop_name prop)
-        && no_houses_on_monopoly player prop
+        owns_property player prop && no_houses_on_monopoly player prop
       in
       if can_transfer then set_owner prop (get_name owner);
       if can_transfer then

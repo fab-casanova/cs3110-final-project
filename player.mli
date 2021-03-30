@@ -40,6 +40,6 @@ val mortgage_allowed : t -> Property.t -> bool
 
 val no_houses_on_monopoly : t -> Property.t -> bool
 
-val owns_property : t -> string -> bool
+val owns_property : t -> Property.t -> bool
 
 val get_prop_of_name : t -> string -> Property.t
