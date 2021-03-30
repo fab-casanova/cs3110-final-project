@@ -27,7 +27,9 @@ let rec buy_prompt game player pos =
 let current_property_effects game player =
   let pos = get_position player in
   print_endline ("Position " ^ string_of_int (get_index game pos) ^ " of 40");
-  if is_tax pos then (
+  if is_com_or_chance pos then
+    print_endline ("Draw a " ^ prop_space_type pos ^ " card!")
+  else if is_tax pos then (
     print_endline "Tax will be collected";
     collect_tax player pos game)
   else if is_owned pos then (

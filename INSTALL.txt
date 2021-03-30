@@ -1,0 +1,8 @@
+Install:
+There is no additional installation needed after opening the zip file
+
+Build:
+Run [make build] on the terminal to build the program
+
+Play game:
+Run [make play] to start the game
