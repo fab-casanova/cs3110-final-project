@@ -24,30 +24,6 @@ let rec buy_prompt game player pos =
       print_endline "Please respond with 'yes' or no";
       buy_prompt game player pos
 
-let current_property_effects game player =
-  let pos = get_position player in
-  print_endline ("Position " ^ string_of_int (get_index game pos) ^ " of 40");
-  if is_com_or_chance pos then
-    print_endline ("Draw a " ^ prop_space_type pos ^ " card!")
-  else if is_tax pos then (
-    print_endline "Tax will be collected";
-    collect_tax player pos game)
-  else if is_owned pos then (
-    print_endline (prop_name pos ^ " is owned");
-    let owner = find_player (get_owner pos) (get_players game) in
-    print_endline ("The owner of " ^ prop_name pos ^ " is " ^ get_name owner);
-    if owner = player then print_endline "This is your property"
-    else collect_rent player owner pos game)
-  else if can_be_purchased pos then (
-    print_endline
-      (prop_name pos ^ " can be purchased for $"
-      ^ string_of_int (purchase_price pos)
-      ^ "\n");
-    if player_money player >= purchase_price pos then buy_prompt game player pos
-    else
-      ANSITerminal.print_string [ ANSITerminal.red ]
-        "Not enough funds to purchase\n\n")
-
 let rec build_prompt player prop =
   ANSITerminal.print_string [ ANSITerminal.blue ] "You currently have ";
   ANSITerminal.print_string [ ANSITerminal.yellow ]
@@ -66,7 +42,7 @@ let rec build_prompt player prop =
         (prop_name prop ^ " is now at Level " ^ what_stage prop ^ "\n")
   | "n" -> print_endline ("\n" ^ prop_name prop ^ " did not have a house built")
   | _ ->
-      print_endline "Please respond with 'yes' or no";
+      print_endline "Please respond with 'y' or 'n'";
       build_prompt player prop
 
 let rec check_build (game : Game.t) (player : Player.t) = function
@@ -74,6 +50,34 @@ let rec check_build (game : Game.t) (player : Player.t) = function
   | h :: t ->
       if can_build_houses_hotel player h then build_prompt player h;
       check_build game player t
+
+let current_property_effects game player =
+  let pos = get_position player in
+  print_endline ("Position " ^ string_of_int (get_index game pos) ^ " of 40");
+  if not (is_go_to_jail pos) then (
+    if is_com_or_chance pos then
+      print_endline ("Draw a " ^ prop_space_type pos ^ " card!");
+    if is_tax pos then (
+      print_endline "Tax will be collected";
+      collect_tax player pos game);
+    if is_owned pos then (
+      print_endline (prop_name pos ^ " is owned");
+      let owner = find_player (get_owner pos) (get_players game) in
+      print_endline ("The owner of " ^ prop_name pos ^ " is " ^ get_name owner);
+      if owner = player then print_endline "This is your property"
+      else collect_rent player owner pos game)
+    else if can_be_purchased pos then (
+      print_endline
+        (prop_name pos ^ " can be purchased for $"
+        ^ string_of_int (purchase_price pos)
+        ^ "\n");
+      if player_money player >= purchase_price pos then
+        buy_prompt game player pos
+      else
+        ANSITerminal.print_string [ ANSITerminal.red ]
+          "Not enough funds to purchase\n\n");
+    check_build game player (get_properties player))
+  else ANSITerminal.print_string [ ANSITerminal.red ] "You're going to jail\n"
 
 let play_a_turn game =
   let player = current_player game in
@@ -96,12 +100,12 @@ let rec current_turn game =
     ("\nCurrent player: " ^ get_name (current_player game));
   play_a_turn game;
   ANSITerminal.print_string [ ANSITerminal.green ]
-    "\nContinue playing? Type 'y' if yes, and anything else for no\n";
+    "\nContinue playing? Press 'q' to quit\n";
   match read_line () with
-  | "y" ->
+  | "q" -> ANSITerminal.print_string [ ANSITerminal.green ] "Bye!\n\n"
+  | _ ->
       move_to_next_player game;
       current_turn game
-  | _ -> ANSITerminal.print_string [ ANSITerminal.green ] "Bye!\n\n"
 
 let first_player game =
   ANSITerminal.print_string [ ANSITerminal.blue ]

@@ -129,6 +129,9 @@ let is_railroad prop =
 
 let is_tax prop = match prop.property_type with IncomeTax -> true | _ -> false
 
+let is_go_to_jail prop =
+  match prop.property_type with GoToJail -> true | _ -> false
+
 let create_t str color own prices cost house_price =
   {
     name = str;

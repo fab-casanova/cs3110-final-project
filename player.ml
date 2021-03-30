@@ -124,6 +124,7 @@ let building_evenly player prop add_or_subtract =
 let can_build_houses_hotel player prop =
   can_have_houses prop && has_monopoly player prop
   && player_money player >= house_cost prop
+  && can_be_upgraded prop
   && building_evenly player prop ( + )
 
 (*
