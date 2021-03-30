@@ -30,13 +30,13 @@ let rec pp_properties_helper acc = function
   | [] -> ""
   | h :: t when List.length t > 0 ->
       if acc <= 0 then
-        prop_name h ^ print_level h ^ ",\n" ^ pp_properties_helper 4 t
+        prop_name h ^ print_level h ^ ",\n" ^ pp_properties_helper 3 t
       else prop_name h ^ print_level h ^ ", " ^ pp_properties_helper (acc - 1) t
   | h :: _ -> prop_name h ^ print_level h
 
 let pp_properties player =
   let properties = get_properties player in
-  pp_properties_helper 3 (List.rev properties)
+  pp_properties_helper 2 (List.rev properties)
 
 let player_money player = player.money
 
@@ -78,7 +78,7 @@ let buy_property player prop =
     player.money <- player.money - price;
     add_property player prop;
     set_owner prop player.name;
-    if can_have_houses prop then check_monopoly player prop )
+    if can_have_houses prop then check_monopoly player prop)
 
 let num_of_prop is_prop player =
   List.length (List.filter (fun x -> is_prop x) (get_properties player))

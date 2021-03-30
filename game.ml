@@ -11,7 +11,7 @@ type t = {
   mutable current_player : string;
 }
 
-let create_list_of_players (lst : Player.t list) : players = lst
+let create_players (lst : Player.t list) : players = lst
 
 let create_gameboard (lst : Property.t list) : gameboard = lst
 
@@ -30,7 +30,7 @@ let find_player player_name plyr_lst =
   List.find (fun x -> get_name x = player_name) plyr_lst
 
 let current_player game =
-  find_player (current_player_name game) (get_players game)
+  List.find (fun x -> get_name x = current_player_name game) (get_players game)
 
 let add_a_player game player =
   if List.length game.player_list > 3 then
@@ -42,6 +42,12 @@ let add_a_player game player =
     else game.player_list <- game.player_list @ [ player ];
     if game.current_player = "" then game.current_player <- get_name player;
     print_endline ("player count: " ^ string_of_int (num_players game))
+
+let move_front_to_back = function [] -> [] | h :: t -> t @ [ h ]
+
+let move_to_next_player game =
+  game.player_list <- move_front_to_back game.player_list;
+  game.current_player <- get_name (List.hd game.player_list)
 
 let rec get_index_helper board (prop : Property.t) acc =
   match board with
@@ -71,7 +77,7 @@ let move_player player game =
   change_pos player new_position;
   if new_index - get_index game old_pos < 0 then (
     print_endline "Passed go, collect $200";
-    update_player_money player 200 )
+    update_player_money player 200)
 
 (*TODO: Finish auction, should take game in as parameter*)
 (*
@@ -104,8 +110,7 @@ let rec collect_nonmonetary_rent player owner rent_owed =
      Would you like to pay with cash, mortgage, sell buildings, or transfer \
      properties?\n";
   print_string "> ";
-  let input = read_line () in
-  match input with
+  match read_line () with
   | "pay with cash" ->
       if not (out_of_cash rent_owed player) then
         update_player_money owner rent_owed
@@ -158,7 +163,7 @@ let collect_rent player owner property game =
   let rent_owed = calculate_rent property owner in
   if not (out_of_cash rent_owed player) then (
     if is_owned property then update_player_money owner rent_owed;
-    update_player_money player (-1 * rent_owed) )
+    update_player_money player (-1 * rent_owed))
   else if is_bankrupt rent_owed player then bankruptcy player game
   else collect_nonmonetary_rent player owner rent_owed
 

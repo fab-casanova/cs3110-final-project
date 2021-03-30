@@ -111,8 +111,9 @@ let first_player game =
            (if str = "" then "player1" else str)
            (get_start_pos game));
       ANSITerminal.print_string [ ANSITerminal.green ]
-        ("\nFirst player is : " ^ current_player_name game
-       ^ "\nPress the 'Enter' key to start");
+        ("\nFirst player is : "
+        ^ get_name (current_player game)
+        ^ "\nPress the 'Enter' key to start");
       (*Prompt adding players in MS2*)
       match read_line () with _ -> current_turn game)
 
@@ -121,7 +122,7 @@ let rec main () =
     "\nWelcome to our 3110 Group Project: Monopoly\n\nUsing standard board\n";
 
   let board = Standard_board.standard_board in
-  let the_game = Game.create_game board (create_list_of_players []) in
+  let the_game = Game.create_game board (create_players []) in
   first_player the_game
 
 let () = main ()

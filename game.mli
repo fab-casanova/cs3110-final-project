@@ -4,13 +4,15 @@ type gameboard
 
 type t
 
-val create_list_of_players : Player.t list -> players
+val create_players : Player.t list -> players
 
 val create_gameboard : Property.t list -> gameboard
 
 val current_player_name : t -> string
 
 val current_player : t -> Player.t
+
+val move_to_next_player : t -> unit
 
 val create_game : gameboard -> players -> t
 
