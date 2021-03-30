@@ -21,16 +21,22 @@ let get_name player = player.name
 
 let get_properties player = player.properties
 
+let print_level prop =
+  " (" ^ prop_space_type prop
+  ^ (if can_have_houses prop then " " ^ what_stage prop else "")
+  ^ ")"
+
 let rec pp_properties_helper acc = function
   | [] -> ""
   | h :: t when List.length t > 0 ->
-      if acc <= 0 then prop_name h ^ ",\n" ^ pp_properties_helper 5 t
-      else prop_name h ^ ", " ^ pp_properties_helper (acc - 1) t
-  | h :: _ -> prop_name h
+      if acc <= 0 then
+        prop_name h ^ print_level h ^ ",\n" ^ pp_properties_helper 4 t
+      else prop_name h ^ print_level h ^ ", " ^ pp_properties_helper (acc - 1) t
+  | h :: _ -> prop_name h ^ print_level h
 
 let pp_properties player =
   let properties = get_properties player in
-  pp_properties_helper 4 (List.rev properties)
+  pp_properties_helper 3 (List.rev properties)
 
 let player_money player = player.money
 
@@ -115,13 +121,20 @@ let building_evenly player prop add_or_subtract =
   in
   building_evenly_helper monopoly prop
 
+let can_build_houses_hotel player prop =
+  can_have_houses prop && has_monopoly player prop
+  && player_money player >= house_cost prop
+  && building_evenly player prop ( + )
+
+(*
 let build_houses_hotel player prop =
   if can_have_houses prop then
     if has_monopoly player prop then
       if building_evenly player prop ( + ) then upgrade_property prop
-      else print_string "Must build houses evenly"
-    else print_string "Cannot build house without monopoly"
-  else print_string "Cannot build house on this property type"
+      else print_string "Must build houses evenly\n"
+    else print_string "Cannot build house without monopoly\n"
+  else print_string "Cannot build house on this property type\n"
+*)
 
 let out_of_cash amount_owed player = amount_owed > player.money
 

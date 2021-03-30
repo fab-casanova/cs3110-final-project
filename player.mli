@@ -34,4 +34,4 @@ val out_of_cash : int -> t -> bool
 
 val is_bankrupt : int -> t -> bool
 
-val build_houses_hotel : t -> Property.t -> unit
+val can_build_houses_hotel : t -> Property.t -> bool

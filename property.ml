@@ -48,7 +48,43 @@ type t = {
 
 let prop_name prop = prop.name
 
+let prop_space_type prop =
+  match prop.property_type with
+  | Brown -> "brown"
+  | LBlue -> "light blue"
+  | Pink -> "pink"
+  | Orange -> "orange"
+  | Red -> "red"
+  | Yellow -> "yellow"
+  | Green -> "green"
+  | DBlue -> "dark blue"
+  | Railroad -> "railroad"
+  | Utilities -> "utilities"
+  | OtherColor str -> str
+  | Jail -> "visiting jail"
+  | GoToJail -> "go to jail"
+  | Go -> "pass go"
+  | FreeParking -> "free parking"
+  | Chance -> "chance"
+  | ComChest -> "community chest"
+  | IncomeTax -> "income tax"
+  | OtherNonpurchase str -> str
+
 let can_be_purchased card = can_purchase_type card.property_type
+
+let can_be_upgraded prop =
+  match prop.stage with CannotBuy | Other | Hotel -> false | _ -> true
+
+let what_stage prop =
+  match prop.stage with
+  | CannotBuy -> "space cannot be purchased"
+  | Other -> "non-house property (cannot have houses)"
+  | Zero -> "zero"
+  | One -> "one"
+  | Two -> "two"
+  | Three -> "three"
+  | Four -> "four"
+  | Hotel -> "hotel"
 
 let can_have_houses prop =
   match prop.property_type with
