@@ -8,6 +8,8 @@ val get_properties : t -> Property.t list
 
 val pp_properties : t -> string
 
+val pp_monopolies : t -> string
+
 val player_money : t -> int
 
 val get_position : t -> Property.t

@@ -29,11 +29,12 @@ let rec build_prompt player prop =
   ANSITerminal.print_string [ ANSITerminal.yellow ]
     ("$" ^ string_of_int (player_money player));
   ANSITerminal.print_string [ ANSITerminal.blue ]
-    (".\nYou can build a house on " ^ prop_name prop ^ " for ");
+    (".\nYou have a monopoly on " ^ prop_space_type prop
+   ^ " properties. You can build a house on " ^ prop_name prop ^ " for ");
   ANSITerminal.print_string [ ANSITerminal.yellow ]
     ("$" ^ string_of_int (house_cost prop));
   ANSITerminal.print_string [ ANSITerminal.blue ]
-    ". Type 'y' if yes, and anything else for no\n";
+    ".\nType 'y' to build a house here, and 'n' to pass.\n";
   match read_line () with
   | "y" ->
       upgrade_property prop;
@@ -45,11 +46,12 @@ let rec build_prompt player prop =
       print_endline "Please respond with 'y' or 'n'";
       build_prompt player prop
 
-let rec check_build (game : Game.t) (player : Player.t) = function
+let rec check_build player props =
+  match props with
   | [] -> ()
   | h :: t ->
       if can_build_houses_hotel player h then build_prompt player h;
-      check_build game player t
+      check_build player t
 
 let current_property_effects game player =
   let pos = get_position player in
@@ -76,7 +78,7 @@ let current_property_effects game player =
       else
         ANSITerminal.print_string [ ANSITerminal.red ]
           "Not enough funds to purchase\n\n");
-    check_build game player (get_properties player))
+    check_build player (get_properties player))
   else ANSITerminal.print_string [ ANSITerminal.red ] "You're going to jail\n"
 
 let play_a_turn game =
@@ -87,13 +89,13 @@ let play_a_turn game =
     (get_name player ^ " is at: " ^ prop_name pos ^ " (" ^ prop_space_type pos
    ^ ")");
   current_property_effects game player;
-  check_build game player (get_properties player);
   ANSITerminal.print_string [ ANSITerminal.yellow ]
     (get_name player ^ "'s money: $"
     ^ string_of_int (player_money player)
     ^ "\n");
   ANSITerminal.print_string [ ANSITerminal.blue ]
-    (get_name player ^ "'s properties: " ^ pp_properties player ^ "\n ")
+    (get_name player ^ "'s properties: " ^ pp_properties player ^ "\n"
+   ^ get_name player ^ "'s monopolies: " ^ pp_monopolies player)
 
 let rec current_turn game =
   ANSITerminal.print_string [ ANSITerminal.green ]

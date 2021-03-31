@@ -26,17 +26,21 @@ let print_level prop =
   ^ (if can_have_houses prop then " " ^ what_stage prop else "")
   ^ ")"
 
-let rec pp_properties_helper acc = function
+let rec pp_helper f name acc global_acc = function
   | [] -> ""
   | h :: t when List.length t > 0 ->
       if acc <= 0 then
-        prop_name h ^ print_level h ^ ",\n" ^ pp_properties_helper 3 t
-      else prop_name h ^ print_level h ^ ", " ^ pp_properties_helper (acc - 1) t
-  | h :: _ -> prop_name h ^ print_level h
+        name h ^ f h ^ ",\n" ^ pp_helper f name global_acc global_acc t
+      else name h ^ f h ^ ", " ^ pp_helper f name (acc - 1) global_acc t
+  | h :: _ -> name h ^ f h
 
 let pp_properties player =
   let properties = get_properties player in
-  pp_properties_helper 2 (List.rev properties)
+  pp_helper print_level prop_name 2 3 (List.rev properties)
+
+let pp_monopolies player =
+  let monops = player.monopolies in
+  pp_helper (fun _ -> "") pp_space_type 5 6 monops
 
 let player_money player = player.money
 
@@ -59,11 +63,9 @@ let rec check_monopoly_helper player owned_properties property_type
       if get_type h = property_type then
         if acc + 1 = properties_required then add_monopoly player property_type
         else
-          check_monopoly_helper player owned_properties property_type
-            properties_required (acc + 1)
-      else
-        check_monopoly_helper player owned_properties property_type
-          properties_required acc
+          check_monopoly_helper player t property_type properties_required
+            (acc + 1)
+      else check_monopoly_helper player t property_type properties_required acc
 
 let check_monopoly player new_property =
   let property_type = get_type new_property in
@@ -107,9 +109,26 @@ let has_monopoly player prop =
   List.length (List.find_all (fun x -> get_type x = color) player.properties)
   = num_for_monopoly prop
 
+(*
+let rec find_extreme acc test lst =
+  match lst with
+  | [] -> acc
+  | h :: t ->
+      if test h acc then find_extreme h test t else find_extreme acc test t
+*)
+let rec is_building_evenly_helper prop house_per_prop =
+  let min, max = (List.hd house_per_prop, List.hd (List.rev house_per_prop)) in
+  max - min <= 1 && num_houses prop = min
+
+let is_building_evenly props prop =
+  props
+  |> List.filter (fun x -> get_type prop = get_type x)
+  |> List.map num_houses |> List.sort_uniq compare
+  |> is_building_evenly_helper prop
+
 let building_evenly player prop add_or_subtract =
   let monopoly =
-    List.find_all (fun x -> get_type x = get_type prop) player.properties
+    List.filter (fun x -> get_type x = get_type prop) player.properties
   in
   let rec building_evenly_helper monopoly prop =
     match monopoly with
@@ -125,7 +144,7 @@ let can_build_houses_hotel player prop =
   can_have_houses prop && has_monopoly player prop
   && player_money player >= house_cost prop
   && can_be_upgraded prop
-  && building_evenly player prop ( + )
+  && is_building_evenly player.properties prop
 
 (*
 let build_houses_hotel player prop =

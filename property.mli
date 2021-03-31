@@ -6,6 +6,8 @@ type t
 
 val prop_name : t -> string
 
+val pp_space_type : space_type -> string
+
 val prop_space_type : t -> string
 
 val is_owned : t -> bool

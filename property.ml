@@ -48,8 +48,7 @@ type t = {
 
 let prop_name prop = prop.name
 
-let prop_space_type prop =
-  match prop.property_type with
+let pp_space_type = function
   | Brown -> "brown"
   | LBlue -> "light blue"
   | Pink -> "pink"
@@ -69,6 +68,8 @@ let prop_space_type prop =
   | ComChest -> "community chest"
   | IncomeTax -> "income tax"
   | OtherNonpurchase str -> str
+
+let prop_space_type prop = pp_space_type prop.property_type
 
 let can_be_purchased card = can_purchase_type card.property_type
 
