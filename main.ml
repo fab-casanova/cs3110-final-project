@@ -21,7 +21,7 @@ let rec buy_prompt game player pos =
       print_endline ("\n" ^ prop_name pos ^ " was not bought")
       (*TODO: prompt an auction if prop is not bought*)
   | _ ->
-      print_endline "Please respond with 'yes' or no";
+      print_endline "Please respond with 'y' or 'n'";
       buy_prompt game player pos
 
 let rec build_prompt player prop =
@@ -102,7 +102,7 @@ let rec current_turn game =
     ("\nCurrent player: " ^ get_name (current_player game));
   play_a_turn game;
   ANSITerminal.print_string [ ANSITerminal.green ]
-    "\nContinue playing? Press 'q' to quit\n";
+    "\nContinue playing? Enter 'q' to quit\n";
   match read_line () with
   | "q" -> ANSITerminal.print_string [ ANSITerminal.green ] "Bye!\n\n"
   | _ ->
