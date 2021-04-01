@@ -6,6 +6,8 @@ val get_name : t -> string
 
 val get_properties : t -> Property.t list
 
+val clear_properties : t -> unit
+
 val pp_properties : t -> string
 
 val pp_monopolies : t -> string
@@ -28,7 +30,9 @@ val add_monopoly : t -> Property.space_type -> unit
 
 val has_monopoly : t -> Property.t -> bool
 
-val building_evenly : t -> Property.t -> (int -> int -> int) -> bool
+val check_monopoly : t -> Property.t -> unit
+
+val is_building_evenly : Property.t list -> Property.t -> bool -> bool
 
 val roll_dice : unit -> int
 
@@ -45,3 +49,5 @@ val no_houses_on_monopoly : t -> Property.t -> bool
 val owns_property : t -> Property.t -> bool
 
 val get_prop_of_name : t -> string -> Property.t
+
+val assets : t -> unit

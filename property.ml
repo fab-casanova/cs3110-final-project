@@ -197,8 +197,6 @@ let return_prop_to_bank prop =
   prop.owner <- "";
   reset_stage prop
 
-let is_mortaged prop = prop.mortgaged
-
 let current_stage prop = prop.stage
 
 let create_mortgage prop = prop.mortgaged <- true

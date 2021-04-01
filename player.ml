@@ -21,8 +21,20 @@ let get_name player = player.name
 
 let get_properties player = player.properties
 
+let rec clear_properties_helper = function
+  | [] -> ()
+  | h :: t ->
+      return_prop_to_bank h;
+      clear_properties_helper t
+
+let clear_properties player =
+  clear_properties_helper player.properties;
+  player.properties <- []
+
 let print_level prop =
-  " (" ^ prop_space_type prop
+  " ("
+  ^ (if is_mortgaged prop then "MORTGAGED " else "")
+  ^ prop_space_type prop
   ^ (if can_have_houses prop then " " ^ what_stage prop else "")
   ^ ")"
 
@@ -109,52 +121,21 @@ let has_monopoly player prop =
   List.length (List.find_all (fun x -> get_type x = color) player.properties)
   = num_for_monopoly prop
 
-(*
-let rec find_extreme acc test lst =
-  match lst with
-  | [] -> acc
-  | h :: t ->
-      if test h acc then find_extreme h test t else find_extreme acc test t
-*)
-let rec is_building_evenly_helper prop house_per_prop =
+let rec is_building_evenly_helper prop building house_per_prop =
   let min, max = (List.hd house_per_prop, List.hd (List.rev house_per_prop)) in
-  max - min <= 1 && num_houses prop = min
+  max - min <= 1 && num_houses prop = if building then min else max
 
-let is_building_evenly props prop =
+let is_building_evenly props prop building_props =
   props
   |> List.filter (fun x -> get_type prop = get_type x)
   |> List.map num_houses |> List.sort_uniq compare
-  |> is_building_evenly_helper prop
-
-let building_evenly player prop add_or_subtract =
-  let monopoly =
-    List.filter (fun x -> get_type x = get_type prop) player.properties
-  in
-  let rec building_evenly_helper monopoly prop =
-    match monopoly with
-    | [] -> true
-    | h :: t ->
-        if Int.abs (num_houses h) - add_or_subtract (num_houses prop) 1 <= 1
-        then building_evenly_helper t prop
-        else false
-  in
-  building_evenly_helper monopoly prop
+  |> is_building_evenly_helper prop building_props
 
 let can_build_houses_hotel player prop =
   can_have_houses prop && has_monopoly player prop
   && player_money player >= house_cost prop
   && can_be_upgraded prop
-  && is_building_evenly player.properties prop
-
-(*
-let build_houses_hotel player prop =
-  if can_have_houses prop then
-    if has_monopoly player prop then
-      if building_evenly player prop ( + ) then upgrade_property prop
-      else print_string "Must build houses evenly\n"
-    else print_string "Cannot build house without monopoly\n"
-  else print_string "Cannot build house on this property type\n"
-*)
+  && is_building_evenly player.properties prop true
 
 let out_of_cash amount_owed player = amount_owed > player.money
 
@@ -168,21 +149,35 @@ let is_bankrupt amount_owed player =
   in
   amount_owed > player.money + property_value player player.properties 0
 
-let rec no_houses_on_monopoly player prop =
+let no_houses_on_monopoly player prop =
   let monopoly =
     List.find_all (fun x -> get_type x = get_type prop) player.properties
   in
-  match monopoly with
-  | [] -> true
-  | h :: t ->
-      if num_houses prop > 0 then false else no_houses_on_monopoly player prop
+  let rec no_houses_on_monopoly_helper monopoly player prop =
+    match monopoly with
+    | [] -> true
+    | h :: t ->
+        if num_houses prop > 0 then false
+        else no_houses_on_monopoly_helper t player prop
+  in
+  no_houses_on_monopoly_helper monopoly player prop
 
 let owns_property player prop =
   List.exists (fun x -> x = prop) player.properties
 
 let rec mortgage_allowed player prop =
-  owns_property player prop && is_mortgaged prop
+  owns_property player prop
+  && (not (is_mortgaged prop))
   && no_houses_on_monopoly player prop
 
 let get_prop_of_name player name =
   List.find (fun x -> prop_name x = name) player.properties
+
+let assets player =
+  ANSITerminal.print_string [ ANSITerminal.yellow ]
+    (get_name player ^ "'s money: $"
+    ^ string_of_int (player_money player)
+    ^ "\n");
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    (get_name player ^ "'s properties: " ^ pp_properties player ^ "\n"
+   ^ get_name player ^ "'s monopolies: " ^ pp_monopolies player)

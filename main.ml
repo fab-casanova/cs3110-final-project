@@ -21,7 +21,7 @@ let rec buy_prompt game player pos =
       print_endline ("\n" ^ prop_name pos ^ " was not bought")
       (*TODO: prompt an auction if prop is not bought*)
   | _ ->
-      print_endline "Please respond with 'y' or 'n'";
+      print_endline "Please respond  with 'y' or 'n'";
       buy_prompt game player pos
 
 let rec build_prompt player prop =
@@ -89,13 +89,15 @@ let play_a_turn game =
     (get_name player ^ " is at: " ^ prop_name pos ^ " (" ^ prop_space_type pos
    ^ ")");
   current_property_effects game player;
-  ANSITerminal.print_string [ ANSITerminal.yellow ]
+  assets player
+
+(*player ANSITerminal.print_string [ ANSITerminal.yellow ]
     (get_name player ^ "'s money: $"
     ^ string_of_int (player_money player)
     ^ "\n");
   ANSITerminal.print_string [ ANSITerminal.blue ]
     (get_name player ^ "'s properties: " ^ pp_properties player ^ "\n"
-   ^ get_name player ^ "'s monopolies: " ^ pp_monopolies player)
+   ^ get_name player ^ "'s monopolies: " ^ pp_monopolies player)*)
 
 let rec current_turn game =
   ANSITerminal.print_string [ ANSITerminal.green ]
@@ -124,7 +126,7 @@ let first_player game =
         ("\nFirst player is: "
         ^ get_name (current_player game)
         ^ "\nPress the 'Enter' key to start");
-      (*Prompt adding players in MS2*)
+      (*Prompt adding more players in MS2*)
       match read_line () with _ -> current_turn game)
 
 let rec main () =
