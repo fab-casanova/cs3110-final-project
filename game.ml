@@ -146,7 +146,6 @@ let rec collect_nonmonetary_payment player prop rent_owed game =
       ANSITerminal.print_string [ ANSITerminal.blue ]
         "\nWhat property would you like to mortgage?\n";
       let input = read_line () in
-      print_string "-1";
       if owns_property_of_name player input game then
         let prop = get_prop_of_name player input in
         let can_mortgage = mortgage_allowed player prop in
