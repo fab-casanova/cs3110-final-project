@@ -30,13 +30,19 @@ val get_players : t -> players
 
 val find_player : string -> players -> Player.t
 
+val get_owner : Property.t -> t -> Player.t
+
 val move_player : Player.t -> t -> unit
 
 val collect_rent : Player.t -> Player.t -> Property.t -> t -> unit
 
 val collect_tax : Player.t -> Property.t -> t -> unit
 
-(*
-val buying_prompt : 
-*)
+val calculate_dues : Property.t -> t -> int
+
+val collect_dues : Player.t -> Property.t -> int -> t -> unit
+
+val bankruptcy : Player.t -> Property.t -> t -> unit
+
+(* val buying_prompt : *)
 (*TODO: Add auction*)

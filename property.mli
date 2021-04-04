@@ -40,11 +40,9 @@ val purchase_price : t -> int
 
 val house_cost : t -> int
 
-val get_owner : t -> string
+val get_owner_name : t -> string
 
 val set_owner : t -> string -> unit
-
-val return_prop_to_bank : t -> unit
 
 val is_mortgaged : t -> bool
 
@@ -67,3 +65,7 @@ val num_houses : t -> int
 val prop_name : t -> string
 
 val get_value : t -> int
+
+val reset_stage : t -> unit
+
+val release_property : t -> unit

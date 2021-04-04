@@ -53,6 +53,25 @@ let rec check_build player props =
       if can_build_houses_hotel player h then build_prompt player h;
       check_build player t
 
+let rec auction_all_props old_props game =
+  match old_props with
+  | [] -> ()
+  | h :: t ->
+      (*auction h game;*)
+      auction_all_props t game
+
+let collect_nonmonetary_payment = ()
+
+let check_status player pos dues game =
+  match player_status dues player with
+  | 0 -> collect_dues player pos dues game
+  | 1 -> collect_nonmonetary_payment
+  | _ ->
+      let owned = is_owned pos in
+      let old_props = get_properties player in
+      bankruptcy player pos game;
+      if not owned then auction_all_props old_props game
+
 let current_property_effects game player =
   let pos = get_position player in
   print_endline ("Position " ^ string_of_int (get_index game pos) ^ " of 40");
@@ -61,13 +80,16 @@ let current_property_effects game player =
       print_endline ("Draw a " ^ prop_space_type pos ^ " card!");
     if is_tax pos then (
       print_endline "Tax will be collected";
-      collect_tax player pos game);
-    if is_owned pos then (
+      let dues = calculate_dues pos game in
+      check_status player pos dues game)
+    else if is_owned pos then (
       print_endline (prop_name pos ^ " is owned");
-      let owner = find_player (get_owner pos) (get_players game) in
+      let owner = get_owner pos game in
       print_endline ("The owner of " ^ prop_name pos ^ " is " ^ get_name owner);
       if owner = player then print_endline "This is your property"
-      else collect_rent player owner pos game)
+      else
+        let dues = calculate_dues pos game in
+        check_status player pos dues game)
     else if can_be_purchased pos then (
       print_endline
         (prop_name pos ^ " can be purchased for $"
@@ -89,15 +111,7 @@ let play_a_turn game =
     (get_name player ^ " is at: " ^ prop_name pos ^ " (" ^ prop_space_type pos
    ^ ")");
   current_property_effects game player;
-  assets player
-
-(*player ANSITerminal.print_string [ ANSITerminal.yellow ]
-    (get_name player ^ "'s money: $"
-    ^ string_of_int (player_money player)
-    ^ "\n");
-  ANSITerminal.print_string [ ANSITerminal.blue ]
-    (get_name player ^ "'s properties: " ^ pp_properties player ^ "\n"
-   ^ get_name player ^ "'s monopolies: " ^ pp_monopolies player)*)
+  print_assets player
 
 let rec current_turn game =
   ANSITerminal.print_string [ ANSITerminal.green ]
@@ -134,7 +148,7 @@ let rec main () =
     "\nWelcome to our 3110 Group Project: Monopoly\n\nUsing standard board\n";
 
   let board = Standard_board.standard_board in
-  let the_game = Game.create_game board (create_players []) in
+  let the_game = create_game board (create_players []) in
   first_player the_game
 
 let () = main ()

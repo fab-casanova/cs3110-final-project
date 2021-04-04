@@ -184,18 +184,16 @@ let purchase_price prop = prop.price
 
 let house_cost prop = prop.per_house_cost
 
-let get_owner prop = prop.owner
+let get_owner_name prop = prop.owner
 
 let set_owner prop owner = prop.owner <- owner
+
+let release_property prop = set_owner prop ""
 
 let reset_stage prop =
   match prop.stage with
   | CannotBuy | Other | Zero -> ()
   | One | Two | Three | Four | Hotel -> prop.stage <- Zero
-
-let return_prop_to_bank prop =
-  prop.owner <- "";
-  reset_stage prop
 
 let current_stage prop = prop.stage
 
@@ -226,6 +224,7 @@ let downgrade_property prop =
   | Hotel -> prop.stage <- Four
   | CannotBuy | Other -> ()
 
+(* maybe move this out later so it changes depending on # of each colors *)
 let num_for_monopoly prop =
   match get_type prop with
   | Brown | DBlue -> 2
