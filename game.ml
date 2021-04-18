@@ -7,7 +7,7 @@ type players = Player.t list
 
 type t = {
   board : gameboard;
-  mutable player_list : players;
+  mutable player_list : Player.t list;
   mutable current_player : string;
   mutable money_pot : int;
   mutable chance_deck : int list;
@@ -21,11 +21,10 @@ let create_gameboard (lst : Property.t list) : gameboard = lst
 let add_to_pot game cash = game.money_pot <- game.money_pot + cash
 
 let shuffle_deck () =
-  (* DEFINE ACC BEFORE USING IT/ TAKE IN AS PARAM*)
   Random.self_init ();
   let num_cards = 16 in
   let rec build_deck num_cards acc =
-    if num_cards >= 0 then build_deck (num_cards - 1) (num_cards :: acc)
+    if num_cards > 0 then build_deck (num_cards - 1) ((num_cards - 1) :: acc)
     else acc
   in
   let deck = build_deck num_cards [] in
@@ -124,47 +123,26 @@ let get_new_pos_and_double player the_game =
   in
   (new_pos, fst moves = snd moves)
 
-let move_player player game given_moves just_escaped =
+let passed_go player game new_index old_pos =
+  if new_index - get_index game old_pos < 0 then update_player_money player 200
+
+let move_player player game given_moves special_move =
   let old_pos = get_position player in
   let roll_outcome =
-    if just_escaped = false then get_new_pos_and_double player game
-    else (get_index game old_pos + given_moves, not just_escaped)
+    if special_move = false then get_new_pos_and_double player game
+    else (get_index game old_pos + given_moves, not special_move)
   in
   let new_index = fst roll_outcome mod 40 in
   if snd roll_outcome then add_double player else reset_doubles player;
   if num_doubles player < 3 then (
     let new_position = get_prop_at_index new_index game in
     change_pos player new_position;
-    if new_index - get_index game old_pos < 0 then (
+    if new_index - get_index game old_pos < 0 && not special_move then (
       print_endline "Passed go, collect $200";
       update_player_money player 200))
   else (
     put_in_jail player;
     change_pos player (get_property_of_name "Jail" game))
-
-let rec auction_helper highest_bidder prop bid_price player_list =
-  match player_list with
-  | [] -> ()
-  | h :: t ->
-      if bid_price > 0 && h == highest_bidder then (
-        update_player_money h (-bid_price);
-        add_property h prop;
-        set_owner prop (get_name h);
-        if can_have_houses prop then check_monopoly h prop)
-      else (
-        print_string
-          "\nEnter your bid value, enter 0 if you would not like to bid\n";
-        let input = read_line () in
-        let new_bid = try int_of_string input with _ -> -1 in
-        if new_bid > bid_price && new_bid < player_money h then
-          auction_helper h prop new_bid (t @ [ h ])
-        else if new_bid <> 0 then (
-          print_string "\nInvalid bid, please try again\n";
-          auction_helper highest_bidder prop bid_price player_list)
-        else auction_helper highest_bidder prop bid_price (t @ [ h ]))
-
-let auction prop game =
-  auction_helper (current_player game) prop 0 game.player_list
 
 let pay_with_cash player rent_owed = update_player_money player (-1 * rent_owed)
 

@@ -2,6 +2,36 @@ open Property
 open Player
 open Game
 
+let rec auction_helper highest_bidder prop bid_price player_list =
+  match player_list with
+  | [] -> ()
+  | h :: t ->
+      if bid_price > 0 && h == highest_bidder then (
+        update_player_money h (-bid_price);
+        add_property h prop;
+        set_owner prop (get_name h);
+        ANSITerminal.print_string [ ANSITerminal.green ]
+          ("\n" ^ get_name h ^ " bought " ^ prop_name prop ^ " for ");
+        ANSITerminal.print_string [ ANSITerminal.yellow ]
+          ("$" ^ string_of_int bid_price ^ "\n\n");
+        if can_have_houses prop then check_monopoly h prop)
+      else (
+        ANSITerminal.print_string [ ANSITerminal.blue ]
+          ("\n" ^ get_name h
+         ^ ": enter your bid value, enter 0 if you would not like to bid\n");
+        let input = read_line () in
+        let new_bid = try int_of_string input with _ -> -1 in
+        if new_bid > bid_price && new_bid < player_money h then
+          auction_helper h prop new_bid (t @ [ h ])
+        else if new_bid <> 0 then (
+          ANSITerminal.print_string [ ANSITerminal.red ]
+            "\nInvalid bid, please try again\n";
+          auction_helper highest_bidder prop bid_price player_list)
+        else auction_helper highest_bidder prop bid_price (t @ [ h ]))
+
+let auction prop game =
+  auction_helper (current_player game) prop 0 (get_players game)
+
 (* TODO: add remaining properties comment, money gained from selling comment *)
 let rec buy_prompt game player pos =
   ANSITerminal.print_string [ ANSITerminal.blue ] "You currently have ";
@@ -19,8 +49,9 @@ let rec buy_prompt game player pos =
       ANSITerminal.print_string [ ANSITerminal.green ]
         ("\n" ^ get_name player ^ " now owns " ^ prop_name pos ^ "\n")
   | "n" ->
-      print_endline ("\n" ^ prop_name pos ^ " was not bought")
-      (*TODO: prompt an auction if prop is not bought*)
+      ANSITerminal.print_string [ ANSITerminal.yellow ]
+        ("\n" ^ prop_name pos ^ " was not bought\nTime to auction!");
+      auction pos game (*TODO: prompt an auction if prop is not bought*)
   | _ ->
       print_endline "Please respond  with 'y' or 'n'";
       buy_prompt game player pos
@@ -58,7 +89,7 @@ let rec auction_all_props old_props game =
   match old_props with
   | [] -> ()
   | h :: t ->
-      (*auction h game;*)
+      auction h game;
       auction_all_props t game
 
 let mortgage_property player game =
@@ -281,23 +312,33 @@ let rec current_turn game =
       move_to_next_player game;
       current_turn game
 
+let rec addl_player game =
+  (let num_of_players = num_players game in
+   ANSITerminal.print_string [ ANSITerminal.blue ]
+     ("\n Please give player"
+     ^ string_of_int (num_of_players + 1)
+     ^ " a name: \n\
+       \ Empty names will default to 'playern' where playern is the nth \
+        player: \n\n"));
+
+  ()
+
 let first_player game =
   ANSITerminal.print_string [ ANSITerminal.blue ]
     "\n\
     \ Please give the first player a name: \n\
     \ Empty names will default to 'playern' where playern is the nth player: \n\n";
-  match read_line () with
-  | str -> (
-      let new_plyr =
-        create_player (if str = "" then "player1" else str) (get_start_pos game)
-      in
-      add_a_player game new_plyr;
-      ANSITerminal.print_string [ ANSITerminal.green ]
-        ("\nFirst player is: "
-        ^ get_name (current_player game)
-        ^ "\nPress the 'Enter' key to start");
-      (*Prompt adding more players in MS2*)
-      match read_line () with _ -> current_turn game)
+  let str = read_line () in
+  let new_plyr =
+    create_player (if str = "" then "player1" else str) (get_start_pos game)
+  in
+  add_a_player game new_plyr;
+  ANSITerminal.print_string [ ANSITerminal.green ]
+    ("\nFirst player is: "
+    ^ get_name (current_player game)
+    ^ "\nType 'more' to add another player, enter anything else to start");
+  (*Prompt adding more players in MS2*)
+  match read_line () with "more" -> addl_player game | _ -> current_turn game
 
 let rec main () =
   ANSITerminal.print_string [ ANSITerminal.green ]

@@ -34,7 +34,7 @@ val get_index : t -> Property.t -> int
 
 val get_prop_at_index : int -> t -> Property.t
 
-val get_players : t -> players
+val get_players : t -> Player.t list
 
 val find_player : string -> players -> Player.t
 
@@ -53,7 +53,3 @@ val owns_property_of_name : Player.t -> string -> t -> bool
 val get_property_of_name : string -> t -> Property.t
 
 val bankruptcy : Player.t -> Property.t -> t -> unit
-
-val auction : Property.t -> t -> unit
-
-(* val buying_prompt : *)
