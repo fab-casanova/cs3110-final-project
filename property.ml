@@ -71,7 +71,7 @@ let pp_space_type = function
 
 let prop_space_type prop = pp_space_type prop.property_type
 
-let can_be_purchased card = can_purchase_type card.property_type
+let can_be_purchased prop = can_purchase_type prop.property_type
 
 let can_be_upgraded prop =
   match prop.stage with CannotBuy | Other | Hotel -> false | _ -> true
@@ -129,6 +129,8 @@ let is_railroad prop =
   match prop.property_type with Railroad -> true | _ -> false
 
 let is_tax prop = match prop.property_type with IncomeTax -> true | _ -> false
+
+let is_jail prop = match prop.property_type with Jail -> true | _ -> false
 
 let is_go_to_jail prop =
   match prop.property_type with GoToJail -> true | _ -> false

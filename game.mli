@@ -16,7 +16,15 @@ val move_to_next_player : t -> unit
 
 val create_game : gameboard -> players -> t
 
+val add_to_pot : t -> int -> unit
+
+val cash_out_pot : t -> Player.t -> unit
+
 val num_players : t -> int
+
+val get_jail : t -> Property.t
+
+val still_in_game : Player.t -> t -> bool
 
 val get_start_pos : t -> Property.t
 
@@ -32,17 +40,20 @@ val find_player : string -> players -> Player.t
 
 val get_owner : Property.t -> t -> Player.t
 
-val move_player : Player.t -> t -> unit
+val move_player : Player.t -> t -> int -> bool -> unit
 
-val collect_rent : Player.t -> Player.t -> Property.t -> t -> unit
-
-val collect_tax : Player.t -> Property.t -> t -> unit
+val shuffle_deck : unit -> int list
 
 val calculate_dues : Property.t -> t -> int
 
 val collect_dues : Player.t -> Property.t -> int -> t -> unit
 
+val owns_property_of_name : Player.t -> string -> t -> bool
+
+val get_property_of_name : string -> t -> Property.t
+
 val bankruptcy : Player.t -> Property.t -> t -> unit
 
+val auction : Property.t -> t -> unit
+
 (* val buying_prompt : *)
-(*TODO: Add auction*)

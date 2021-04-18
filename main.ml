@@ -2,6 +2,7 @@ open Property
 open Player
 open Game
 
+(* TODO: add remaining properties comment, money gained from selling comment *)
 let rec buy_prompt game player pos =
   ANSITerminal.print_string [ ANSITerminal.blue ] "You currently have ";
   ANSITerminal.print_string [ ANSITerminal.yellow ]
@@ -60,12 +61,91 @@ let rec auction_all_props old_props game =
       (*auction h game;*)
       auction_all_props t game
 
-let collect_nonmonetary_payment = ()
+let mortgage_property player game =
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    "\nWhat property would you like to mortgage?\n";
+  let input = read_line () in
+  if owns_property_of_name player input game then
+    let prop = get_property_of_name input game in
+    let can_mortgage = mortgage_allowed player prop in
+    if can_mortgage then (
+      update_player_money player (purchase_price prop / 2);
+      create_mortgage prop)
+    else
+      ANSITerminal.print_string [ ANSITerminal.blue ]
+        "\nCan't mortgage this property\n"
+  else
+    ANSITerminal.print_string [ ANSITerminal.red ]
+      "\nInvalid property name. Please enter a valid property\n"
+
+let sell_buildings player prop game =
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    "What property do you want to sell buildings on?\n";
+  let input = read_line () in
+  if owns_property_of_name player input game then
+    let prop = get_property_of_name input game in
+    let selling_allowed =
+      owns_property player prop
+      && num_houses prop > 0
+      && is_building_evenly (get_properties player) prop false
+    in
+    if selling_allowed then (
+      update_player_money player (house_cost prop / 2);
+      downgrade_property prop)
+    else
+      ANSITerminal.print_string [ ANSITerminal.blue ]
+        "Cannot sell buildings on this property"
+
+let transfer_properties player owner prop game =
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    "What property do you want to sell?\n";
+  let input = read_line () in
+  if owns_property_of_name player input game then (
+    let prop = get_property_of_name input game in
+    let can_transfer =
+      owns_property player prop && no_houses_on_monopoly player prop
+    in
+    let owned = is_owned prop in
+    if (not owned) && can_transfer then return_prop_to_bank player prop
+    else if can_transfer then (
+      swap_owner player owner prop;
+      update_player_money player (get_value prop)))
+  else print_string "Can't sell this property"
+
+let rec collect_nonmonetary_payment player prop rent_owed game =
+  let owner = if is_owned prop then get_owner prop game else player in
+  print_assets player;
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    "\n\
+     Would you like to pay with cash, mortgage, sell buildings, or transfer \
+     properties?\n";
+  ANSITerminal.print_string [ ANSITerminal.blue ] "> ";
+  match read_line () with
+  | "pay with cash" | "cash" ->
+      if not (out_of_cash rent_owed player) then
+        update_player_money player (-1 * rent_owed)
+      else (
+        ANSITerminal.print_string [ ANSITerminal.blue ]
+          "\nInvalid choice, not enough money.\n";
+        collect_nonmonetary_payment player prop rent_owed game)
+  | "mortgage" ->
+      mortgage_property player game;
+      collect_nonmonetary_payment player prop rent_owed game
+  | "sell buildings" ->
+      sell_buildings player prop game;
+      collect_nonmonetary_payment player prop rent_owed game
+  | "transfer properties" ->
+      transfer_properties player owner prop game;
+      collect_nonmonetary_payment player prop rent_owed game
+  | _ ->
+      ANSITerminal.print_string [ ANSITerminal.blue ]
+        "\nInvalid input, please try again\n";
+      collect_nonmonetary_payment player prop rent_owed game
 
 let check_status player pos dues game =
   match player_status dues player with
   | 0 -> collect_dues player pos dues game
-  | 1 -> collect_nonmonetary_payment
+  | 1 -> collect_nonmonetary_payment player pos dues game
   | _ ->
       let owned = is_owned pos in
       let old_props = get_properties player in
@@ -101,22 +181,98 @@ let current_property_effects game player =
         ANSITerminal.print_string [ ANSITerminal.red ]
           "Not enough funds to purchase\n\n");
     check_build player (get_properties player))
-  else ANSITerminal.print_string [ ANSITerminal.red ] "You're going to jail\n"
+  else (
+    ANSITerminal.print_string [ ANSITerminal.red ] "You're going to jail\n";
+    put_in_jail player;
+    change_pos player (get_jail game);
+    ANSITerminal.print_string [ ANSITerminal.red ]
+      (string_of_int (time_left player)
+      ^ " turn(s) left in jail for" ^ get_name player ^ "\n"))
 
-let play_a_turn game =
+let rec play_a_turn game =
   let player = current_player game in
-  move_player player game;
-  let pos = get_position player in
-  print_endline
-    (get_name player ^ " is at: " ^ prop_name pos ^ " (" ^ prop_space_type pos
-   ^ ")");
-  current_property_effects game player;
-  print_assets player
+  let old_doubles = num_doubles player in
+  move_player player game 0 false;
+  if num_doubles player >= 3 then (
+    ANSITerminal.print_string [ ANSITerminal.red ]
+      "Rolled 3 doubles. Going to jail. Serve 3 turns";
+    change_pos player (get_jail game);
+    reset_doubles player)
+  else
+    let pos = get_position player in
+    print_endline
+      (get_name player ^ " is at: " ^ prop_name pos ^ " (" ^ prop_space_type pos
+     ^ ")");
+    current_property_effects game player;
+    if still_in_game player game then (
+      print_assets player;
+      if num_doubles player > old_doubles && not (in_jail player) then (
+        (match num_doubles player with
+        | 1 ->
+            ANSITerminal.print_string [ ANSITerminal.red ]
+              "Rolled a double. Go again"
+        | _ ->
+            ANSITerminal.print_string [ ANSITerminal.red ]
+              "Rolled a second double. Go again\n");
+        play_a_turn game))
+
+let attempt_escape player game =
+  let roll = roll_dice () in
+  if fst roll = snd roll then (
+    let sum = sum_dice roll in
+    ANSITerminal.print_string [ ANSITerminal.yellow ]
+      ("Rolled doubles of "
+      ^ string_of_int (fst roll)
+      ^ "! Escaped!\nMoving " ^ string_of_int sum ^ " spaces\n");
+    un_jail player;
+    move_player player game sum true;
+    current_property_effects game player)
+  else
+    ANSITerminal.print_string [ ANSITerminal.yellow ] "Did not roll doubles!\n"
+
+let rec jail_prompt player game =
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    ("Would you like to "
+    ^ (if player_money player >= 500 && time_left player > 1 then
+       "pay $500 (pay) or"
+      else "")
+    ^ "attempt to roll doubles (roll) to escape jail? Type 'no' to remain in \
+       jail\n");
+  match read_line () with
+  | "pay" ->
+      if player_money player < 500 then (
+        ANSITerminal.print_string [ ANSITerminal.red ] "\nNot enough money\n";
+        jail_prompt player game)
+      else if time_left player <= 1 then (
+        ANSITerminal.print_string [ ANSITerminal.red ]
+          "\nCannot pay to get out in your last turn of jail\n";
+        jail_prompt player game)
+      else (
+        update_player_money player (-500);
+        un_jail player)
+  | "roll" -> attempt_escape player game
+  | "remain" | "no" -> ()
+  | _ -> jail_prompt player game
 
 let rec current_turn game =
   ANSITerminal.print_string [ ANSITerminal.green ]
     ("\nCurrent player: " ^ get_name (current_player game));
-  play_a_turn game;
+  let curr = current_player game in
+  if not (in_jail curr) then (
+    print_endline " NOT IN JAIL";
+    play_a_turn game)
+  else (
+    ANSITerminal.print_string [ ANSITerminal.red ]
+      ("\n" ^ get_name curr ^ " is in jail\n");
+    (* (let pos = get_position curr in print_endline (get_name curr ^ " is at: "
+       ^ prop_name pos ^ " (" ^ prop_space_type pos ^ ")")); *)
+    jail_prompt curr game;
+    if in_jail curr then (
+      served_a_turn curr;
+      ANSITerminal.print_string [ ANSITerminal.blue ]
+        (string_of_int (time_left curr)
+        ^ " turn(s) left in jail for " ^ get_name curr ^ "\n")));
+
   ANSITerminal.print_string [ ANSITerminal.green ]
     "\nContinue playing? Enter 'q' to quit\n";
   match read_line () with

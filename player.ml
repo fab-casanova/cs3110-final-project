@@ -6,6 +6,8 @@ type t = {
   mutable money : int;
   mutable position : Property.t;
   mutable monopolies : Property.space_type list;
+  mutable jailed : int;
+  mutable doubles : int;
 }
 
 let create_player player_name start =
@@ -15,11 +17,19 @@ let create_player player_name start =
     money = 1000;
     position = start;
     monopolies = [];
+    jailed = 0;
+    doubles = 0;
   }
 
 let get_name player = player.name
 
 let get_properties player = player.properties
+
+let num_doubles player = player.doubles
+
+let reset_doubles player = player.doubles <- 0
+
+let add_double player = player.doubles <- player.doubles + 1
 
 let print_level prop =
   " ("
@@ -47,6 +57,16 @@ let pp_monopolies player =
 let player_money player = player.money
 
 let get_position player = player.position
+
+let in_jail player = player.jailed > 0
+
+let put_in_jail player = player.jailed <- 3
+
+let time_left player = player.jailed
+
+let served_a_turn player = player.jailed <- max 0 (player.jailed - 1)
+
+let un_jail player = player.jailed <- 0
 
 let change_pos player new_pos = player.position <- new_pos
 
@@ -91,13 +111,19 @@ let num_of_util = num_of_prop is_utilities
 
 let num_of_rail = num_of_prop is_railroad
 
+let sum_dice dice = fst dice + snd dice
+
+let debug_dubs = false
+
 let roll_dice () =
-  Random.self_init ();
-  2 + Random.int 5 + Random.int 5
+  if debug_dubs then (2, 2)
+  else (
+    Random.self_init ();
+    (1 + Random.int 5, 1 + Random.int 5))
 
 let util_rent player =
   let utils_owned = num_of_util player in
-  (1 + (3 * utils_owned)) * roll_dice ()
+  (1 + (3 * utils_owned)) * sum_dice (roll_dice ())
 
 let has_monopoly player prop =
   let color = get_type prop in
@@ -112,15 +138,15 @@ let calculate_owned_rent prop owner =
   else if has_monopoly owner prop then 2 * rent
   else rent
 
-let rec is_building_evenly_helper prop building house_per_prop =
+let rec is_building_evenly_helper prop is_building house_per_prop =
   let min, max = (List.hd house_per_prop, List.hd (List.rev house_per_prop)) in
-  max - min <= 1 && num_houses prop = if building then min else max
+  max - min <= 1 && num_houses prop = if is_building then min else max
 
-let is_building_evenly props prop building_props =
+let is_building_evenly props prop is_building =
   props
   |> List.filter (fun x -> get_type prop = get_type x)
   |> List.map num_houses |> List.sort_uniq compare
-  |> is_building_evenly_helper prop building_props
+  |> is_building_evenly_helper prop is_building
 
 let can_build_houses_hotel player prop =
   can_have_houses prop && has_monopoly player prop
@@ -166,9 +192,6 @@ let rec mortgage_allowed player prop =
   && (not (is_mortgaged prop))
   && no_houses_on_monopoly player prop
 
-let get_prop_of_name player name =
-  List.find (fun x -> prop_name x = name) player.properties
-
 let print_assets player =
   ANSITerminal.print_string [ ANSITerminal.yellow ]
     (get_name player ^ "'s money: $"
@@ -176,7 +199,9 @@ let print_assets player =
     ^ "\n");
   ANSITerminal.print_string [ ANSITerminal.blue ]
     (get_name player ^ "'s properties: " ^ pp_properties player ^ "\n"
-   ^ get_name player ^ "'s monopolies: " ^ pp_monopolies player)
+   ^ get_name player ^ "'s monopolies: " ^ pp_monopolies player ^ "\n"
+    ^ string_of_int (num_doubles player)
+    ^ " consecutive double(s)\n")
 
 let remove_property player prop =
   player.properties <- List.filter (fun x -> x <> prop) player.properties
@@ -191,6 +216,7 @@ let rec swap_owner_helper giver receiver = function
   | h :: t ->
       set_owner h (get_name receiver);
       add_property receiver h;
+      remove_property giver h;
       swap_owner_helper giver receiver t
 
 let swap_owner giver receiver prop = swap_owner_helper giver receiver [ prop ]
