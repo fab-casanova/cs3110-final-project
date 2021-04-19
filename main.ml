@@ -322,12 +322,12 @@ let rec addl_player game =
     create_player (if str = "" then default_name else str) (get_start_pos game)
   in
   add_a_player game new_plyr;
-  ANSITerminal.print_string [ ANSITerminal.blue ]
+  ANSITerminal.print_string [ ANSITerminal.green ]
     ("Added " ^ get_name new_plyr ^ " to game!\n" ^ pp_players game
    ^ "\n\
       Enter 'add' to add another player, enter anything else to start the game\n"
     );
-  match read_line () with "y" -> addl_player game | _ -> current_turn game
+  match read_line () with "add" -> addl_player game | _ -> current_turn game
 
 let first_player game =
   ANSITerminal.print_string [ ANSITerminal.blue ]
