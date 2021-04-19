@@ -16,6 +16,13 @@ type t = {
 
 let create_players (lst : Player.t list) : players = lst
 
+let rec pp_players_helper = function
+  | [] -> ""
+  | [ h ] -> get_name h
+  | h :: t -> get_name h ^ ", " ^ pp_players_helper t
+
+let pp_players game = "Players: " ^ pp_players_helper game.player_list
+
 let create_gameboard (lst : Property.t list) : gameboard = lst
 
 let add_to_pot game cash = game.money_pot <- game.money_pot + cash
@@ -122,9 +129,6 @@ let get_new_pos_and_double player the_game =
     player |> get_position |> get_index the_game |> ( + ) (sum_dice moves)
   in
   (new_pos, fst moves = snd moves)
-
-let passed_go player game new_index old_pos =
-  if new_index - get_index game old_pos < 0 then update_player_money player 200
 
 let move_player player game given_moves special_move =
   let old_pos = get_position player in

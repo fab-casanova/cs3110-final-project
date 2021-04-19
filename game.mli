@@ -6,6 +6,8 @@ type t
 
 val create_players : Player.t list -> players
 
+val pp_players : t -> string
+
 val create_gameboard : Property.t list -> gameboard
 
 val current_player_name : t -> string

@@ -313,21 +313,27 @@ let rec current_turn game =
       current_turn game
 
 let rec addl_player game =
-  (let num_of_players = num_players game in
-   ANSITerminal.print_string [ ANSITerminal.blue ]
-     ("\n Please give player"
-     ^ string_of_int (num_of_players + 1)
-     ^ " a name: \n\
-       \ Empty names will default to 'playern' where playern is the nth \
-        player: \n\n"));
-
-  ()
+  let default_name = "player" ^ string_of_int (num_players game + 1) in
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    ("\n Please give " ^ default_name
+   ^ " a name \n Entering nothing will default to " ^ default_name ^ " \n\n");
+  let str = read_line () in
+  let new_plyr =
+    create_player (if str = "" then default_name else str) (get_start_pos game)
+  in
+  add_a_player game new_plyr;
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    ("Added " ^ get_name new_plyr ^ " to game!\n" ^ pp_players game
+   ^ "\n\
+      Enter 'add' to add another player, enter anything else to start the game\n"
+    );
+  match read_line () with "y" -> addl_player game | _ -> current_turn game
 
 let first_player game =
   ANSITerminal.print_string [ ANSITerminal.blue ]
     "\n\
-    \ Please give the first player a name: \n\
-    \ Empty names will default to 'playern' where playern is the nth player: \n\n";
+    \ Please give the first player a name \n\
+    \ Entering nothing will default to player1 \n\n";
   let str = read_line () in
   let new_plyr =
     create_player (if str = "" then "player1" else str) (get_start_pos game)
@@ -336,9 +342,11 @@ let first_player game =
   ANSITerminal.print_string [ ANSITerminal.green ]
     ("\nFirst player is: "
     ^ get_name (current_player game)
-    ^ "\nType 'more' to add another player, enter anything else to start");
+    ^ "\n\
+       Enter 'add' to add another player, enter anything else to start the game\n"
+    );
   (*Prompt adding more players in MS2*)
-  match read_line () with "more" -> addl_player game | _ -> current_turn game
+  match read_line () with "add" -> addl_player game | _ -> current_turn game
 
 let rec main () =
   ANSITerminal.print_string [ ANSITerminal.green ]
