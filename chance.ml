@@ -1,5 +1,6 @@
 open Game
 open Player
+open Property
 
 type t = { text : string; effect : Game.t -> unit }
 
@@ -14,12 +15,32 @@ let advance_to_st_charles game =
   change_pos (current_player game)
     (get_property_of_name "St. Charles Place" game)
 
-let advance_to_nearest_utility game = ()
+let advance_to_nearest_utility game =
+  let pos = get_index game (get_position (current_player game)) in
+  if pos > 12 && pos < 19 then
+    change_pos (current_player game) (get_property_of_name "Water Works" game)
+  else
+    change_pos (current_player game)
+      (get_property_of_name "Electric Company" game)
 
-let advance_to_nearest_railroad game = ()
+let advance_to_nearest_railroad game =
+  let pos = get_index game (get_position (current_player game)) in
+  if pos > 35 || pos < 6 then
+    change_pos (current_player game)
+      (get_property_of_name "Reading Railroad" game)
+  else if pos > 5 && pos < 16 then
+    change_pos (current_player game)
+      (get_property_of_name "Pennsylvania Railroad" game)
+  else if pos > 15 && pos < 26 then
+    change_pos (current_player game)
+      (get_property_of_name "B & O Railroad" game)
+  else if pos > 25 && pos < 36 then
+    change_pos (current_player game)
+      (get_property_of_name "Short Line Railroad" game)
 
 let bank_50_dividend game = update_player_money (current_player game) 50
 
+(*TODO: get out of jail free*)
 let jail_free game = ()
 
 let back_3 game = move_player (current_player game) game (-3) true
@@ -29,9 +50,24 @@ let go_to_jail game =
   change_pos player (get_property_of_name "Jail" game);
   put_in_jail player
 
-let general_repairs game = ()
+let general_repairs game =
+  let player = current_player game in
+  let properties = get_properties player in
+  let rec repair_cost properties acc =
+    match properties with
+    | [] -> acc
+    | h :: t ->
+        let houses = num_houses h in
+        if houses = 5 then repair_cost t (acc + 100)
+        else repair_cost t (acc + (25 * houses))
+  in
+  let cost = repair_cost properties 0 in
+  add_to_pot game cost;
+  update_player_money (current_player game) (-cost)
 
-let poor_tax game = ()
+let poor_tax game =
+  add_to_pot game 15;
+  update_player_money (current_player game) (-15)
 
 let to_reading_railroad game =
   change_pos (current_player game)
@@ -40,11 +76,19 @@ let to_reading_railroad game =
 let go_to_boardwalk game =
   change_pos (current_player game) (get_property_of_name "Boardwalk" game)
 
-let elected_chairman game = ()
+let elected_chairman game =
+  let total_payment = (num_players game - 1) * 50 in
+  let players = get_players game in
+  let current = current_player game in
+  add_to_pot game total_payment;
+  update_player_money current (-total_payment);
+  match players with
+  | [] -> ()
+  | h :: t -> if h <> current then update_player_money h 50
 
-let loan_matures game = ()
+let loan_matures game = update_player_money (current_player game) 150
 
-let crossword_competition game = ()
+let crossword_competition game = update_player_money (current_player game) 100
 
 let chance_cards =
   [
