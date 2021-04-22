@@ -80,26 +80,44 @@ val set_owner : t -> string -> unit
 (** [is_mortgaged prop] is true if [prop] is currently mortgaged *)
 val is_mortgaged : t -> bool
 
+(** [current_stage prop] is the current stage of [prop] *)
 val current_stage : t -> property_stage
 
+(*TODO: CHECK!!!!!!!!!!!!!!*)
+
+(** [create_mortgage prop] creates a mortgage for [prop] *)
 val create_mortgage : t -> unit
 
+(*TODO: CHECK!!!!!!!!!!!!!!*)
+
+(** [unmortgage prop] removes the mortgage from [prop] *)
 val unmortgage : t -> unit
 
+(** [get_type prop] is the property type of [prop] *)
 val get_type : t -> space_type
 
+(** [upgrade_property prop] upgrades [prop] by one stage *)
 val upgrade_property : t -> unit
 
+(** [downgrade_property prop] downgrades [prop] by one stage *)
 val downgrade_property : t -> unit
 
+(* TODO: CHECK!!!!!!!!!!!!! *)
 val num_for_monopoly : t -> int
 
+(* TODO: CHECK!!!!!!!!!!!!! *)
 val num_houses : t -> int
 
+(** [prop_name prop] is the property name for [prop] *)
 val prop_name : t -> string
 
+(* TODO: CHECK!!!!!!!!!!!!! *)
 val get_value : t -> int
 
+(** [reset_stage prop] resets [prop] to its lowest stage *)
 val reset_stage : t -> unit
 
+(* TODO: CHECK!!!!!!!!! *)
+
+(** [release_property prop] sets the bank as the owner of [prop] *)
 val release_property : t -> unit
