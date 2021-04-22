@@ -7,6 +7,7 @@ type t = {
   mutable position : Property.t;
   mutable monopolies : Property.space_type list;
   mutable jailed : int;
+  mutable jail_free : string list;
   mutable doubles : int;
 }
 
@@ -18,6 +19,7 @@ let create_player player_name start =
     position = start;
     monopolies = [];
     jailed = 0;
+    jail_free = [];
     doubles = 0;
   }
 
@@ -233,3 +235,10 @@ let rec clear_properties_helper player = function
 let clear_properties player =
   clear_properties_helper player player.properties;
   player.properties <- []
+
+let num_jail_free_cards player = List.length player.jail_free
+
+let add_jail_free_card deck player =
+  player.jail_free <- deck :: player.jail_free
+
+let owns_jail_free_card deck player = List.exists (( = ) deck) player.jail_free

@@ -2,6 +2,19 @@ open Property
 open Player
 open Game
 
+let draw_card game =
+  let player = current_player game in
+  let card_type = pp_space_type (get_type (get_position player)) in
+  match card_type with "chance" -> () | "community chest" -> () | _ -> ()
+
+let win_message game =
+  ANSITerminal.print_string [ ANSITerminal.yellow ]
+    ("Congratulations " ^ current_player_name game
+   ^ "!\n\n\
+      You won a poorly-coded children's game.\n\n\
+      Your parents must be proud :)\n\n\
+      Bye!\n\n")
+
 let rec auction_helper highest_bidder prop bid_price player_list =
   match player_list with
   | [] -> ()
@@ -17,6 +30,9 @@ let rec auction_helper highest_bidder prop bid_price player_list =
         if can_have_houses prop then check_monopoly h prop)
       else (
         ANSITerminal.print_string [ ANSITerminal.blue ]
+          ("\nCurrent highest bidder: " ^ get_name highest_bidder
+         ^ "\nBid amount: " ^ string_of_int bid_price);
+        ANSITerminal.print_string [ ANSITerminal.blue ]
           ("\n" ^ get_name h
          ^ ": enter your bid value, enter 0 if you would not like to bid\n");
         let input = read_line () in
@@ -25,7 +41,11 @@ let rec auction_helper highest_bidder prop bid_price player_list =
           auction_helper h prop new_bid (t @ [ h ])
         else if new_bid <> 0 then (
           ANSITerminal.print_string [ ANSITerminal.red ]
-            "\nInvalid bid, please try again\n";
+            (if new_bid <= bid_price && new_bid > 0 then
+             "\n\
+             \ Bid cannot be lower than current highest bid if you want to bid \
+              on this property, please try again\n"
+            else "\nInvalid bid, please try again\n");
           auction_helper highest_bidder prop bid_price player_list)
         else auction_helper highest_bidder prop bid_price (t @ [ h ]))
 
@@ -47,7 +67,9 @@ let rec buy_prompt game player pos =
   | "y" ->
       buy_property player pos;
       ANSITerminal.print_string [ ANSITerminal.green ]
-        ("\n" ^ get_name player ^ " now owns " ^ prop_name pos ^ "\n")
+        ("\n" ^ get_name player ^ " now owns " ^ prop_name pos ^ "\n");
+      ANSITerminal.print_string [ ANSITerminal.cyan ]
+        (pp_remaining_properties game player pos)
   | "n" ->
       ANSITerminal.print_string [ ANSITerminal.yellow ]
         ("\n" ^ prop_name pos ^ " was not bought\nTime to auction!");
@@ -104,8 +126,9 @@ let mortgage_property player game =
     let prop = get_property_of_name input game in
     let can_mortgage = mortgage_allowed player prop in
     if can_mortgage then (
-      update_player_money player (purchase_price prop / 2);
-      create_mortgage prop)
+      (*PERFORMING THIS ACTION WILL GIVE YOU X MONEY. DO ACTION?*)
+      create_mortgage prop;
+      update_player_money player (get_value prop))
     else
       ANSITerminal.print_string [ ANSITerminal.blue ]
         "\nCan't mortgage this property\n"
@@ -148,6 +171,11 @@ let transfer_properties player owner prop game =
   else print_string "Can't sell this property"
 
 let rec collect_nonmonetary_payment player prop rent_owed game =
+  (*MONEY REMAINING TO PAY: X MONEY ON HAND: Y*)
+  (*TODO: FOR EVERY ACTION, ADD PROMPT SHOWING HOW MUCH MONEY WILL BE EARNED,
+    ALONG WITH ASKING THE PLAYER IF THEY WANT TO GO THROUGH WITH IT
+
+    DO THIS FOR EVERY ACTION*)
   let owner = if is_owned prop then get_owner prop game else player in
   print_assets player;
   ANSITerminal.print_string [ ANSITerminal.blue ]
@@ -177,8 +205,6 @@ let rec collect_nonmonetary_payment player prop rent_owed game =
         "\nInvalid input, please try again\n";
       collect_nonmonetary_payment player prop rent_owed game
 
-let redistribute_assets = ()
-
 let check_status player pos dues game =
   match player_status dues player with
   | 0 -> collect_dues player pos dues game
@@ -187,16 +213,24 @@ let check_status player pos dues game =
       let owned = is_owned pos in
       let old_props = get_properties player in
       bankruptcy player pos game;
-      if not owned then auction_all_props old_props game
+      if not (last_one_standing game) then (
+        if not owned then auction_all_props old_props game)
+      else win_message game
 
 let current_property_effects game player =
   let pos = get_position player in
   print_endline ("Position " ^ string_of_int (get_index game pos) ^ " of 40");
   if not (is_go_to_jail pos) then (
+    if is_free_parking pos && pot_amount game > 0 then (
+      ANSITerminal.print_string [ ANSITerminal.yellow ]
+        (get_name player ^ " will receive the "
+        ^ string_of_int (pot_amount game)
+        ^ " in the free parking money pot!");
+      cash_out_pot game player);
     if is_com_or_chance pos then
       print_endline ("Draw a " ^ prop_space_type pos ^ " card!");
     if is_tax pos then (
-      print_endline "Tax will be collected";
+      print_endline "Tax will be collected and added to the pot";
       let dues = calculate_dues pos game in
       check_status player pos dues game)
     else if is_owned pos then (
@@ -292,38 +326,45 @@ let rec jail_prompt player game =
   | _ -> jail_prompt player game
 
 let rec current_turn game =
-  ANSITerminal.print_string [ ANSITerminal.green ]
-    ("\nCurrent player: " ^ get_name (current_player game));
-  let curr = current_player game in
-  if not (in_jail curr) then (* print_endline " NOT IN JAIL";*)
-    play_a_turn game
-  else (
-    ANSITerminal.print_string [ ANSITerminal.red ]
-      ("\n" ^ get_name curr ^ " is in jail\n");
-    (* (let pos = get_position curr in print_endline (get_name curr ^ " is at: "
-       ^ prop_name pos ^ " (" ^ prop_space_type pos ^ ")")); *)
-    jail_prompt curr game;
-    if in_jail curr then (
-      served_a_turn curr;
-      ANSITerminal.print_string [ ANSITerminal.blue ]
-        (string_of_int (time_left curr)
-        ^ " turn(s) left in jail for " ^ get_name curr ^ "\n")));
-
-  ANSITerminal.print_string [ ANSITerminal.green ]
-    "\nContinue playing? Enter 'f' to forfeit player, 'q' to quit game\n";
-  match read_line () with
-  | "f" ->
+  if not (last_one_standing game) then (
+    ANSITerminal.print_string [ ANSITerminal.green ]
+      ("\nCurrent player: " ^ get_name (current_player game));
+    let curr = current_player game in
+    if not (in_jail curr) then
+      (* print_endline " NOT IN JAIL";*)
+      play_a_turn game
+    else (
       ANSITerminal.print_string [ ANSITerminal.red ]
-        (get_name curr ^ " has forfeited. \n Removing " ^ get_name curr ^ "\n\n");
-      let old_props = get_properties curr in
-      forfeit curr game;
-      auction_all_props old_props game;
-      ANSITerminal.print_string [ ANSITerminal.blue ] (pp_players game ^ "\n\n");
-      current_turn game
-  | "q" -> ANSITerminal.print_string [ ANSITerminal.green ] "Bye!\n\n"
-  | _ ->
-      move_to_next_player game;
-      current_turn game
+        ("\n" ^ get_name curr ^ " is in jail\n");
+      (* (let pos = get_position curr in print_endline (get_name curr ^ " is at:
+         " ^ prop_name pos ^ " (" ^ prop_space_type pos ^ ")")); *)
+      jail_prompt curr game;
+      if in_jail curr then (
+        served_a_turn curr;
+        ANSITerminal.print_string [ ANSITerminal.blue ]
+          (string_of_int (time_left curr)
+          ^ " turn(s) left in jail for " ^ get_name curr ^ "\n")));
+
+    ANSITerminal.print_string [ ANSITerminal.green ]
+      "\nContinue playing? Enter 'f' to forfeit player, 'q' to quit game\n";
+    match read_line () with
+    | "f" ->
+        ANSITerminal.print_string [ ANSITerminal.red ]
+          (get_name curr ^ " has forfeited. \n Removing " ^ get_name curr
+         ^ "\n\n");
+        forfeit curr game;
+        if not (last_one_standing game) then (
+          let old_props = get_properties curr in
+          auction_all_props old_props game;
+          ANSITerminal.print_string [ ANSITerminal.blue ]
+            (pp_players game ^ "\n\n");
+          current_turn game)
+        else win_message game
+    | "q" -> ANSITerminal.print_string [ ANSITerminal.green ] "Bye!\n\n"
+    | _ ->
+        move_to_next_player game;
+        current_turn game)
+  else win_message game
 
 let rec addl_player game =
   let old_num = num_players game in

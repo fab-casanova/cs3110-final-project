@@ -125,6 +125,9 @@ let is_com_or_chance prop =
 let is_utilities prop =
   match prop.property_type with Utilities -> true | _ -> false
 
+let is_free_parking prop =
+  match prop.property_type with FreeParking -> true | _ -> false
+
 let is_railroad prop =
   match prop.property_type with Railroad -> true | _ -> false
 

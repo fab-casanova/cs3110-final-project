@@ -23,7 +23,36 @@ let rec pp_players_helper = function
 
 let pp_players game = "Players: " ^ pp_players_helper game.player_list
 
+let last_one_standing game = List.length game.player_list <= 1
+
+let rec p_aux = function
+  | [] -> ""
+  | [ h ] ->
+      prop_name h
+      ^ (if is_owned h then " (owned by " ^ get_owner_name h ^ ")"
+        else " (unowned)")
+      ^ "\n"
+  | h :: t ->
+      prop_name h
+      ^ (if is_owned h then " (owned by " ^ get_owner_name h ^ ")"
+        else " (unowned)")
+      ^ ",\n" ^ p_aux t
+
+let pp_remaining_properties game player prop =
+  let color = get_type prop in
+  let remaining_props =
+    List.filter
+      (fun x -> get_type x = color && get_owner_name x <> get_name player)
+      game.board
+  in
+  if List.length remaining_props > 0 then
+    "Remaining " ^ prop_space_type prop ^ " properties not owned by "
+    ^ get_name player ^ ":\n" ^ p_aux remaining_props
+  else ""
+
 let create_gameboard (lst : Property.t list) : gameboard = lst
+
+let pot_amount game = game.money_pot
 
 let add_to_pot game cash = game.money_pot <- game.money_pot + cash
 
@@ -39,6 +68,30 @@ let shuffle_deck () =
   let shuffled_with_weights = List.sort compare cards_with_weights in
   List.map fst shuffled_with_weights
 
+let draw_card deck game =
+  let check_chance_shuffle cur_deck =
+    if cur_deck = [] then game.chance_deck <- shuffle_deck ()
+  in
+  let check_com_chest_shuffle cur_deck =
+    if cur_deck = [] then game.community_chest_deck <- shuffle_deck ()
+  in
+  match deck with
+  | "chance" -> (
+      check_chance_shuffle game.chance_deck;
+      match game.chance_deck with
+      | [] -> -1
+      | h :: t ->
+          game.chance_deck <- t;
+          h)
+  | "community chest" -> (
+      check_com_chest_shuffle game.community_chest_deck;
+      match game.community_chest_deck with
+      | [] -> -1
+      | h :: t ->
+          game.community_chest_deck <- t;
+          h)
+  | _ -> -1
+
 let cash_out_pot game player =
   update_player_money player game.money_pot;
   game.money_pot <- 0
@@ -53,7 +106,7 @@ let create_game (board : gameboard) (players : players) =
   {
     board;
     player_list = players;
-    current_player = "";
+    current_player = (match players with [] -> "" | h :: t -> get_name h);
     money_pot = 0;
     chance_deck = [ 0 ];
     community_chest_deck = [ 0 ];
@@ -72,8 +125,7 @@ let still_in_game player game = List.mem player game.player_list
 
 let get_players game = game.player_list
 
-let find_player player_name plyr_lst =
-  List.find (fun x -> get_name x = player_name) plyr_lst
+let find_player name lst = List.find (fun x -> get_name x = name) lst
 
 let get_owner prop game = find_player (get_owner_name prop) (get_players game)
 
@@ -102,16 +154,15 @@ let rec get_index_helper board (prop : Property.t) acc =
   | [] -> raise Not_found
   | h :: t -> if prop = h then acc else get_index_helper t prop (acc + 1)
 
-let get_index (the_game : t) (prop : Property.t) =
-  get_index_helper the_game.board prop 0
+let get_index (game : t) (prop : Property.t) =
+  get_index_helper game.board prop 0
 
 let rec get_prop_at_index_helper index (board : gameboard) =
   match board with
   | [] -> raise Not_found
   | h :: t -> if index = 0 then h else get_prop_at_index_helper (index - 1) t
 
-let get_prop_at_index index the_game =
-  get_prop_at_index_helper index the_game.board
+let get_prop_at_index index game = get_prop_at_index_helper index game.board
 
 let get_new_pos_and_double player the_game =
   let moves = roll_dice () in
@@ -218,8 +269,6 @@ let bankruptcy player prop game =
     update_player_money owner (player_money player);
     hand_over_all_properties player owner)
   else forfeit player game
-
-let can_pay player property game = if is_owned property then 0 else 0
 
 let collect_dues player prop dues game =
   update_player_money player (-1 * dues);

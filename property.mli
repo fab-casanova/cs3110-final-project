@@ -23,6 +23,9 @@ val is_owned : t -> bool
 (** [is_utilities prop] is true if [prop] is a utilities property *)
 val is_utilities : t -> bool
 
+(** [is_free_parking prop] is true if [prop] is a free parking space *)
+val is_free_parking : t -> bool
+
 (** [is_tax prop] is true if [prop] is a tax property *)
 val is_tax : t -> bool
 
@@ -83,12 +86,8 @@ val is_mortgaged : t -> bool
 (** [current_stage prop] is the current stage of [prop] *)
 val current_stage : t -> property_stage
 
-(*TODO: CHECK!!!!!!!!!!!!!!*)
-
 (** [create_mortgage prop] creates a mortgage for [prop] *)
 val create_mortgage : t -> unit
-
-(*TODO: CHECK!!!!!!!!!!!!!!*)
 
 (** [unmortgage prop] removes the mortgage from [prop] *)
 val unmortgage : t -> unit
@@ -102,22 +101,22 @@ val upgrade_property : t -> unit
 (** [downgrade_property prop] downgrades [prop] by one stage *)
 val downgrade_property : t -> unit
 
-(* TODO: CHECK!!!!!!!!!!!!! *)
+(** [num_for_monopoly prop] is the number of properties needed to have a
+    monopoly for a the color of [prop] *)
 val num_for_monopoly : t -> int
 
-(* TODO: CHECK!!!!!!!!!!!!! *)
+(** [num_houses prop] is the number of houses on [prop] *)
 val num_houses : t -> int
 
 (** [prop_name prop] is the property name for [prop] *)
 val prop_name : t -> string
 
-(* TODO: CHECK!!!!!!!!!!!!! *)
+(** [get_value prop] is the price of the [prop] based on whether or not it is
+    mortgaged *)
 val get_value : t -> int
 
 (** [reset_stage prop] resets [prop] to its lowest stage *)
 val reset_stage : t -> unit
-
-(* TODO: CHECK!!!!!!!!! *)
 
 (** [release_property prop] sets the bank as the owner of [prop] *)
 val release_property : t -> unit

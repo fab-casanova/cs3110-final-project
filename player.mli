@@ -15,7 +15,7 @@ val get_properties : t -> Property.t list
 val net_worth : t -> int
 
 (** [clear_properties player] empties the list of properties held by [player]
-    and sets the owner to the empty string*)
+    and sets the owner to the bank *)
 val clear_properties : t -> unit
 
 (** [pp_properties player] is the string containing the properties of [player] *)
@@ -158,3 +158,15 @@ val reset_doubles : t -> unit
 
 (** [add_double player] increments the amount of doubles rolled by [player] *)
 val add_double : t -> unit
+
+(** [num_jail_free_cards] returns the number of get out of jail free cards
+    [player] has*)
+val num_jail_free_cards : t -> int
+
+(** [add_jail_free_card] gives [player] a get out of jail free card from the
+    deck represented by [jail_card]*)
+val add_jail_free_card : string -> t -> unit
+
+(** [add_jail_free_card] returns true if [player] has a get out of jail free
+    card from the deck [jail_card]*)
+val owns_jail_free_card : string -> t -> bool
