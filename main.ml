@@ -86,9 +86,13 @@ let rec check_build player props =
       check_build player t
 
 let rec auction_all_props old_props game =
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    (string_of_int (List.length old_props) ^ " properties left to auction\n");
   match old_props with
   | [] -> ()
   | h :: t ->
+      ANSITerminal.print_string [ ANSITerminal.yellow ]
+        ("Now auctioning: " ^ prop_name h);
       auction h game;
       auction_all_props t game
 
@@ -172,6 +176,8 @@ let rec collect_nonmonetary_payment player prop rent_owed game =
       ANSITerminal.print_string [ ANSITerminal.blue ]
         "\nInvalid input, please try again\n";
       collect_nonmonetary_payment player prop rent_owed game
+
+let redistribute_assets = ()
 
 let check_status player pos dues game =
   match player_status dues player with
@@ -289,9 +295,8 @@ let rec current_turn game =
   ANSITerminal.print_string [ ANSITerminal.green ]
     ("\nCurrent player: " ^ get_name (current_player game));
   let curr = current_player game in
-  if not (in_jail curr) then (
-    print_endline " NOT IN JAIL";
-    play_a_turn game)
+  if not (in_jail curr) then (* print_endline " NOT IN JAIL";*)
+    play_a_turn game
   else (
     ANSITerminal.print_string [ ANSITerminal.red ]
       ("\n" ^ get_name curr ^ " is in jail\n");
@@ -305,29 +310,51 @@ let rec current_turn game =
         ^ " turn(s) left in jail for " ^ get_name curr ^ "\n")));
 
   ANSITerminal.print_string [ ANSITerminal.green ]
-    "\nContinue playing? Enter 'q' to quit\n";
+    "\nContinue playing? Enter 'f' to forfeit player, 'q' to quit game\n";
   match read_line () with
+  | "f" ->
+      ANSITerminal.print_string [ ANSITerminal.red ]
+        (get_name curr ^ " has forfeited. \n Removing " ^ get_name curr ^ "\n\n");
+      let old_props = get_properties curr in
+      forfeit curr game;
+      auction_all_props old_props game;
+      ANSITerminal.print_string [ ANSITerminal.blue ] (pp_players game ^ "\n\n");
+      current_turn game
   | "q" -> ANSITerminal.print_string [ ANSITerminal.green ] "Bye!\n\n"
   | _ ->
       move_to_next_player game;
       current_turn game
 
 let rec addl_player game =
-  let default_name = "player" ^ string_of_int (num_players game + 1) in
+  let old_num = num_players game in
+  let default_name = "player" ^ string_of_int (old_num + 1) in
   ANSITerminal.print_string [ ANSITerminal.blue ]
     ("\n Please give " ^ default_name
-   ^ " a name \n Entering nothing will default to " ^ default_name ^ " \n\n");
+   ^ " a name \n Entering nothing will default to " ^ default_name ^ "\n");
   let str = read_line () in
   let new_plyr =
     create_player (if str = "" then default_name else str) (get_start_pos game)
   in
   add_a_player game new_plyr;
+  if old_num = num_players game then
+    ANSITerminal.print_string [ ANSITerminal.red ] "\nName was already taken\n"
+  else
+    ANSITerminal.print_string [ ANSITerminal.green ]
+      ("\nAdded " ^ get_name new_plyr ^ " to game!\n");
   ANSITerminal.print_string [ ANSITerminal.green ]
-    ("Added " ^ get_name new_plyr ^ " to game!\n" ^ pp_players game
+    (pp_players game
    ^ "\n\
       Enter 'add' to add another player, enter anything else to start the game\n"
     );
-  match read_line () with "add" -> addl_player game | _ -> current_turn game
+  if num_players game = 1 then (
+    ANSITerminal.print_string [ ANSITerminal.green ] "Please add another player";
+    addl_player game)
+  else if num_players game < 4 then
+    match read_line () with "add" -> addl_player game | _ -> current_turn game
+  else (
+    ANSITerminal.print_string [ ANSITerminal.green ]
+      "Max number of players reached, starting game...\n";
+    current_turn game)
 
 let first_player game =
   ANSITerminal.print_string [ ANSITerminal.blue ]
@@ -340,13 +367,8 @@ let first_player game =
   in
   add_a_player game new_plyr;
   ANSITerminal.print_string [ ANSITerminal.green ]
-    ("\nFirst player is: "
-    ^ get_name (current_player game)
-    ^ "\n\
-       Enter 'add' to add another player, enter anything else to start the game\n"
-    );
-  (*Prompt adding more players in MS2*)
-  match read_line () with "add" -> addl_player game | _ -> current_turn game
+    ("\nFirst player is: " ^ get_name (current_player game));
+  addl_player game
 
 let rec main () =
   ANSITerminal.print_string [ ANSITerminal.green ]

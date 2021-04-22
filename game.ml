@@ -87,11 +87,9 @@ let add_a_player game player =
     print_endline "Max number of players reached, cannot add more\n"
   else
     let name_lst = List.map get_name game.player_list in
-    if List.mem (get_name player) name_lst then
-      print_endline "This name is already taken\n"
-    else game.player_list <- game.player_list @ [ player ];
-    if game.current_player = "" then game.current_player <- get_name player;
-    print_endline ("player count: " ^ string_of_int (num_players game))
+    if not (List.mem (get_name player) name_lst) then
+      game.player_list <- game.player_list @ [ player ];
+    if game.current_player = "" then game.current_player <- get_name player
 
 let move_front_to_back = function [] -> [] | h :: t -> t @ [ h ]
 
@@ -209,13 +207,17 @@ let calculate_dues prop game =
     calculate_owned_rent prop owner
   else calculate_rent_or_tax prop
 
-let bankruptcy player prop game =
-  if is_owned prop then
-    let owner = get_owner prop game in
-    update_player_money owner (player_money player)
-  else add_to_pot game (net_worth player);
+let forfeit player game =
+  add_to_pot game (player_money player);
   clear_properties player;
   remove_player player game
+
+let bankruptcy player prop game =
+  if is_owned prop then (
+    let owner = get_owner prop game in
+    update_player_money owner (player_money player);
+    hand_over_all_properties player owner)
+  else forfeit player game
 
 let can_pay player property game = if is_owned property then 0 else 0
 

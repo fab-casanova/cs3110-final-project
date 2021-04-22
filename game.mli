@@ -55,3 +55,5 @@ val owns_property_of_name : Player.t -> string -> t -> bool
 val get_property_of_name : string -> t -> Property.t
 
 val bankruptcy : Player.t -> Property.t -> t -> unit
+
+val forfeit : Player.t -> t -> unit

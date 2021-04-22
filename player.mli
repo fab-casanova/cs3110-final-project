@@ -1,4 +1,3 @@
-
 (** The abstract type of values representing players. *)
 type t
 
@@ -127,6 +126,13 @@ val remove_property : t -> Property.t -> unit
     [receiver]: sets the owner to [receiver], adds [prop] to [receiver]'s list
     of properties, and removes [prop] from [giver]'s list of properties *)
 val swap_owner : t -> t -> Property.t -> unit
+
+(** [hand_over_all_properties giver receiver] swaps ownership of all properties
+    owned by [giver] to [receiver]: sets the owner to [receiver], adds each
+    property to [receiver]'s list of properties, and removes [prop] from
+    [giver]'s list of properties *)
+val hand_over_all_properties : t -> t -> unit
+
 (** [in_jail player] is true if [player] is currently in jail *)
 val in_jail : t -> bool
 
@@ -136,22 +142,19 @@ val put_in_jail : t -> unit
 (** [un_jail player] removes [player] from jail *)
 val un_jail : t -> unit
 
-(** [served_a_turn player] decreases the amount of turns [player] has to be in 
+(** [served_a_turn player] decreases the amount of turns [player] has to be in
     jail by 1 *)
 val served_a_turn : t -> unit
 
 (** [time_left player] is the amount of turns left for [player] to be in jail *)
 val time_left : t -> int
 
-(** [num_doubles player] is the number of consequtive doubles [player] has 
+(** [num_doubles player] is the number of consequtive doubles [player] has
     rolled *)
 val num_doubles : t -> int
 
-(** [reset_doubles player] resets the number of doubles rolled by [player] to 
-    0 *)
+(** [reset_doubles player] resets the number of doubles rolled by [player] to 0 *)
 val reset_doubles : t -> unit
 
 (** [add_double player] increments the amount of doubles rolled by [player] *)
 val add_double : t -> unit
-
-    
