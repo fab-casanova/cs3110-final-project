@@ -1,4 +1,4 @@
-MODULES= property player game main standard_board
+MODULES= property player game main standard_board cards
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)

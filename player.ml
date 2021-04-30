@@ -117,8 +117,11 @@ let sum_dice dice = fst dice + snd dice
 
 let debug_dubs = false
 
+let debug_fp = false
+
 let roll_dice () =
   if debug_dubs then (2, 2)
+  else if debug_fp then (10, 10)
   else (
     Random.self_init ();
     (1 + Random.int 5, 1 + Random.int 5))
@@ -136,7 +139,7 @@ let calculate_owned_rent prop owner =
   let rent = calculate_rent_or_tax prop in
   if is_utilities prop then util_rent owner
   else if is_railroad prop then
-    int_of_float (2. ** float_of_int (rent * num_of_rail owner))
+    rent * int_of_float (2. ** float_of_int (num_of_rail owner - 1))
   else if has_monopoly owner prop then 2 * rent
   else rent
 
@@ -202,8 +205,10 @@ let print_assets player =
   ANSITerminal.print_string [ ANSITerminal.blue ]
     (get_name player ^ "'s properties: " ^ pp_properties player ^ "\n"
    ^ get_name player ^ "'s monopolies: " ^ pp_monopolies player ^ "\n"
-    ^ string_of_int (num_doubles player)
-    ^ " consecutive double(s)\n")
+    ^
+    if num_doubles player > 0 then
+      string_of_int (num_doubles player) ^ " consecutive double(s)\n"
+    else "")
 
 let remove_property player prop =
   player.properties <- List.filter (fun x -> x <> prop) player.properties

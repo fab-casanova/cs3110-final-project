@@ -13,6 +13,10 @@ val create_players : Player.t list -> players
 (** [pp_players game] prints out the players of the [game] *)
 val pp_players : t -> string
 
+(** [print_game_status game] prints the position and assets of each active
+    player in [game].*)
+val print_game_status : t -> unit
+
 (** [create_gameboard lst] creates a gameboard out of a [lst] of properties *)
 val create_gameboard : Property.t list -> gameboard
 
@@ -118,4 +122,12 @@ val forfeit : Player.t -> t -> unit
     monopoly in the [game] *)
 val pp_remaining_properties : t -> Player.t -> Property.t -> string
 
+(** [last_one_standing game] is true if there is only 1 player in the [game] *)
 val last_one_standing : t -> bool
+
+(** [set_deck new_deck card_type game] sets the deck that matches [card_type] to
+    [new_deck]]*)
+val set_deck : int list -> string -> t -> unit
+
+(** [get_deck card_type game] returns the deck that matches [card_type]*)
+val get_deck : string -> t -> int list

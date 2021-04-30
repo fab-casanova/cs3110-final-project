@@ -190,3 +190,13 @@ let com_chest =
     };
     { text = "You inherit $100"; effect = get_money 100 };
   ]
+
+let get_card card_type card_id =
+  match card_type with
+  | "chance" -> List.nth chance_cards card_id
+  | "community chest" -> List.nth com_chest card_id
+  | _ -> List.nth chance_cards card_id
+
+let card_text card = card.text
+
+let card_effect card game = card.effect game

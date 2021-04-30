@@ -87,12 +87,13 @@ let what_stage prop =
   | Four -> "four"
   | Hotel -> "hotel"
 
-let can_have_houses prop =
-  match prop.property_type with
+let space_type_has_houses = function
   | Brown | LBlue | Pink | Orange | Red | Yellow | Green | DBlue | OtherColor _
     ->
       true
   | _ -> false
+
+let can_have_houses prop = space_type_has_houses prop.property_type
 
 let assign_purchaseable = function
   | "brown" -> Brown
@@ -143,7 +144,10 @@ let create_t str color own prices cost house_price =
     name = str;
     property_type = color;
     owner = own;
-    stage = (if can_purchase_type color then Zero else CannotBuy);
+    stage =
+      (if can_purchase_type color then
+       if space_type_has_houses color then Zero else Other
+      else CannotBuy);
     mortgaged = false;
     price = cost;
     rent_prices = prices;
