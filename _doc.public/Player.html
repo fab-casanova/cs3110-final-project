@@ -71,15 +71,21 @@
 </div>
 </div>
 
+<pre><span id="VALpp_property_list"><span class="keyword">val</span> pp_property_list</span> : <code class="type"><a href="Property.html#TYPEt">Property.t</a> list -> string</code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">pp_property_list lst</code> is the string listing the properties in <code class="code">lst</code></p>
+</div>
+</div>
+
 <pre><span id="VALpp_properties"><span class="keyword">val</span> pp_properties</span> : <code class="type"><a href="Player.html#TYPEt">t</a> -> string</code></pre><div class="info ">
 <div class="info-desc">
-<p><code class="code">pp_properties player</code> is the string containing the properties of <code class="code">player</code></p>
+<p><code class="code">pp_properties player</code> is the string listing the properties of <code class="code">player</code></p>
 </div>
 </div>
 
 <pre><span id="VALpp_monopolies"><span class="keyword">val</span> pp_monopolies</span> : <code class="type"><a href="Player.html#TYPEt">t</a> -> string</code></pre><div class="info ">
 <div class="info-desc">
-<p><code class="code">pp_monopolies player</code> is the string containing the monopolies of <code class="code">player</code></p>
+<p><code class="code">pp_monopolies player</code> is the string listing the monopolies of <code class="code">player</code></p>
 </div>
 </div>
 
@@ -204,6 +210,13 @@
 <p><code class="code">mortgage_allowed player prop</code> is true if <code class="code">player</code> is the owner of <code class="code">prop</code>,
     <code class="code">prop</code> is not currently being mortgaged, and there are no houses on the
     color of <code class="code">prop</code></p>
+</div>
+</div>
+
+<pre><span id="VALmortgageable_props"><span class="keyword">val</span> mortgageable_props</span> : <code class="type"><a href="Player.html#TYPEt">t</a> -> <a href="Property.html#TYPEt">Property.t</a> list</code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">mortgageable_props player</code> is a list of all properties owned by <code class="code">player</code>
+    that can be mortgaged</p>
 </div>
 </div>
 

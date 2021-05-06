@@ -77,7 +77,7 @@ let shuffle_deck () =
   let deck = build_deck num_cards [] in
   let cards_with_weights = List.map (fun x -> (Random.bits (), x)) deck in
   let shuffled_with_weights = List.sort compare cards_with_weights in
-  List.map fst shuffled_with_weights
+  List.map snd shuffled_with_weights
 
 let draw_card deck game =
   let check_chance_shuffle cur_deck =
@@ -119,8 +119,8 @@ let create_game (board : gameboard) =
     player_list = [];
     current_player = "";
     money_pot = 0;
-    chance_deck = [ 0 ];
-    community_chest_deck = [ 0 ];
+    chance_deck = [ 11; 11 ];
+    community_chest_deck = shuffle_deck ();
   }
 
 let get_property_of_name name game =

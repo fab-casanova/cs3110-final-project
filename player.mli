@@ -20,10 +20,13 @@ val net_worth : t -> int
     and sets the owner to the bank *)
 val clear_properties : t -> unit
 
-(** [pp_properties player] is the string containing the properties of [player] *)
+(** [pp_property_list lst] is the string listing the properties in [lst] *)
+val pp_property_list : Property.t list -> string
+
+(** [pp_properties player] is the string listing the properties of [player] *)
 val pp_properties : t -> string
 
-(** [pp_monopolies player] is the string containing the monopolies of [player] *)
+(** [pp_monopolies player] is the string listing the monopolies of [player] *)
 val pp_monopolies : t -> string
 
 (** [player_money player] is the amount of money owned by [player] *)
@@ -98,6 +101,10 @@ val can_build_houses_hotel : t -> Property.t -> bool
     [prop] is not currently being mortgaged, and there are no houses on the
     color of [prop] *)
 val mortgage_allowed : t -> Property.t -> bool
+
+(** [mortgageable_props player] is a list of all properties owned by [player]
+    that can be mortgaged *)
+val mortgageable_props : t -> Property.t list
 
 (** [no_houses_on_monopoly player prop] is true if [player] doesn't have any
     houses on the color of [prop] *)

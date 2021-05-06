@@ -48,6 +48,8 @@ let rec pp_helper f name acc global_acc = function
       else name h ^ f h ^ ", " ^ pp_helper f name (acc - 1) global_acc t
   | h :: _ -> name h ^ f h
 
+let pp_property_list = pp_helper print_level prop_name 2 3
+
 let pp_properties player =
   let properties = get_properties player in
   pp_helper print_level prop_name 2 3 (List.rev properties)
@@ -117,16 +119,16 @@ let sum_dice dice = fst dice + snd dice
 
 let debug_dubs = false
 
-let debug_comm = true
+let debug_comm = false
 
-let debug_chance = false
+let debug_chance = true
 
 let debug_jail = false
 
 let roll_dice () =
   if debug_dubs then (2, 2)
   else if debug_comm then (0, 2)
-  else if debug_chance then (3, 4)
+  else if debug_chance then (2, 5)
   else if debug_jail then (15, 15)
   else (
     Random.self_init ();
@@ -198,10 +200,21 @@ let no_houses_on_monopoly player prop =
 
 let owns_property player prop = List.mem prop player.properties
 
-let rec mortgage_allowed player prop =
+let rec allowed_props (player : t) f acc = function
+  | [] -> acc
+  | h :: t -> allowed_props player f (if f player h then h :: acc else acc) t
+
+let mortgage_allowed player prop =
   owns_property player prop
   && (not (is_mortgaged prop))
   && no_houses_on_monopoly player prop
+
+let mortgageable_props player =
+  let rec aux acc = function
+    | [] -> acc
+    | h :: t -> aux (if mortgage_allowed player h then h :: acc else acc) t
+  in
+  aux [] (get_properties player)
 
 let print_assets player =
   ANSITerminal.print_string [ ANSITerminal.yellow ]

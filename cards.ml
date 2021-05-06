@@ -10,9 +10,18 @@ type transaction = giver * int * receiver
 
 type t = { text : string; effect : Game.t -> transaction list }
 
+let get_money money game = [ (None, money, Some (current_player game)) ]
+
+let pay_money money game = [ (Some (current_player game), money, None) ]
+
 let advance_to_property property_name game =
-  change_pos (current_player game) (get_property_of_name property_name game);
-  []
+  let player = current_player game in
+  let old_pos = get_position player in
+  change_pos player (get_property_of_name property_name game);
+  let new_pos = get_position player in
+  if get_index game new_pos - get_index game old_pos < 0 then get_money 200 game
+  else if property_name = "Pass Go" then get_money 200 game
+  else []
 
 let advance_to_nearest_utility game =
   let pos = get_index game (get_position (current_player game)) in
@@ -25,19 +34,22 @@ let advance_to_nearest_utility game =
 
 let advance_to_nearest_railroad game =
   let pos = get_index game (get_position (current_player game)) in
-  if pos > 35 || pos < 6 then
-    change_pos (current_player game)
-      (get_property_of_name "Reading Railroad" game)
-  else if pos > 5 && pos < 16 then
-    change_pos (current_player game)
-      (get_property_of_name "Pennsylvania Railroad" game)
-  else if pos > 15 && pos < 26 then
-    change_pos (current_player game)
-      (get_property_of_name "B & O Railroad" game)
-  else if pos > 25 && pos < 36 then
-    change_pos (current_player game)
-      (get_property_of_name "Short Line Railroad" game);
-  []
+  let name =
+    if pos > 35 || pos < 6 then "Reading Railroad"
+    else if pos > 5 && pos < 16 then "Pennsylvania Railroad"
+    else if pos > 15 && pos < 26 then "B & O Railroad"
+    else if pos > 25 && pos < 36 then "Short Line Railroad"
+    else ""
+  in
+  let rail = get_property_of_name name game in
+  change_pos (current_player game) rail;
+  if is_owned rail then
+    [
+      ( Some (current_player game),
+        calculate_dues rail game,
+        Some (get_owner rail game) );
+    ]
+  else []
 
 let jail_free deck game =
   add_jail_free_card deck (current_player game);
@@ -76,14 +88,10 @@ let pay_all_players payment_per_player game : transaction list =
         if h <> current then
           if payment_per_player > 0 then
             trans_list t ((Some current, payment_per_player, Some h) :: acc)
-          else trans_list t ((Some h, payment_per_player, Some current) :: acc)
+          else trans_list t ((Some h, -payment_per_player, Some current) :: acc)
         else trans_list t acc
   in
   trans_list (get_players game) []
-
-let get_money money game = [ (None, money, Some (current_player game)) ]
-
-let pay_money money game = [ (Some (current_player game), money, None) ]
 
 let chance_cards =
   [
@@ -159,7 +167,7 @@ let com_chest =
     { text = "Bank error in your favor—Collect $200"; effect = get_money 200 };
     { text = "Doctor's fee—Pay $50"; effect = pay_money 50 };
     { text = "From sale of stock you get $50"; effect = get_money 50 };
-    { text = "Get Out of Jail Free"; effect = jail_free "com_chest" };
+    { text = "Get Out of Jail Free"; effect = jail_free "community chest" };
     {
       text =
         "Go to Jail–Go directly to jail–Do not pass Go–Do not collect \

@@ -196,8 +196,7 @@
 </td></tr>
 <tr><td><a href="Game.html#VALcreate_game">create_game</a> [<a href="Game.html">Game</a>]</td>
 <td><div class="info">
-<p><code class="code">create_game board players</code> creates a game with a given <code class="code">board</code> and
-    <code class="code">players</code></p>
+<p><code class="code">create_game board</code> creates a game with a given <code class="code">board</code></p>
 
 </div>
 </td></tr>
@@ -217,12 +216,6 @@
 <td><div class="info">
 <p><code class="code">create_player player_name start</code> is a player with the name <code class="code">player_name</code>
     and initializes their position at <code class="code">start</code></p>
-
-</div>
-</td></tr>
-<tr><td><a href="Game.html#VALcreate_players">create_players</a> [<a href="Game.html">Game</a>]</td>
-<td><div class="info">
-<p><code class="code">create_players lst</code> creates players out of a <code class="code">lst</code> of players</p>
 
 </div>
 </td></tr>
@@ -485,6 +478,13 @@
 
 </div>
 </td></tr>
+<tr><td><a href="Player.html#VALmortgageable_props">mortgageable_props</a> [<a href="Player.html">Player</a>]</td>
+<td><div class="info">
+<p><code class="code">mortgageable_props player</code> is a list of all properties owned by <code class="code">player</code>
+    that can be mortgaged</p>
+
+</div>
+</td></tr>
 <tr><td><a href="Game.html#VALmove_player">move_player</a> [<a href="Game.html">Game</a>]</td>
 <td><div class="info">
 <p><code class="code">move_player player game given_moves special_move</code> moves <code class="code">player</code> in the
@@ -599,7 +599,7 @@
 </td></tr>
 <tr><td><a href="Player.html#VALpp_monopolies">pp_monopolies</a> [<a href="Player.html">Player</a>]</td>
 <td><div class="info">
-<p><code class="code">pp_monopolies player</code> is the string containing the monopolies of <code class="code">player</code></p>
+<p><code class="code">pp_monopolies player</code> is the string listing the monopolies of <code class="code">player</code></p>
 
 </div>
 </td></tr>
@@ -611,7 +611,13 @@
 </td></tr>
 <tr><td><a href="Player.html#VALpp_properties">pp_properties</a> [<a href="Player.html">Player</a>]</td>
 <td><div class="info">
-<p><code class="code">pp_properties player</code> is the string containing the properties of <code class="code">player</code></p>
+<p><code class="code">pp_properties player</code> is the string listing the properties of <code class="code">player</code></p>
+
+</div>
+</td></tr>
+<tr><td><a href="Player.html#VALpp_property_list">pp_property_list</a> [<a href="Player.html">Player</a>]</td>
+<td><div class="info">
+<p><code class="code">pp_property_list lst</code> is the string listing the properties in <code class="code">lst</code></p>
 
 </div>
 </td></tr>

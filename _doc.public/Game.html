@@ -26,12 +26,17 @@
 
 <pre><span id="MODULEGame"><span class="keyword">module</span> Game</span>: <code class="code">sig</code> <a href="Game.html">..</a> <code class="code">end</code></pre><div class="info module top">
 <div class="info-desc">
-<p>Represents a game in Monopoly</p>
+<p>Represents the current status of a Monopoly game</p>
 </div>
 </div>
 <hr width="100%">
 
 <pre><span id="TYPEplayers"><span class="keyword">type</span> <code class="type"></code>players</span> </pre>
+<div class="info ">
+<div class="info-desc">
+<p>The type representing the players</p>
+</div>
+</div>
 
 
 <pre><span id="TYPEgameboard"><span class="keyword">type</span> <code class="type"></code>gameboard</span> </pre>
@@ -49,12 +54,6 @@
 </div>
 </div>
 
-
-<pre><span id="VALcreate_players"><span class="keyword">val</span> create_players</span> : <code class="type"><a href="Player.html#TYPEt">Player.t</a> list -> <a href="Game.html#TYPEplayers">players</a></code></pre><div class="info ">
-<div class="info-desc">
-<p><code class="code">create_players lst</code> creates players out of a <code class="code">lst</code> of players</p>
-</div>
-</div>
 
 <pre><span id="VALpp_players"><span class="keyword">val</span> pp_players</span> : <code class="type"><a href="Game.html#TYPEt">t</a> -> string</code></pre><div class="info ">
 <div class="info-desc">
@@ -95,10 +94,9 @@
 </div>
 </div>
 
-<pre><span id="VALcreate_game"><span class="keyword">val</span> create_game</span> : <code class="type"><a href="Game.html#TYPEgameboard">gameboard</a> -> <a href="Game.html#TYPEplayers">players</a> -> <a href="Game.html#TYPEt">t</a></code></pre><div class="info ">
+<pre><span id="VALcreate_game"><span class="keyword">val</span> create_game</span> : <code class="type"><a href="Game.html#TYPEgameboard">gameboard</a> -> <a href="Game.html#TYPEt">t</a></code></pre><div class="info ">
 <div class="info-desc">
-<p><code class="code">create_game board players</code> creates a game with a given <code class="code">board</code> and
-    <code class="code">players</code></p>
+<p><code class="code">create_game board</code> creates a game with a given <code class="code">board</code></p>
 </div>
 </div>
 

@@ -119,30 +119,34 @@ let rec auction_all_props old_props game =
       auction_all_props t game
 
 let mortgage_property player game =
-  ANSITerminal.print_string [ ANSITerminal.blue ]
-    "\nWhat property would you like to mortgage?\n";
-  let input = read_line () in
-  if owns_property_of_name player input game then
-    let prop = get_property_of_name input game in
-    (*let can_mortgage = mortgage_allowed player prop in*)
-    if mortgage_allowed player prop then (
-      ANSITerminal.print_string [ ANSITerminal.blue ]
-        ("Mortgaging " ^ prop_name prop ^ " will earn you $"
-        ^ string_of_int (get_value prop / 2)
-        ^ ".\n\
-          \  Enter 'y' to go through with this action, anything else to forgo \
-           this action.\n");
-      match read_line () with
-      | "y" ->
-          create_mortgage prop;
-          update_player_money player (get_value prop)
-      | _ -> ())
+  let props = mortgageable_props player in
+  if List.length props > 0 then (
+    ANSITerminal.print_string [ ANSITerminal.blue ]
+      "\nWhat property would you like to mortgage? Enter 'q' to exit\n";
+    let input = read_line () in
+    if input = "q" then ()
+    else if owns_property_of_name player input game then
+      let prop = get_property_of_name input game in
+      (*let can_mortgage = mortgage_allowed player prop in*)
+      if mortgage_allowed player prop then (
+        ANSITerminal.print_string [ ANSITerminal.blue ]
+          ("Mortgaging " ^ prop_name prop ^ " will earn you $"
+          ^ string_of_int (get_value prop / 2)
+          ^ ".\n\
+            \  Enter 'y' to go through with this action, anything else to \
+             forgo this action.\n");
+        match read_line () with
+        | "y" ->
+            create_mortgage prop;
+            update_player_money player (get_value prop)
+        | _ -> ())
+      else
+        ANSITerminal.print_string [ ANSITerminal.blue ]
+          "\nCan't mortgage this property\n"
     else
-      ANSITerminal.print_string [ ANSITerminal.blue ]
-        "\nCan't mortgage this property\n"
-  else
-    ANSITerminal.print_string [ ANSITerminal.red ]
-      "\nInvalid property name. Please enter a valid property\n"
+      ANSITerminal.print_string [ ANSITerminal.red ]
+        "\nInvalid property name. Please enter a valid property\n")
+  else print_string "No properties to mortgage"
 
 let sell_buildings player prop game =
   ANSITerminal.print_string [ ANSITerminal.blue ]
@@ -172,30 +176,34 @@ let sell_buildings player prop game =
         "Cannot sell buildings on this property\n"
 
 let transfer_properties player owner game =
-  ANSITerminal.print_string [ ANSITerminal.blue ]
-    "What property do you want to sell?\n";
-  let input = read_line () in
-  if owns_property_of_name player input game then
-    let prop = get_property_of_name input game in
-    let can_transfer =
-      owns_property player prop && no_houses_on_monopoly player prop
-    in
-    let owned = is_owned prop in
-    if (not owned) && can_transfer then return_prop_to_bank player prop
-    else if can_transfer then (
-      ANSITerminal.print_string [ ANSITerminal.blue ]
-        ("Transferring " ^ prop_name prop ^ " will earn you $"
-        ^ string_of_int (get_value prop)
-        ^ ".\n\
-          \  Enter 'y' to go through with this action, anything else to forgo \
-           this action.\n");
-      match read_line () with
-      | "y" ->
-          swap_owner player owner prop;
-          update_player_money player (get_value prop)
-      | _ -> ())
-    else print_string "Can't transfer this property\n"
-  else print_string "Can't transfer this property\n"
+  let props = get_properties player in
+  if List.length props > 0 then (
+    ANSITerminal.print_string [ ANSITerminal.blue ]
+      ("Mortgageable props: " ^ pp_property_list props
+     ^ "\nWhat property do you want to sell?\n");
+    let input = read_line () in
+    if owns_property_of_name player input game then
+      let prop = get_property_of_name input game in
+      let can_transfer =
+        owns_property player prop && no_houses_on_monopoly player prop
+      in
+      let owned = is_owned prop in
+      if (not owned) && can_transfer then return_prop_to_bank player prop
+      else if can_transfer then (
+        ANSITerminal.print_string [ ANSITerminal.blue ]
+          ("Transferring " ^ prop_name prop ^ " will earn you $"
+          ^ string_of_int (get_value prop)
+          ^ ".\n\
+            \  Enter 'y' to go through with this action, anything else to \
+             forgo this action.\n");
+        match read_line () with
+        | "y" ->
+            swap_owner player owner prop;
+            update_player_money player (get_value prop)
+        | _ -> ())
+      else print_string "Can't transfer this property\n"
+    else print_string "Can't transfer this property\n")
+  else print_string "No properties to transfer"
 
 let rec collect_nonmonetary_payment player receiver rent_owed game =
   (*MONEY REMAINING TO PAY: X MONEY ON HAND: Y*)
@@ -266,14 +274,19 @@ let rec current_property_effects game player =
       let players = get_players game in
       List.exists (fun x -> owns_jail_free_card card_type x) players
     in
-    let card =
+    let rec first_card deck =
       match deck with
-      | [] -> get_card card_type (-1)
+      | [] -> first_card (get_nonempty_deck card_type game)
       | h :: t ->
           set_deck t card_type game;
-          if jail_in_play card_type then draw_card game;
-          get_card card_type h
+          let temp_card = get_card card_type h in
+          if
+            card_text temp_card = "Get Out of Jail Free"
+            && jail_in_play card_type
+          then first_card t
+          else temp_card
     in
+    let card = first_card deck in
     let rec print_deck deck acc =
       match deck with
       | [] -> acc
@@ -306,20 +319,26 @@ let rec current_property_effects game player =
           if not (last_one_standing game) then auction_all_props old_props game
           else win_message game
     in
+
+    let rec finish_transactions transactions =
+      match transactions with
+      | [] -> ()
+      | (giver, amount, receiver) :: t ->
+          let giver_is_none = is_none giver in
+          let receiver_is_none = is_none receiver in
+          if (not giver_is_none) && not receiver_is_none then (
+            perform_payment giver amount receiver;
+            finish_transactions t)
+          else if giver_is_none then (
+            update_player_money (Option.get receiver) amount;
+            finish_transactions t)
+          else if receiver_is_none then (
+            update_player_money (Option.get giver) (-amount);
+            add_to_pot game amount)
+    in
     if before_pos <> get_position player then
       current_property_effects game player;
-    match transactions with
-    | [] -> ()
-    | (giver, amount, receiver) :: t ->
-        let giver_is_none = is_none giver in
-        let receiver_is_none = is_none receiver in
-        if (not giver_is_none) && not receiver_is_none then
-          perform_payment giver amount receiver
-        else if giver_is_none then
-          update_player_money (Option.get receiver) amount
-        else if receiver_is_none then
-          update_player_money (Option.get giver) (-amount);
-        add_to_pot game amount
+    finish_transactions transactions
   in
   (*Current property effects*)
   let pos = get_position player in
@@ -433,6 +452,35 @@ let rec jail_prompt player game =
   | "remain" | "no" -> ()
   | _ -> jail_prompt player game
 
+let deal_prompt player game = ()
+
+let rec end_of_turn player game =
+  ANSITerminal.print_string [ ANSITerminal.green ]
+    "Enter 's' to print the remaining players' current stats,\n\
+     'b' to check if houses can be built on any properties,\n\
+     'm' to mortgage a properties,\n\
+     \'d' to make deals with other players, anything else to move on.\n";
+  match read_line () with
+  | "s" ->
+      print_game_status game;
+      end_of_turn player game
+  | "b" ->
+      ANSITerminal.print_string [ ANSITerminal.blue ]
+        ("Checking which of " ^ get_name player
+       ^ "'s properties can be built on.\n\
+          note: one house can be built on each elligible property per 'b'.\n\
+          If you would like to build multiple houses, continue inputting 'b' \n\
+          to evenly build houses until no prompts to build show up.\n\
+          If no prompts show up, you cannot currently build houses\n\n");
+      check_build player (get_properties player);
+      end_of_turn player game
+  | "d" ->
+      deal_prompt player game;
+      end_of_turn player game
+  | _ -> ()
+
+(*current_turn game*)
+
 let rec current_turn game =
   if not (last_one_standing game) then (
     ANSITerminal.print_string [ ANSITerminal.green ]
@@ -452,11 +500,10 @@ let rec current_turn game =
         ANSITerminal.print_string [ ANSITerminal.blue ]
           (string_of_int (time_left curr)
           ^ " turn(s) left in jail for " ^ get_name curr ^ "\n")));
-
+    end_of_turn curr game;
     ANSITerminal.print_string [ ANSITerminal.green ]
       ("\nContinue playing? Enter 'f' to forfeit, 'q' to quit the entire game\n"
-     ^ "or 's' to print the remaining players' current stats before the next \
-        turn\n");
+     ^ "anything else to start the next turn.\n");
     match read_line () with
     | "f" ->
         ANSITerminal.print_string [ ANSITerminal.red ]
@@ -470,14 +517,6 @@ let rec current_turn game =
             (pp_players game ^ "\n\n");
           current_turn game)
         else win_message game
-    | "s" -> (
-        print_game_status game;
-        ANSITerminal.print_string [ ANSITerminal.green ]
-          "Enter anything to start the next turn\n";
-        match read_line () with
-        | _ ->
-            move_to_next_player game;
-            current_turn game)
     | "q" -> ANSITerminal.print_string [ ANSITerminal.green ] "Bye!\n\n"
     | _ ->
         move_to_next_player game;

@@ -17,14 +17,13 @@
 &nbsp;&nbsp;<span class="keyword">type</span>&nbsp;players<br>
 &nbsp;&nbsp;<span class="keyword">type</span>&nbsp;gameboard<br>
 &nbsp;&nbsp;<span class="keyword">type</span>&nbsp;t<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;create_players&nbsp;:&nbsp;<span class="constructor">Player</span>.t&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Game</span>.players<br>
 &nbsp;&nbsp;<span class="keyword">val</span>&nbsp;pp_players&nbsp;:&nbsp;<span class="constructor">Game</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
 &nbsp;&nbsp;<span class="keyword">val</span>&nbsp;print_game_status&nbsp;:&nbsp;<span class="constructor">Game</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
 &nbsp;&nbsp;<span class="keyword">val</span>&nbsp;create_gameboard&nbsp;:&nbsp;<span class="constructor">Property</span>.t&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Game</span>.gameboard<br>
 &nbsp;&nbsp;<span class="keyword">val</span>&nbsp;current_player_name&nbsp;:&nbsp;<span class="constructor">Game</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
 &nbsp;&nbsp;<span class="keyword">val</span>&nbsp;current_player&nbsp;:&nbsp;<span class="constructor">Game</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Player</span>.t<br>
 &nbsp;&nbsp;<span class="keyword">val</span>&nbsp;move_to_next_player&nbsp;:&nbsp;<span class="constructor">Game</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
-&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;create_game&nbsp;:&nbsp;<span class="constructor">Game</span>.gameboard&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Game</span>.players&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Game</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;create_game&nbsp;:&nbsp;<span class="constructor">Game</span>.gameboard&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Game</span>.t<br>
 &nbsp;&nbsp;<span class="keyword">val</span>&nbsp;pot_amount&nbsp;:&nbsp;<span class="constructor">Game</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int<br>
 &nbsp;&nbsp;<span class="keyword">val</span>&nbsp;add_to_pot&nbsp;:&nbsp;<span class="constructor">Game</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
 &nbsp;&nbsp;<span class="keyword">val</span>&nbsp;cash_out_pot&nbsp;:&nbsp;<span class="constructor">Game</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Player</span>.t&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
