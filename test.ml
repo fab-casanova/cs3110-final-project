@@ -2,11 +2,12 @@ open OUnit2
 open Property
 open Player
 open Game
+open Cards
 
 (*Player Done*)
 (*Property Done*)
-(*Game*)
-(*Cards*)
+(*Game Done*)
+(*Cards Done*)
 (*Main*)
 
 (*Template*)
@@ -268,35 +269,36 @@ let get_jail_test name game out =
 let current_player_test name game out =
   name >:: fun _ -> assert_equal out (current_player game)
 
-(* let move_front_to_back_test name lst out = name >:: fun _ -> assert_equal out
-   (move_front_to_back lst)
+let move_to_next_player_test name game out =
+  name >:: fun _ -> assert_equal out (move_to_next_player game)
 
-   let funct_test name inp1 inp2 inp3 out = name >:: fun _ -> assert_equal out
-   (funct inp1 inp2 inp3)
+let get_index_test name game prop out =
+  name >:: fun _ -> assert_equal out (get_index game prop)
 
-   let funct_test name inp1 inp2 inp3 out = name >:: fun _ -> assert_equal out
-   (funct inp1 inp2 inp3)
+let get_prop_at_index_test name index game out =
+  name >:: fun _ -> assert_equal out (get_prop_at_index index game)
 
-   let funct_test name inp1 inp2 inp3 out = name >:: fun _ -> assert_equal out
-   (funct inp1 inp2 inp3)
+let calculate_dues_test name prop game out =
+  name >:: fun _ -> assert_equal out (calculate_dues prop game)
 
-   let funct_test name inp1 inp2 inp3 out = name >:: fun _ -> assert_equal out
-   (funct inp1 inp2 inp3)
+let get_deck_test name card_type game out =
+  name >:: fun _ -> assert_equal out (get_deck card_type game)
 
-   let funct_test name inp1 inp2 inp3 out = name >:: fun _ -> assert_equal out
-   (funct inp1 inp2 inp3)
+let game_tests = []
 
-   let funct_test name inp1 inp2 inp3 out = name >:: fun _ -> assert_equal out
-   (funct inp1 inp2 inp3)
+(*Card functions*)
 
-   let funct_test name inp1 inp2 inp3 out = name >:: fun _ -> assert_equal out
-   (funct inp1 inp2 inp3)
+let get_card_test name card_type card_id out =
+  name >:: fun _ -> assert_equal out (get_card card_type card_id)
 
-   let funct_test name inp1 inp2 inp3 out = name >:: fun _ -> assert_equal out
-   (funct inp1 inp2 inp3)
+let card_text_test name card out =
+  name >:: fun _ -> assert_equal out (card_text card)
 
-   let funct_test name inp1 inp2 inp3 out = name >:: fun _ -> assert_equal out
-   (funct inp1 inp2 inp3) *)
+let card_effect_test name card game out =
+  name >:: fun _ -> assert_equal out (card_effect card game)
+
+let card_tests = []
+
 let suite = "test suite" >::: List.flatten []
 
 let _ = run_test_tt_main suite

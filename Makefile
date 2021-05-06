@@ -21,6 +21,19 @@ zip:
 play:
 	$(OCAMLBUILD) -tag 'debug' $(MAIN) && OCAMLRUNPARAM=b ./$(MAIN)
 
+docs: docs-public docs-private
+	
+docs-public: build
+	mkdir -p _doc.public
+	ocamlfind ocamldoc -I _build -package ANSITerminal \
+		-html -stars -d _doc.public $(MLIS)
+
+docs-private: build
+	mkdir -p _doc.private
+	ocamlfind ocamldoc -I _build -package ANSITerminal \
+		-html -stars -d _doc.private \
+		-inv-merge-ml-mli -m A $(MLIS) $(MLS)
+
 clean: 	
 	ocamlbuild -clean
 	rm -rf monopoly.zip

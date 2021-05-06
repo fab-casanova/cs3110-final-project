@@ -14,8 +14,6 @@ type t = {
   mutable community_chest_deck : int list;
 }
 
-let create_players (lst : Player.t list) : players = lst
-
 let rec pp_players_helper = function
   | [] -> ""
   | [ h ] -> get_name h
@@ -115,11 +113,11 @@ let owns_property_of_name player name game =
     get_owner_name prop = get_name player
   else false
 
-let create_game (board : gameboard) (players : players) =
+let create_game (board : gameboard) =
   {
     board;
-    player_list = players;
-    current_player = (match players with [] -> "" | h :: t -> get_name h);
+    player_list = [];
+    current_player = "";
     money_pot = 0;
     chance_deck = [ 0 ];
     community_chest_deck = [ 0 ];
