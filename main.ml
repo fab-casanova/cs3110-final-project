@@ -259,88 +259,6 @@ let check_status player pos dues game =
       else win_message game
 
 let rec current_property_effects game player =
-  (*Card drawing. If we can figure out how to draw without calling
-    current_property_effects we can move draw_card elsewhere*)
-  let rec draw_card game =
-    let player = current_player game in
-    let before_pos = get_position player in
-    let card_type = pp_space_type (get_type (get_position player)) in
-    let get_nonempty_deck card_type game =
-      let deck = get_deck card_type game in
-      if List.length deck > 0 then deck else shuffle_deck ()
-    in
-    let deck = get_nonempty_deck card_type game in
-    let jail_in_play card_type =
-      let players = get_players game in
-      List.exists (fun x -> owns_jail_free_card card_type x) players
-    in
-    let rec first_card deck =
-      match deck with
-      | [] -> first_card (get_nonempty_deck card_type game)
-      | h :: t ->
-          set_deck t card_type game;
-          let temp_card = get_card card_type h in
-          if
-            card_text temp_card = "Get Out of Jail Free"
-            && jail_in_play card_type
-          then first_card t
-          else temp_card
-    in
-    let card = first_card deck in
-    let rec print_deck deck acc =
-      match deck with
-      | [] -> acc
-      | h :: t -> print_deck t (acc ^ " " ^ string_of_int h)
-    in
-    ANSITerminal.print_string [ ANSITerminal.blue ]
-      ("Your card: " ^ card_text card ^ "\n");
-
-    ANSITerminal.print_string [ ANSITerminal.blue ]
-      ("Current deck: " ^ print_deck deck "" ^ "\n");
-
-    let transactions = card_effect card game in
-    let is_none giver_receiver =
-      match giver_receiver with None -> true | giver_receiver -> false
-    in
-    let perform_payment giver amount receiver =
-      match player_status amount player with
-      | 0 ->
-          update_player_money (Option.get giver) (-1 * amount);
-          update_player_money (Option.get receiver) amount
-      | 1 ->
-          collect_nonmonetary_payment player (Option.get receiver) amount game
-      | _ ->
-          let old_props = get_properties (Option.get giver) in
-          if not (is_none receiver) then (
-            update_player_money (Option.get receiver)
-              (player_money (Option.get giver));
-            hand_over_all_properties (Option.get giver) (Option.get receiver))
-          else forfeit player game;
-          if not (last_one_standing game) then auction_all_props old_props game
-          else win_message game
-    in
-
-    let rec finish_transactions transactions =
-      match transactions with
-      | [] -> ()
-      | (giver, amount, receiver) :: t ->
-          let giver_is_none = is_none giver in
-          let receiver_is_none = is_none receiver in
-          if (not giver_is_none) && not receiver_is_none then (
-            perform_payment giver amount receiver;
-            finish_transactions t)
-          else if giver_is_none then (
-            update_player_money (Option.get receiver) amount;
-            finish_transactions t)
-          else if receiver_is_none then (
-            update_player_money (Option.get giver) (-amount);
-            add_to_pot game amount)
-    in
-    if before_pos <> get_position player then
-      current_property_effects game player;
-    finish_transactions transactions
-  in
-  (*Current property effects*)
   let pos = get_position player in
   print_endline ("Position " ^ string_of_int (get_index game pos) ^ " of 40");
   if not (is_go_to_jail pos) then (
@@ -377,8 +295,7 @@ let rec current_property_effects game player =
         buy_prompt game player pos
       else
         ANSITerminal.print_string [ ANSITerminal.red ]
-          "Not enough funds to purchase\n\n");
-    check_build player (get_properties player))
+          "Not enough funds to purchase\n\n"))
   else (
     ANSITerminal.print_string [ ANSITerminal.red ] "You're going to jail\n";
     put_in_jail player;
@@ -386,6 +303,82 @@ let rec current_property_effects game player =
     ANSITerminal.print_string [ ANSITerminal.red ]
       (string_of_int (time_left player)
       ^ " turn(s) left in jail for " ^ get_name player ^ "\n"))
+
+and draw_card game =
+  let player = current_player game in
+  let before_pos = get_position player in
+  let card_type = pp_space_type (get_type (get_position player)) in
+  let get_nonempty_deck card_type game =
+    let deck = get_deck card_type game in
+    if List.length deck > 0 then deck else shuffle_deck ()
+  in
+  let deck = get_nonempty_deck card_type game in
+  let jail_in_play card_type =
+    let players = get_players game in
+    List.exists (fun x -> owns_jail_free_card card_type x) players
+  in
+  let rec first_card deck =
+    match deck with
+    | [] -> first_card (get_nonempty_deck card_type game)
+    | h :: t ->
+        set_deck t card_type game;
+        let temp_card = get_card card_type h in
+        if
+          card_text temp_card = "Get Out of Jail Free" && jail_in_play card_type
+        then first_card t
+        else temp_card
+  in
+  let card = first_card deck in
+  let rec print_deck deck acc =
+    match deck with
+    | [] -> acc
+    | h :: t -> print_deck t (acc ^ " " ^ string_of_int h)
+  in
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    ("Your card: " ^ card_text card ^ "\n");
+
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    ("Current deck: " ^ print_deck deck "" ^ "\n");
+
+  let transactions = card_effect card game in
+  let is_none giver_receiver =
+    match giver_receiver with None -> true | giver_receiver -> false
+  in
+  let perform_payment giver amount receiver =
+    match player_status amount player with
+    | 0 ->
+        update_player_money (Option.get giver) (-1 * amount);
+        update_player_money (Option.get receiver) amount
+    | 1 -> collect_nonmonetary_payment player (Option.get receiver) amount game
+    | _ ->
+        let old_props = get_properties (Option.get giver) in
+        if not (is_none receiver) then (
+          update_player_money (Option.get receiver)
+            (player_money (Option.get giver));
+          hand_over_all_properties (Option.get giver) (Option.get receiver))
+        else forfeit player game;
+        if not (last_one_standing game) then auction_all_props old_props game
+        else win_message game
+  in
+
+  let rec finish_transactions transactions =
+    match transactions with
+    | [] -> ()
+    | (giver, amount, receiver) :: t ->
+        let giver_is_none = is_none giver in
+        let receiver_is_none = is_none receiver in
+        if (not giver_is_none) && not receiver_is_none then (
+          perform_payment giver amount receiver;
+          finish_transactions t)
+        else if giver_is_none then (
+          update_player_money (Option.get receiver) amount;
+          finish_transactions t)
+        else if receiver_is_none then (
+          update_player_money (Option.get giver) (-amount);
+          add_to_pot game amount)
+  in
+  if before_pos <> get_position player then current_property_effects game player;
+  finish_transactions transactions
 
 let rec play_a_turn game =
   let player = current_player game in
@@ -429,37 +422,91 @@ let attempt_escape player game =
     ANSITerminal.print_string [ ANSITerminal.yellow ] "Did not roll doubles!\n"
 
 let rec jail_prompt player game =
-  ANSITerminal.print_string [ ANSITerminal.blue ]
-    ("Would you like to "
-    ^ (if player_money player >= 500 && time_left player > 1 then
-       "pay $500 (pay) or "
-      else "")
-    ^ "attempt to roll doubles (roll) to escape jail? Type 'no' to remain in \
-       jail\n");
-  match read_line () with
-  | "pay" ->
-      if player_money player < 500 then (
-        ANSITerminal.print_string [ ANSITerminal.red ] "\nNot enough money\n";
-        jail_prompt player game)
-      else if time_left player <= 1 then (
-        ANSITerminal.print_string [ ANSITerminal.red ]
-          "\nCannot pay to get out in your last turn of jail\n";
-        jail_prompt player game)
-      else (
-        update_player_money player (-500);
-        un_jail player)
-  | "roll" -> attempt_escape player game
-  | "remain" | "no" -> ()
-  | _ -> jail_prompt player game
+  if
+    num_jail_free_cards player > 0
+    || (player_money player >= 50 && time_left player > 1)
+  then (
+    ANSITerminal.print_string [ ANSITerminal.blue ]
+      ("Would you like to "
+      ^ (if player_money player >= 50 && time_left player > 1 then
+         "pay $50 (pay) or "
+        else "")
+      ^ (if num_jail_free_cards player > 0 then
+         "use your Get Out of Jail card (use) or "
+        else "")
+      ^ "attempt to roll doubles (roll) to escape jail? Type 'no' to remain in \
+         jail\n");
+    match read_line () with
+    | "pay" ->
+        if player_money player < 50 then (
+          ANSITerminal.print_string [ ANSITerminal.red ] "\nNot enough money\n";
+          jail_prompt player game)
+        else if time_left player <= 1 then (
+          ANSITerminal.print_string [ ANSITerminal.red ]
+            "\nCannot pay to get out in your last turn of jail\n";
+          jail_prompt player game)
+        else (
+          update_player_money player (-50);
+          un_jail player)
+    | "y" | "roll" -> attempt_escape player game
+    | "remain" | "n" | "no" -> ()
+    | "use" | "use card" ->
+        if num_jail_free_cards player > 0 then (
+          remove_jail_free_card player;
+          un_jail player)
+        else (
+          ANSITerminal.print_string [ ANSITerminal.red ]
+            "\nDoesn't own get out of jail free card\n";
+          jail_prompt player game)
+    | _ -> jail_prompt player game)
+  else (
+    ANSITerminal.print_string [ ANSITerminal.red ] "\n\n";
+    attempt_escape player game)
 
-let deal_prompt player game = ()
+let rec start_deal player asked_player game =
+  print_assets player;
+  print_endline "";
+  print_assets asked_player;
+  print_endline ""
+
+let rec deal_prompt player game =
+  ();
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    (pp_other_players player game ^ "\n");
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    "Which player would you like to make a deal with?\nEnter '' to go back\n";
+  let s = read_line () in
+  if String.length s > 0 then (
+    try
+      let other_player = find_player s game in
+      if player <> other_player then (
+        ANSITerminal.print_string [ ANSITerminal.yellow ]
+          ("Attempting a deal with " ^ get_name other_player);
+        start_deal player other_player game;
+        ANSITerminal.print_string [ ANSITerminal.blue ]
+          "\nMake more deals? 'y' for yes, anything else for no\n";
+        match read_line () with
+        | "y" | "yes" -> deal_prompt player game
+        | _ -> ())
+      else (
+        ANSITerminal.print_string [ ANSITerminal.red ]
+          "Cannot make a deal with yourself, choose another player\n";
+        deal_prompt player game)
+    with _ ->
+      ANSITerminal.print_string [ ANSITerminal.red ]
+        "Invalid player name, please enter one of the other player names\n";
+      deal_prompt player game)
+
+(* responses from other player: yes, no negotiate*)
 
 let rec end_of_turn player game =
   ANSITerminal.print_string [ ANSITerminal.green ]
-    "Enter 's' to print the remaining players' current stats,\n\
+    "Enter\n\
+     's' to print the remaining players' current stats,\n\
      'b' to check if houses can be built on any properties,\n\
      'm' to mortgage a properties,\n\
-     \'d' to make deals with other players, anything else to move on.\n";
+     \'d' to make deals with other players,\n\
+     anything else to move on.\n";
   match read_line () with
   | "s" ->
       print_game_status game;
@@ -474,6 +521,7 @@ let rec end_of_turn player game =
           If no prompts show up, you cannot currently build houses\n\n");
       check_build player (get_properties player);
       end_of_turn player game
+  | "m" -> mortgage_property player game
   | "d" ->
       deal_prompt player game;
       end_of_turn player game
@@ -539,16 +587,17 @@ let rec addl_player game =
   else
     ANSITerminal.print_string [ ANSITerminal.green ]
       ("\nAdded " ^ get_name new_plyr ^ " to game!\n");
-  ANSITerminal.print_string [ ANSITerminal.green ]
-    (pp_players game
-   ^ "\n\
-      Enter 'add' to add another player, enter anything else to start the game\n"
-    );
+
   if num_players game = 1 then (
     ANSITerminal.print_string [ ANSITerminal.green ] "Please add another player";
     addl_player game)
-  else if num_players game < 4 then
-    match read_line () with "add" -> addl_player game | _ -> current_turn game
+  else if num_players game < 4 then (
+    ANSITerminal.print_string [ ANSITerminal.green ]
+      (pp_players game
+     ^ "\n\
+        Enter 'add' to add another player, enter anything else to start the game\n"
+      );
+    match read_line () with "add" -> addl_player game | _ -> current_turn game)
   else (
     ANSITerminal.print_string [ ANSITerminal.green ]
       "Max number of players reached, starting game...\n";

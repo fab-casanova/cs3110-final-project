@@ -15,7 +15,7 @@ let create_player player_name start =
   {
     name = player_name;
     properties = [];
-    money = 1000;
+    money = 1500;
     position = start;
     monopolies = [];
     jailed = 0;
@@ -52,11 +52,18 @@ let pp_property_list = pp_helper print_level prop_name 2 3
 
 let pp_properties player =
   let properties = get_properties player in
-  pp_helper print_level prop_name 2 3 (List.rev properties)
+  if List.length properties > 0 then
+    pp_helper print_level prop_name 2 3 (List.rev properties)
+  else "none"
 
 let pp_monopolies player =
   let monops = player.monopolies in
-  pp_helper (fun _ -> "") pp_space_type 5 6 monops
+  if List.length monops > 0 then
+    pp_helper (fun _ -> "") pp_space_type 5 6 monops
+  else "none"
+
+let rec pp_jail_free jail_free_cards =
+  match jail_free_cards with [] -> "" | h :: t -> h ^ pp_jail_free t
 
 let player_money player = player.money
 
@@ -119,9 +126,9 @@ let sum_dice dice = fst dice + snd dice
 
 let debug_dubs = false
 
-let debug_comm = false
+let debug_comm = true
 
-let debug_chance = true
+let debug_chance = false
 
 let debug_jail = false
 
@@ -224,6 +231,11 @@ let print_assets player =
   ANSITerminal.print_string [ ANSITerminal.blue ]
     (get_name player ^ "'s properties: " ^ pp_properties player ^ "\n"
    ^ get_name player ^ "'s monopolies: " ^ pp_monopolies player ^ "\n"
+    ^ (if List.length player.jail_free > 0 then
+       get_name player ^ "'s get out of jail free cards: "
+       ^ pp_jail_free player.jail_free
+       ^ "\n"
+      else "")
     ^
     if num_doubles player > 0 then
       string_of_int (num_doubles player) ^ " consecutive double(s)\n"
@@ -266,3 +278,6 @@ let add_jail_free_card deck player =
   player.jail_free <- deck :: player.jail_free
 
 let owns_jail_free_card deck player = List.exists (( = ) deck) player.jail_free
+
+let remove_jail_free_card player =
+  match player.jail_free with [] -> () | h :: t -> player.jail_free <- t

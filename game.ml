@@ -21,6 +21,12 @@ let rec pp_players_helper = function
 
 let pp_players game = "Players: " ^ pp_players_helper game.player_list
 
+let pp_other_players player game =
+  let remaining_list = List.filter (fun x -> x <> player) game.player_list in
+  "Other player"
+  ^ (if List.length remaining_list > 1 then "s: " else ": ")
+  ^ pp_players_helper remaining_list
+
 let last_one_standing game = List.length game.player_list <= 1
 
 let rec p_aux = function
@@ -56,10 +62,13 @@ let print_game_status game =
         ANSITerminal.print_string [ ANSITerminal.blue ]
           (get_name h ^ "'s position: " ^ prop_name (get_position h) ^ "\n");
         print_assets h;
-        print_endline "\n";
-        ppgs_aux t
+        print_endline "\n"
   in
-  ppgs_aux game.player_list
+
+  ppgs_aux game.player_list;
+  if game.money_pot > 0 then
+    ANSITerminal.print_string [ ANSITerminal.yellow ]
+      ("Money pot: " ^ string_of_int game.money_pot ^ "\n")
 
 let create_gameboard (lst : Property.t list) : gameboard = lst
 
@@ -119,8 +128,8 @@ let create_game (board : gameboard) =
     player_list = [];
     current_player = "";
     money_pot = 0;
-    chance_deck = [ 11; 11 ];
-    community_chest_deck = shuffle_deck ();
+    chance_deck = [ 9 ];
+    community_chest_deck = [ 13 ];
   }
 
 let get_property_of_name name game =
@@ -136,9 +145,12 @@ let still_in_game player game = List.mem player game.player_list
 
 let get_players game = game.player_list
 
-let find_player name lst = List.find (fun x -> get_name x = name) lst
+let find_player_name name lst = List.find (fun x -> get_name x = name) lst
 
-let get_owner prop game = find_player (get_owner_name prop) (get_players game)
+let find_player name game = find_player_name name game.player_list
+
+let get_owner prop game =
+  find_player_name (get_owner_name prop) (get_players game)
 
 let get_jail game = List.find is_jail game.board
 

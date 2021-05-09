@@ -12,6 +12,10 @@ type t
 (** [pp_players game] prints out the players of the [game] *)
 val pp_players : t -> string
 
+(** [pp_other_players player game] prints out all players of the [game] aside
+    from [player]*)
+val pp_other_players : Player.t -> t -> string
+
 (** [print_game_status game] prints the position and assets of each active
     player in [game].*)
 val print_game_status : t -> unit
@@ -69,9 +73,8 @@ val get_prop_at_index : int -> t -> Property.t
 (** [get_players game] is the list of players in the [game] *)
 val get_players : t -> Player.t list
 
-(** [find_player name lst] is the player of a given [name] in the [lst] of
-    players *)
-val find_player : string -> players -> Player.t
+(** [find_player name lst] is the player of a given [name] in the [game] *)
+val find_player : string -> t -> Player.t
 
 (** [get_owner prop game] is the player who owns [prop] in the [game] *)
 val get_owner : Property.t -> t -> Player.t

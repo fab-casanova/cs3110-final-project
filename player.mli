@@ -179,3 +179,6 @@ val add_jail_free_card : string -> t -> unit
 (** [add_jail_free_card] returns true if [player] has a get out of jail free
     card from the deck [jail_card]*)
 val owns_jail_free_card : string -> t -> bool
+
+(** [remove_jail_free_card] removes a get out of jail free card from [player]*)
+val remove_jail_free_card : t -> unit
