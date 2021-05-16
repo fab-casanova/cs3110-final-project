@@ -1,0 +1,62 @@
+{
+  "spaces": [
+    {
+      "name": "Pass Go",
+      "card_type": "go",
+      "rent": 0,
+      "buyable": false
+    },
+    {
+      "name": "Mediterranean Avenue",
+      "card_type": "brown",
+      "rents": [
+        2,
+        10,
+        30,
+        90,
+        160,
+        250
+      ],
+      "price": 60,
+      "house_cost": 50,
+      "buyable": true
+    },
+    {
+      "name": "Community Chest No. 1",
+      "card_type": "community chest",
+      "rent": 0,
+      "buyable": false
+    },
+    {
+      "name": "Baltic Avenue",
+      "card_type": "brown",
+      "rents": [
+        4,
+        20,
+        60,
+        180,
+        320,
+        450
+      ],
+      "price": 60,
+      "house_cost": 50,
+      "buyable": true
+    },
+    {
+      "name": "Pay $200 Income Tax",
+      "card_type": "income tax",
+      "rent": 200,
+      "buyable": false
+    },
+    {
+      "name": "Reading Railroad",
+      "card_type": "railroad",
+      "rents": [
+        25
+      ],
+      "price": 200,
+      "house_cost": 0,
+      "buyable": true
+    }
+  ]
+}

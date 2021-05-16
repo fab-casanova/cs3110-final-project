@@ -16,11 +16,17 @@ open Cards
 
 (* Code for testing *)
 let property_test =
-  create_buyable_card "Test" "Green" [| 10; 20; 30; 40; 50; 60 |] 500 100
+  create_buyable_card "property" "Green" [| 10; 20; 30; 40; 50; 60 |] 500 100
 
 let player_test = create_player "player" property_test
 
 let dice_test = (5, 4)
+
+let deck_test = ""
+
+let gameboard_test = create_gameboard [ property_test ]
+
+let game_test = create_game gameboard_test
 
 (*Player functions*)
 
@@ -80,9 +86,17 @@ let player_status_test name dues player out =
 let no_houses_on_monopoly_test name player prop out =
   name >:: fun _ -> assert_equal out (no_houses_on_monopoly player prop)
 
-(* Pending *)
 let owns_property_test name player prop out =
   name >:: fun _ -> assert_equal out (owns_property player prop)
+
+let mortgage_allowed_test name player prop out =
+  name >:: fun _ -> assert_equal out (mortgage_allowed player prop)
+
+let num_jail_free_cards_test name player out =
+  name >:: fun _ -> assert_equal out (num_jail_free_cards player)
+
+let owns_jail_free_card_test name deck player out =
+  name >:: fun _ -> assert_equal out (owns_jail_free_card deck player)
 
 let player_tests =
   [
@@ -104,18 +118,15 @@ let player_tests =
     player_status_test "basic player status test" 0 player_test 0;
     no_houses_on_monopoly_test "basic no house on monopoly test" player_test
       property_test true;
+    owns_property_test "basic owns property test" player_test property_test
+      false;
+    mortgage_allowed_test "basic mortgage allowed test" player_test
+      property_test false;
+    num_jail_free_cards_test "basic number of jail free cards test" player_test
+      0;
+    owns_jail_free_card_test "basic owns jail free card test" deck_test
+      player_test false;
   ]
-
-let mortgage_allowed_test name player prop out =
-  name >:: fun _ -> assert_equal out (mortgage_allowed player prop)
-
-let num_jail_free_cards_test name player out =
-  name >:: fun _ -> assert_equal out (num_jail_free_cards player)
-
-let owns_jail_free_card_test name deck player out =
-  name >:: fun _ -> assert_equal out (owns_jail_free_card deck player)
-
-(* player_tests goes here (might be somewhere else) *)
 
 (*Property functions*)
 
@@ -160,16 +171,6 @@ let is_jail_test name prop out =
 let is_go_to_jail_test name prop out =
   name >:: fun _ -> assert_equal out (is_go_to_jail prop)
 
-let create_buyable_card_test name name_input card_type prices price house_price
-    out =
-  name >:: fun _ ->
-  assert_equal out
-    (create_buyable_card name_input card_type prices price house_price)
-
-let create_unbuyable_card_test name name_input card_type rent out =
-  name >:: fun _ ->
-  assert_equal out (create_unbuyable_card name_input card_type rent)
-
 let calculate_rent_or_tax_test name prop out =
   name >:: fun _ -> assert_equal out (calculate_rent_or_tax prop)
 
@@ -200,24 +201,44 @@ let num_houses_test name prop out =
 let get_value_test name prop out =
   name >:: fun _ -> assert_equal out (get_value prop)
 
-let property_tests = [ get_name_test "Player name test" player_test "player" ]
+let property_tests =
+  [
+    prop_name_test "basic property test" property_test "property";
+    prop_space_type_test "basic property space type test" property_test "Green";
+    can_be_purchased_test "basic can be purchased test" property_test true;
+    can_be_upgraded_test "basic can be upgraded test" property_test true;
+    what_stage_test "basic what stage test" property_test "zero";
+    can_have_houses_test "basic can have houses test" property_test true;
+    is_owned_test "basic is owned test" property_test false;
+    is_com_or_chance_test "basic is community or chance test" property_test
+      false;
+    is_utilities_test "basic is utilities test" property_test false;
+    is_free_parking_test "basic is free parking test" property_test false;
+    is_railroad_test "basic is railroad test" property_test false;
+    is_tax_test "basic is tax test" property_test false;
+    is_jail_test "basic is jail test" property_test false;
+    is_go_to_jail_test "basic is go to jail test" property_test false;
+    calculate_rent_or_tax_test "basic calculate rent test" property_test 10;
+    purchase_price_test "basic purchase price test" property_test 500;
+    house_cost_test "basic house cost test" property_test 100;
+    get_owner_name_test "basic get owner name test" property_test "";
+    is_mortgaged_test "basic is mortgaged test" property_test false;
+    num_for_monopoly_test "basic number for monopoly test" property_test 3;
+    num_houses_test "basic house number test" property_test 0;
+    get_value_test "basic get value test" property_test 500;
+  ]
 
-(*Game functions*)
+(* Game functions *)
 
+(* Pending *)
 let last_one_standing_test name game out =
   name >:: fun _ -> assert_equal out (last_one_standing game)
-
-let create_gameboard_test name lst out =
-  name >:: fun _ -> assert_equal out (create_gameboard lst)
 
 let pot_amount_test name game out =
   name >:: fun _ -> assert_equal out (pot_amount game)
 
 let owns_property_of_name_test name player name game out =
   name >:: fun _ -> assert_equal out (owns_property_of_name player name game)
-
-let create_game_test name board out =
-  name >:: fun _ -> assert_equal out (create_game board)
 
 let get_property_of_name_test name name_input game out =
   name >:: fun _ -> assert_equal out (get_property_of_name name_input game)
@@ -228,8 +249,21 @@ let get_start_pos_test name game out =
 let num_players_test name game out =
   name >:: fun _ -> assert_equal out (num_players game)
 
+(*Pending*)
 let current_player_name_test name game out =
   name >:: fun _ -> assert_equal out (current_player_name game)
+
+let game_tests =
+  [
+    last_one_standing_test "basic last one standing test" game_test true;
+    pot_amount_test "basic pot amount test" game_test 0;
+    owns_property_of_name_test "basic owns property of name test" player_test
+      "property" game_test false;
+    get_property_of_name_test "basic get property of name test" "property"
+      game_test property_test;
+    get_start_pos_test "basic get start position test" game_test property_test;
+    num_players_test "basic player number test" game_test 0;
+  ]
 
 let still_in_game_test name player game out =
   name >:: fun _ -> assert_equal out (still_in_game player game)
@@ -261,7 +295,7 @@ let calculate_dues_test name prop game out =
 let get_deck_test name card_type game out =
   name >:: fun _ -> assert_equal out (get_deck card_type game)
 
-let game_tests = []
+(* game_tests goes here (might be somewhere else) *)
 
 (*Card functions*)
 
