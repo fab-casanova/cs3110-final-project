@@ -106,6 +106,18 @@ val mortgage_allowed : t -> Property.t -> bool
     that can be mortgaged *)
 val mortgageable_props : t -> Property.t list
 
+(** [unmortgageable_props player] is a list of all properties owned by [player]
+    that can be unmortgaged *)
+val unmortgageable_props : t -> Property.t list
+
+(** [can_transfer player prop] is whether [prop] is owned by [player] and can be
+    transfered *)
+val can_transfer : t -> Property.t -> bool
+
+(** [transferable_props player] is a list of all properties owned by [player]
+    that can be transfered *)
+val transferable_props : t -> Property.t list
+
 (** [no_houses_on_monopoly player prop] is true if [player] doesn't have any
     houses on the color of [prop] *)
 val no_houses_on_monopoly : t -> Property.t -> bool

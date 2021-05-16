@@ -217,11 +217,18 @@ let mortgage_allowed player prop =
   && no_houses_on_monopoly player prop
 
 let mortgageable_props player =
-  let rec aux acc = function
-    | [] -> acc
-    | h :: t -> aux (if mortgage_allowed player h then h :: acc else acc) t
-  in
-  aux [] (get_properties player)
+  List.filter (mortgage_allowed player) (get_properties player)
+
+let unmortgageable_props player =
+  List.filter
+    (fun x -> owns_property player x && is_mortgaged x)
+    (get_properties player)
+
+let can_transfer player prop =
+  owns_property player prop && no_houses_on_monopoly player prop
+
+let transferable_props player =
+  List.filter (can_transfer player) (get_properties player)
 
 let print_assets player =
   ANSITerminal.print_string [ ANSITerminal.yellow ]

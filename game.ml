@@ -58,17 +58,18 @@ let print_game_status game =
   let rec ppgs_aux = function
     | [] -> ()
     | h :: t ->
-        ANSITerminal.print_string [ ANSITerminal.green ] (get_name h ^ "\n");
+        ANSITerminal.print_string [ ANSITerminal.green ]
+          ("\n" ^ get_name h ^ "\n");
         ANSITerminal.print_string [ ANSITerminal.blue ]
           (get_name h ^ "'s position: " ^ prop_name (get_position h) ^ "\n");
         print_assets h;
-        print_endline "\n"
+        ppgs_aux t
   in
 
   ppgs_aux game.player_list;
   if game.money_pot > 0 then
     ANSITerminal.print_string [ ANSITerminal.yellow ]
-      ("Money pot: " ^ string_of_int game.money_pot ^ "\n")
+      ("\nMoney pot: $" ^ string_of_int game.money_pot ^ "\n")
 
 let create_gameboard (lst : Property.t list) : gameboard = lst
 
@@ -220,7 +221,7 @@ let move_player player game given_moves special_move =
     put_in_jail player;
     change_pos player (get_property_of_name "Jail" game))
 
-let pay_with_cash player rent_owed = update_player_money player (-1 * rent_owed)
+let pay_with_cash player rent_owed = update_player_money player (-rent_owed)
 
 let remove_player player game =
   if game.current_player = get_name player then move_to_next_player game;
@@ -246,7 +247,7 @@ let bankruptcy player prop game =
   else forfeit player game
 
 let collect_dues player prop dues game =
-  update_player_money player (-1 * dues);
+  update_player_money player (-dues);
   if is_owned prop then
     let owner = get_owner prop game in
     update_player_money owner dues
