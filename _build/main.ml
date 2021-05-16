@@ -179,7 +179,7 @@ let unmortgage_property player game =
     else
       ANSITerminal.print_string [ ANSITerminal.red ]
         "\nInvalid property name. Please enter a valid property\n")
-  else print_string "No properties to mortgage\n"
+  else print_string "No properties to mortgage"
 
 let sell_buildings player prop game =
   ANSITerminal.print_string [ ANSITerminal.blue ]
