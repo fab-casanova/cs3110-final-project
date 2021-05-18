@@ -310,6 +310,6 @@ let card_effect_test name card game out =
 
 let card_tests = []
 
-let suite = "test suite" >::: List.flatten []
+let suite = "test suite" >::: List.flatten [ property_tests; game_tests ]
 
 let _ = run_test_tt_main suite
