@@ -521,8 +521,8 @@ let rec propose_price player asked_player buyer seller prop wants_to_buy =
           propose_price player asked_player buyer seller prop wants_to_buy)
         else (
           ANSITerminal.print_string [ ANSITerminal.blue ]
-            (get_name player ^ ": would you like to "
-            ^ (if wants_to_buy then "buy " else "sell ")
+            (get_name player ^ ": would you like to propose"
+            ^ (if wants_to_buy then "buying " else "selling ")
             ^ prop_name prop ^ " for ");
           ANSITerminal.print_string [ ANSITerminal.yellow ] ("$" ^ input);
           ANSITerminal.print_string [ ANSITerminal.blue ]
@@ -540,7 +540,16 @@ let rec propose_price player asked_player buyer seller prop wants_to_buy =
 
 and barter_respond player asked_player buyer seller prop price wants_to_buy =
   ANSITerminal.print_string [ ANSITerminal.blue ]
-    (get_name asked_player ^ ": yes, no, barter\n");
+    (get_name asked_player ^ ": would you like to "
+    ^ (if wants_to_buy then "sell " else "buy ")
+    ^ prop_name prop
+    ^ (if wants_to_buy then " to " else " from ")
+    ^ get_name asked_player ^ " for ");
+  ANSITerminal.print_string [ ANSITerminal.yellow ] ("$" ^ string_of_int price);
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    "?\n\
+     Enter 'y' to accept, 'b' to barter and propose a new price, or 'n' to \
+     reject the deal\n";
   match read_line () with
   | "y" ->
       ANSITerminal.print_string [ ANSITerminal.green ]
