@@ -33,13 +33,13 @@ let rec p_aux = function
   | [] -> ""
   | [ h ] ->
       prop_name h
-      ^ ( if is_owned h then " (owned by " ^ get_owner_name h ^ ")"
-        else " (unowned)" )
+      ^ (if is_owned h then " (owned by " ^ get_owner_name h ^ ")"
+        else " (unowned)")
       ^ "\n"
   | h :: t ->
       prop_name h
-      ^ ( if is_owned h then " (owned by " ^ get_owner_name h ^ ")"
-        else " (unowned)" )
+      ^ (if is_owned h then " (owned by " ^ get_owner_name h ^ ")"
+        else " (unowned)")
       ^ ",\n" ^ p_aux t
 
 let pp_remaining_properties game player prop =
@@ -103,14 +103,14 @@ let draw_card deck game =
       | [] -> -1
       | h :: t ->
           game.chance_deck <- t;
-          h )
+          h)
   | "community chest" -> (
       check_com_chest_shuffle game.community_chest_deck;
       match game.community_chest_deck with
       | [] -> -1
       | h :: t ->
           game.community_chest_deck <- t;
-          h )
+          h)
   | _ -> -1
 
 let cash_out_pot game player =
@@ -191,13 +191,13 @@ let get_prop_at_index index game = get_prop_at_index_helper index game.board
 let get_new_pos_and_double player the_game =
   let moves = roll_dice () in
   print_endline
-    ( "\n" ^ get_name player ^ " rolled a "
+    ("\n" ^ get_name player ^ " rolled a "
     ^ string_of_int (fst moves)
     ^ " and a "
     ^ string_of_int (snd moves)
     ^ " ("
     ^ string_of_int (sum_dice moves)
-    ^ ")" );
+    ^ ")");
   let new_pos =
     player |> get_position |> get_index the_game |> ( + ) (sum_dice moves)
   in
@@ -216,10 +216,10 @@ let move_player player game given_moves special_move =
     change_pos player new_position;
     if new_index - get_index game old_pos < 0 && not special_move then (
       print_endline "Passed go, collect $200";
-      update_player_money player 200 ) )
+      update_player_money player 200))
   else (
     put_in_jail player;
-    change_pos player (get_property_of_name "Jail" game) )
+    change_pos player (get_property_of_name "Jail" game))
 
 let pay_with_cash player rent_owed = update_player_money player (-rent_owed)
 
@@ -243,7 +243,7 @@ let bankruptcy player prop game =
   if is_owned prop then (
     let owner = get_owner prop game in
     update_player_money owner (player_money player);
-    hand_over_all_properties player owner )
+    hand_over_all_properties player owner)
   else forfeit player game
 
 let collect_dues player prop dues game =
@@ -275,13 +275,13 @@ let get_prop_at_index index game = get_prop_at_index_helper index game.board
 let get_new_pos_and_double player the_game =
   let moves = roll_dice () in
   print_endline
-    ( "\n" ^ get_name player ^ " rolled a "
+    ("\n" ^ get_name player ^ " rolled a "
     ^ string_of_int (fst moves)
     ^ " and a "
     ^ string_of_int (snd moves)
     ^ " ("
     ^ string_of_int (sum_dice moves)
-    ^ ")" );
+    ^ ")");
   let new_pos =
     player |> get_position |> get_index the_game |> ( + ) (sum_dice moves)
   in
@@ -300,10 +300,10 @@ let move_player player game given_moves special_move =
     change_pos player new_position;
     if new_index - get_index game old_pos < 0 && not special_move then (
       print_endline "Passed go, collect $200";
-      update_player_money player 200 ) )
+      update_player_money player 200))
   else (
     put_in_jail player;
-    change_pos player (get_property_of_name "Jail" game) )
+    change_pos player (get_property_of_name "Jail" game))
 
 let pay_with_cash player rent_owed = update_player_money player (-rent_owed)
 
@@ -327,7 +327,7 @@ let bankruptcy player prop game =
   if is_owned prop then (
     let owner = get_owner prop game in
     update_player_money owner (player_money player);
-    hand_over_all_properties player owner )
+    hand_over_all_properties player owner)
   else forfeit player game
 
 let collect_dues player prop dues game =
