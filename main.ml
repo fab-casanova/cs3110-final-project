@@ -515,7 +515,6 @@ let rec propose_price player asked_player buyer seller prop wants_to_buy =
   | _ -> (
       try
         let desired = int_of_string input in
-
         if desired < 0 then (
           ANSITerminal.print_string [ ANSITerminal.red ]
             "Please only enter a nonnegative number or 'n'\n";
@@ -550,7 +549,7 @@ and barter_respond player asked_player buyer seller prop price wants_to_buy =
     ^ (if wants_to_buy then "sell " else "buy ")
     ^ prop_name prop
     ^ (if wants_to_buy then " to " else " from ")
-    ^ get_name asked_player ^ " for ");
+    ^ get_name player ^ " for ");
   ANSITerminal.print_string [ ANSITerminal.yellow ] ("$" ^ string_of_int price);
   ANSITerminal.print_string [ ANSITerminal.blue ]
     "?\n\
