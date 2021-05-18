@@ -521,7 +521,7 @@ let rec propose_price player asked_player buyer seller prop wants_to_buy =
           propose_price player asked_player buyer seller prop wants_to_buy)
         else (
           ANSITerminal.print_string [ ANSITerminal.blue ]
-            ("Would you like to "
+            (get_name player ^ ": would you like to "
             ^ (if wants_to_buy then "buy " else "sell ")
             ^ prop_name prop ^ " for ");
           ANSITerminal.print_string [ ANSITerminal.yellow ] ("$" ^ input);
@@ -600,7 +600,8 @@ let rec propose_deal player asked_player game wants_to_buy =
 
 let rec start_deal player asked_player game =
   ANSITerminal.print_string [ ANSITerminal.blue ]
-    (get_name player ^ ": would you like to buy (b) or sell (s) a property to "
+    (get_name player
+   ^ ": would you like to buy ('b') or sell ('s') a property to "
    ^ get_name asked_player ^ "?\nEnter '' to go back\n");
   let input = read_line () in
   match input with
@@ -632,7 +633,8 @@ let rec deal_prompt player game =
         print_endline "";
         start_deal player other_player game;
         ANSITerminal.print_string [ ANSITerminal.blue ]
-          "\nMake more deals? 'y' for yes, anything else for no\n";
+          ("\n" ^ get_name player
+         ^ ": make more deals? 'y' for yes, anything else for no\n");
         match read_line () with
         | "y" | "yes" -> deal_prompt player game
         | _ -> ())
