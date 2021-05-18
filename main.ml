@@ -514,7 +514,9 @@ let rec barter_respond player asked_player buyer seller prop price game
         ^ (if b then "bought " else "sold ")
         ^ prop_name prop
         ^ (if b then " from " else " to ")
-        ^ get_name asked_player ^ " for " ^ string_of_int price);
+        ^ get_name asked_player ^ " for ");
+      ANSITerminal.print_string [ ANSITerminal.yellow ]
+        ("$" ^ string_of_int price);
       swap_owner seller buyer prop;
       update_player_money buyer (-1 * price);
       update_player_money seller price;
@@ -550,9 +552,10 @@ let rec propose_price player asked_player buyer seller prop game wants_to_buy =
           ANSITerminal.print_string [ ANSITerminal.blue ]
             ("Would you like to "
             ^ (if wants_to_buy then "buy " else "sell ")
-            ^ prop_name prop ^ " for $" ^ input
-            ^ "?\nEnter 'y' to confirm, anything else to choose another price\n"
-            );
+            ^ prop_name prop ^ " for ");
+          ANSITerminal.print_string [ ANSITerminal.yellow ] ("$" ^ input);
+          ANSITerminal.print_string [ ANSITerminal.blue ]
+            "?\nEnter 'y' to confirm, anything else to choose another price\n";
           match read_line () with
           | "y" ->
               barter_respond player asked_player buyer seller prop desired game
@@ -572,7 +575,8 @@ let rec propose_deal player asked_player game wants_to_buy =
   let props = transferable_props seller in
   if List.length props > 0 then (
     ANSITerminal.print_string [ ANSITerminal.blue ]
-      (get_name seller ^ "'s transferable properties: " ^ pp_property_list props);
+      (get_name seller ^ "'s transferable properties: ");
+    ANSITerminal.print_string [ ANSITerminal.cyan ] (pp_property_list props);
     ANSITerminal.print_string [ ANSITerminal.blue ]
       ("\n" ^ get_name player
      ^ ": which property from this list would you like to "
