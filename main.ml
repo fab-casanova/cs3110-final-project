@@ -502,36 +502,7 @@ let rec jail_prompt player game =
     ANSITerminal.print_string [ ANSITerminal.red ] "\n\n";
     attempt_escape player game)
 
-let rec barter_respond player asked_player buyer seller prop price game
-    wants_to_buy =
-  ANSITerminal.print_string [ ANSITerminal.blue ]
-    (get_name asked_player ^ ": yes, no, barter\n");
-  match read_line () with
-  | "y" ->
-      let b = player = buyer in
-      ANSITerminal.print_string [ ANSITerminal.green ]
-        (get_name player ^ " has "
-        ^ (if b then "bought " else "sold ")
-        ^ prop_name prop
-        ^ (if b then " from " else " to ")
-        ^ get_name asked_player ^ " for ");
-      ANSITerminal.print_string [ ANSITerminal.yellow ]
-        ("$" ^ string_of_int price);
-      swap_owner seller buyer prop;
-      update_player_money buyer (-1 * price);
-      update_player_money seller price;
-      check_monopoly buyer prop;
-      remove_monopoly seller prop
-      (* TELEPORT HERE*)
-  | "b" | "n" ->
-      ANSITerminal.print_string [ ANSITerminal.red ]
-        (get_name asked_player ^ " has rejected the deal on " ^ prop_name prop
-       ^ "\n")
-  | _ ->
-      barter_respond player asked_player buyer seller prop price game
-        wants_to_buy
-
-let rec propose_price player asked_player buyer seller prop game wants_to_buy =
+let rec propose_price player asked_player buyer seller prop wants_to_buy =
   ANSITerminal.print_string [ ANSITerminal.blue ]
     (get_name player ^ ": how much would you like to "
     ^ (if wants_to_buy then "buy " else "sell ")
@@ -547,7 +518,7 @@ let rec propose_price player asked_player buyer seller prop game wants_to_buy =
         if desired < 0 then (
           ANSITerminal.print_string [ ANSITerminal.red ]
             "Please only enter a nonnegative number or 'n'\n";
-          propose_price player asked_player buyer seller prop game wants_to_buy)
+          propose_price player asked_player buyer seller prop wants_to_buy)
         else (
           ANSITerminal.print_string [ ANSITerminal.blue ]
             ("Would you like to "
@@ -558,15 +529,40 @@ let rec propose_price player asked_player buyer seller prop game wants_to_buy =
             "?\nEnter 'y' to confirm, anything else to choose another price\n";
           match read_line () with
           | "y" ->
-              barter_respond player asked_player buyer seller prop desired game
+              barter_respond player asked_player buyer seller prop desired
                 wants_to_buy
           | _ ->
-              propose_price player asked_player buyer seller prop game
-                wants_to_buy)
+              propose_price player asked_player buyer seller prop wants_to_buy)
       with _ ->
         ANSITerminal.print_string [ ANSITerminal.red ]
           "Please only enter a nonnegative number or 'n'\n";
-        propose_price player asked_player buyer seller prop game wants_to_buy)
+        propose_price player asked_player buyer seller prop wants_to_buy)
+
+and barter_respond player asked_player buyer seller prop price wants_to_buy =
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    (get_name asked_player ^ ": yes, no, barter\n");
+  match read_line () with
+  | "y" ->
+      ANSITerminal.print_string [ ANSITerminal.green ]
+        (get_name player ^ " has "
+        ^ (if wants_to_buy then "bought " else "sold ")
+        ^ prop_name prop
+        ^ (if wants_to_buy then " from " else " to ")
+        ^ get_name asked_player ^ " for ");
+      ANSITerminal.print_string [ ANSITerminal.yellow ]
+        ("$" ^ string_of_int price);
+      swap_owner seller buyer prop;
+      update_player_money buyer (-1 * price);
+      update_player_money seller price;
+      check_monopoly buyer prop;
+      remove_monopoly seller prop (* TELEPORT HERE*)
+  | "b" ->
+      propose_price asked_player player buyer seller prop (not wants_to_buy)
+  | "n" ->
+      ANSITerminal.print_string [ ANSITerminal.red ]
+        (get_name asked_player ^ " has rejected the deal on " ^ prop_name prop
+       ^ "\n")
+  | _ -> barter_respond player asked_player buyer seller prop price wants_to_buy
 
 let rec propose_deal player asked_player game wants_to_buy =
   let buyer, seller =
@@ -589,8 +585,7 @@ let rec propose_deal player asked_player game wants_to_buy =
         if owns_property_of_name seller input game then
           let prop = get_property_of_name input game in
           if can_transfer seller prop then
-            propose_price player asked_player buyer seller prop game
-              wants_to_buy
+            propose_price player asked_player buyer seller prop wants_to_buy
           else (
             ANSITerminal.print_string [ ANSITerminal.red ]
               (input ^ "cannot be transfered\n");
