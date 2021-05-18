@@ -113,7 +113,7 @@ let buy_property player prop =
     player.money <- player.money - price;
     add_property player prop;
     set_owner prop player.name;
-    if can_have_houses prop then check_monopoly player prop )
+    if can_have_houses prop then check_monopoly player prop)
 
 let num_of_prop is_prop player =
   List.length (List.filter (fun x -> is_prop x) (get_properties player))
@@ -139,7 +139,7 @@ let roll_dice () =
   else if debug_jail then (15, 15)
   else (
     Random.self_init ();
-    (1 + Random.int 5, 1 + Random.int 5) )
+    (1 + Random.int 5, 1 + Random.int 5))
 
 let util_rent player =
   let utils_owned = num_of_util player in
@@ -232,21 +232,21 @@ let transferable_props player =
 
 let print_assets player =
   ANSITerminal.print_string [ ANSITerminal.yellow ]
-    ( get_name player ^ "'s money: $"
+    (get_name player ^ "'s money: $"
     ^ string_of_int (player_money player)
-    ^ "\n" );
+    ^ "\n");
   ANSITerminal.print_string [ ANSITerminal.blue ]
-    ( get_name player ^ "'s properties: " ^ pp_properties player ^ "\n"
-    ^ get_name player ^ "'s monopolies: " ^ pp_monopolies player ^ "\n"
-    ^ ( if List.length player.jail_free > 0 then
-        get_name player ^ "'s get out of jail free cards: "
-        ^ pp_jail_free player.jail_free
-        ^ "\n"
-      else "" )
+    (get_name player ^ "'s properties: " ^ pp_properties player ^ "\n"
+   ^ get_name player ^ "'s monopolies: " ^ pp_monopolies player ^ "\n"
+    ^ (if List.length player.jail_free > 0 then
+       get_name player ^ "'s get out of jail free cards: "
+       ^ pp_jail_free player.jail_free
+       ^ "\n"
+      else "")
     ^
     if num_doubles player > 0 then
       string_of_int (num_doubles player) ^ " consecutive double(s)\n"
-    else "" )
+    else "")
 
 let remove_property player prop =
   player.properties <- List.filter (fun x -> x <> prop) player.properties
@@ -290,5 +290,5 @@ let remove_jail_free_card player =
   match player.jail_free with [] -> () | h :: t -> player.jail_free <- t
 
 let remove_monopoly player prop =
-  let porp_type = get_type prop in
-  player.monopolies <- List.filter (fun x -> x <> porp_type) player.monopolies
+  let prop_type = get_type prop in
+  player.monopolies <- List.filter (fun x -> x <> prop_type) player.monopolies
