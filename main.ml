@@ -521,7 +521,7 @@ let rec propose_price player asked_player buyer seller prop wants_to_buy =
           propose_price player asked_player buyer seller prop wants_to_buy)
         else (
           ANSITerminal.print_string [ ANSITerminal.blue ]
-            (get_name player ^ ": would you like to propose"
+            (get_name player ^ ": would you like to propose "
             ^ (if wants_to_buy then "buying " else "selling ")
             ^ prop_name prop ^ " for ");
           ANSITerminal.print_string [ ANSITerminal.yellow ] ("$" ^ input);
@@ -573,11 +573,7 @@ and barter_respond player asked_player buyer seller prop price wants_to_buy =
        ^ "\n")
   | _ -> barter_respond player asked_player buyer seller prop price wants_to_buy
 
-let rec propose_deal player asked_player game wants_to_buy =
-  let buyer, seller =
-    if wants_to_buy then (player, asked_player) else (asked_player, player)
-  in
-  let props = transferable_props seller in
+let rec propose_deal player asked_player game buyer seller props wants_to_buy =
   if List.length props > 0 then (
     ANSITerminal.print_string [ ANSITerminal.blue ]
       (get_name seller ^ "'s transferable properties: ");
@@ -598,29 +594,46 @@ let rec propose_deal player asked_player game wants_to_buy =
           else (
             ANSITerminal.print_string [ ANSITerminal.red ]
               (input ^ "cannot be transfered\n");
-            propose_deal player asked_player game wants_to_buy)
+            propose_deal player asked_player game buyer seller props
+              wants_to_buy)
         else (
           ANSITerminal.print_string [ ANSITerminal.red ]
             (get_name seller ^ " does not own a property named " ^ input ^ "\n");
-          propose_deal player asked_player game wants_to_buy))
+          propose_deal player asked_player game buyer seller props wants_to_buy))
   else
     ANSITerminal.print_string [ ANSITerminal.red ]
-      (get_name asked_player ^ " does not have any transferrable properties")
+      (get_name asked_player ^ " does not have any transferable properties")
 
 let rec start_deal player asked_player game =
-  ANSITerminal.print_string [ ANSITerminal.blue ]
-    (get_name player
-   ^ ": would you like to buy ('b') or sell ('s') a property to "
-   ^ get_name asked_player ^ "?\nEnter '' to go back\n");
-  let input = read_line () in
-  match input with
-  | "b" -> propose_deal player asked_player game true
-  | "s" -> propose_deal player asked_player game false
-  | "" -> ()
-  | _ ->
-      ANSITerminal.print_string [ ANSITerminal.red ]
-        "Please enter 'b', 's', or '' depending on what you want to do\n";
-      start_deal player asked_player game
+  let tprops1 = transferable_props player in
+  let tprops2 = transferable_props asked_player in
+  let props1exist = List.length tprops1 > 0 in
+  let props2exist = List.length tprops2 > 0 in
+  if props1exist || props2exist then (
+    let msg =
+      match (props2exist, props1exist) with
+      | true, true -> "buy ('b') a property from or sell ('s') a property to "
+      | true, false -> "buy ('b') a property from "
+      | _ -> "sell ('s') a property to "
+    in
+    ANSITerminal.print_string [ ANSITerminal.blue ]
+      (get_name player ^ ": would you like to " ^ msg ^ get_name asked_player
+     ^ "?\nEnter '' to go back\n");
+    let input = read_line () in
+    match input with
+    | "b" ->
+        propose_deal player asked_player game player asked_player tprops2 true
+    | "s" ->
+        propose_deal player asked_player game asked_player player tprops1 false
+    | "" -> ()
+    | _ ->
+        ANSITerminal.print_string [ ANSITerminal.red ]
+          "Please enter one of the given inputs depending on what you want to do\n";
+        start_deal player asked_player game)
+  else
+    ANSITerminal.print_string [ ANSITerminal.red ]
+      "A deal cannot be struck because neither side has any transferable \
+       properties\n"
 
 let rec deal_prompt player game =
   ANSITerminal.print_string [ ANSITerminal.blue ]
@@ -658,13 +671,14 @@ let rec deal_prompt player game =
 
 let rec end_of_turn player game =
   ANSITerminal.print_string [ ANSITerminal.green ]
-    "Enter\n\
-     's' to print the remaining players' current stats,\n\
-     'b' to check if houses can be built on any properties,\n\
-     'm' to mortgage a property,\n\
-     'u' to unmortgage a property,\n\
-     \'d' to make deals with other players,\n\
-     anything else to move on.\n";
+    (get_name player
+   ^ ": enter\n\
+      's' to print the remaining players' current stats,\n\
+      'b' to check if houses can be built on any properties,\n\
+      'm' to mortgage a property,\n\
+      'u' to unmortgage a property,\n\
+      \'d' to make deals with other players,\n\
+      anything else to move on.\n");
   match read_line () with
   | "s" ->
       print_game_status game;
