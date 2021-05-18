@@ -503,21 +503,27 @@ let rec jail_prompt player game =
     attempt_escape player game)
 
 let rec propose_price player asked_player buyer seller prop wants_to_buy =
+  let buyer_max = player_money buyer in
   ANSITerminal.print_string [ ANSITerminal.blue ]
     (get_name player ^ ": how much would you like to "
     ^ (if wants_to_buy then "buy " else "sell ")
-    ^ prop_name prop
-    ^ " for?\n\
-       Please enter a nonnegative number, enter 'n' if you want to cancel\n");
+    ^ prop_name prop ^ " for?\nPlease enter a nonnegative number (at most $"
+    ^ string_of_int buyer_max ^ "), enter 'n' if you want to cancel\n");
   let input = read_line () in
   match input with
   | "n" -> ()
   | _ -> (
       try
         let desired = int_of_string input in
+
         if desired < 0 then (
           ANSITerminal.print_string [ ANSITerminal.red ]
             "Please only enter a nonnegative number or 'n'\n";
+          propose_price player asked_player buyer seller prop wants_to_buy)
+        else if desired > buyer_max then (
+          ANSITerminal.print_string [ ANSITerminal.red ]
+            (get_name buyer ^ " cannot pay anything greater than $"
+           ^ string_of_int buyer_max ^ "\n");
           propose_price player asked_player buyer seller prop wants_to_buy)
         else (
           ANSITerminal.print_string [ ANSITerminal.blue ]
