@@ -505,7 +505,7 @@ let rec jail_prompt player game =
 let rec barter_respond player asked_player buyer seller prop price game
     wants_to_buy =
   ANSITerminal.print_string [ ANSITerminal.blue ]
-    (get_name asked_player ^ ": yes, no, barter\n");
+    "asked player: yes, no, barter\n";
   match read_line () with
   | "y" ->
       let b = player = buyer in
@@ -517,9 +517,7 @@ let rec barter_respond player asked_player buyer seller prop price game
         ^ get_name asked_player ^ " for " ^ string_of_int price);
       swap_owner seller buyer prop;
       update_player_money buyer (-1 * price);
-      update_player_money seller price;
-      check_monopoly buyer prop;
-      remove_monopoly seller prop
+      update_player_money seller price
       (* TELEPORT HERE*)
   | "b" | "n" ->
       ANSITerminal.print_string [ ANSITerminal.red ]
