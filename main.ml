@@ -26,10 +26,14 @@ let rec auction_helper highest_bidder prop bid_price player_list =
         if can_have_houses prop then check_monopoly h prop)
       else if not (in_jail h) then (
         ANSITerminal.print_string [ ANSITerminal.blue ]
-          ("\nCurrent highest bidder: " ^ get_name highest_bidder
-         ^ "\nBid amount: " ^ string_of_int bid_price);
+          "\nCurrent highest bidder: ";
+        ANSITerminal.print_string [ ANSITerminal.cyan ]
+          (get_name highest_bidder ^ "\n");
+        ANSITerminal.print_string [ ANSITerminal.blue ] "Bid amount: ";
+        ANSITerminal.print_string [ ANSITerminal.yellow ]
+          ("$" ^ string_of_int bid_price ^ "\n");
         ANSITerminal.print_string [ ANSITerminal.blue ]
-          ("\n" ^ get_name h
+          (get_name h
          ^ ": enter your bid value, enter 0 if you would not like to bid\n");
         let input = read_line () in
         let new_bid = try int_of_string input with _ -> -1 in
