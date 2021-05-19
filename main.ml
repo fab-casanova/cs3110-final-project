@@ -161,9 +161,9 @@ let rec mortgage_property player game is_end_of_turn =
       (pp_property_list props ^ "\n");
     ANSITerminal.print_string [ ANSITerminal.blue ]
       (get_name player
-     ^ ": what property would you like to mortgage? Enter 'q' to exit\n");
+     ^ ": what property would you like to mortgage? Enter '' to exit\n");
     let input = read_line () in
-    if input = "q" then ()
+    if input = "" then ()
     else if owns_property_of_name player input game then
       let prop = get_property_of_name input game in
       if mortgage_allowed player prop then (
