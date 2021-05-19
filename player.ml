@@ -174,6 +174,9 @@ let can_build_houses_hotel player prop =
   && can_be_upgraded prop
   && is_building_evenly player.properties prop true
 
+let buildable_props player =
+  List.filter (can_build_houses_hotel player) player.properties
+
 let out_of_cash amount_owed player = amount_owed > player.money
 
 let rec net_worth_helper properties total_value =

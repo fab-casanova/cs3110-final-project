@@ -91,11 +91,13 @@ val out_of_cash : int -> t -> bool
     [player]'s net worth and false otherwise *)
 val is_bankrupt : int -> t -> bool
 
-(** [can_build_houses_hotel player prop] is true if [player] can have houses on
-    [prop], if they have a monopoly that includes [prop], if they have enough
-    money to buy and a house on [prop], if [prop] is upgradable, and if building
-    on [prop] ensures that [player] is building evenly over all property types *)
-val can_build_houses_hotel : t -> Property.t -> bool
+(** [buildable_props player] is the list of properties owned by [player] that
+    can currently have houses (or a hotel) built on them. A property is included
+    if the player has a monopoly that includes said property, if they have
+    enough money to buy a house on said property, if said property is
+    upgradeable, and if the building on said property ensures that [player] is
+    building evenly over all properties of that color *)
+val buildable_props : t -> Property.t list
 
 (** [mortgage_allowed player prop] is true if [player] is the owner of [prop],
     [prop] is not currently being mortgaged, and there are no houses on the
