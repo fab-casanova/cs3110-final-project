@@ -292,3 +292,11 @@ let remove_jail_free_card player =
 let remove_monopoly player prop =
   let prop_type = get_type prop in
   player.monopolies <- List.filter (fun x -> x <> prop_type) player.monopolies
+
+let selling_allowed player prop =
+  owns_property player prop
+  && num_houses prop > 0
+  && is_building_evenly (get_properties player) prop false
+
+let sellable_bldg_props player =
+  List.filter (selling_allowed player) player.properties

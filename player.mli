@@ -197,3 +197,7 @@ val remove_jail_free_card : t -> unit
 
 (** [remove_monopoly] removes the color of [prop] from [player]'s monopolies*)
 val remove_monopoly : t -> Property.t -> unit
+
+(** [sellable_bldg_props player] is the list of properties owned by [player]
+    with house that can be currently sold *)
+val sellable_bldg_props : t -> Property.t list

@@ -133,7 +133,6 @@ let mortgage_property player game =
     if input = "q" then ()
     else if owns_property_of_name player input game then
       let prop = get_property_of_name input game in
-      (*let can_mortgage = mortgage_allowed player prop in*)
       if mortgage_allowed player prop then (
         ANSITerminal.print_string [ ANSITerminal.blue ]
           (get_name player ^ ": mortgaging " ^ prop_name prop
@@ -199,32 +198,43 @@ let unmortgage_property player game =
         "\nInvalid property name. Please enter a valid property\n")
   else print_string "No properties to unmortgage\n"
 
-let sell_buildings player prop game =
-  ANSITerminal.print_string [ ANSITerminal.blue ]
-    "What property do you want to sell buildings on?\n";
-  let input = read_line () in
-  if owns_property_of_name player input game then
-    let prop = get_property_of_name input game in
-    let selling_allowed =
-      owns_property player prop
-      && num_houses prop > 0
-      && is_building_evenly (get_properties player) prop false
-    in
-    if selling_allowed then (
-      ANSITerminal.print_string [ ANSITerminal.blue ]
-        ("Selling buildings on " ^ prop_name prop ^ " will earn you $"
-        ^ string_of_int (house_cost prop / 2)
-        ^ ".\n\
-          \  Enter 'y' to go through with this action, anything else to forgo \
-           this action.\n");
-      match read_line () with
-      | "y" ->
-          update_player_money player (house_cost prop / 2);
-          downgrade_property prop
-      | _ -> ())
-    else
-      ANSITerminal.print_string [ ANSITerminal.blue ]
-        "Cannot sell buildings on this property\n"
+let sell_buildings player game =
+  let props = sellable_bldg_props player in
+  if List.length props > 0 then (
+    ANSITerminal.print_string [ ANSITerminal.blue ]
+      "Properties with houses to sell: ";
+    ANSITerminal.print_string [ ANSITerminal.cyan ] (pp_property_list props);
+    ANSITerminal.print_string [ ANSITerminal.blue ]
+      ("\n" ^ get_name player
+     ^ ": what property do you want to sell buildings on?\n");
+    let input = read_line () in
+    if owns_property_of_name player input game then
+      let prop = get_property_of_name input game in
+      let selling_allowed =
+        owns_property player prop
+        && num_houses prop > 0
+        && is_building_evenly (get_properties player) prop false
+      in
+      if selling_allowed then (
+        ANSITerminal.print_string [ ANSITerminal.blue ]
+          ("Selling a building on " ^ prop_name prop ^ " will earn you ");
+        ANSITerminal.print_string [ ANSITerminal.yellow ]
+          ("$" ^ string_of_int (house_cost prop / 2));
+        ANSITerminal.print_string [ ANSITerminal.blue ]
+          ".\n\
+           Enter 'y' to go through with this action, anything else to forgo \
+           this action.\n";
+        match read_line () with
+        | "y" ->
+            update_player_money player (house_cost prop / 2);
+            downgrade_property prop
+        | _ -> ())
+      else
+        ANSITerminal.print_string [ ANSITerminal.blue ]
+          "Cannot sell buildings on this property\n")
+  else
+    ANSITerminal.print_string [ ANSITerminal.red ]
+      "No properties to sell buildings from\n"
 
 let transfer_properties player owner game =
   let props = transferable_props player in
@@ -286,7 +296,7 @@ let rec collect_nonmonetary_payment player receiver rent_owed game =
         mortgage_property player game;
         collect_nonmonetary_payment player receiver rent_owed game
     | "sell buildings" | "sell" ->
-        sell_buildings player receiver game;
+        sell_buildings player game;
         collect_nonmonetary_payment player receiver rent_owed game
     | "transfer properties" | "transfer" ->
         transfer_properties player receiver game;
@@ -453,7 +463,7 @@ let rec play_a_turn game =
         (match num_doubles player with
         | 1 ->
             ANSITerminal.print_string [ ANSITerminal.red ]
-              "Rolled a double. Press Enter to go again"
+              "Rolled a double. Press Enter to go again\n"
         | _ ->
             ANSITerminal.print_string [ ANSITerminal.red ]
               "Rolled a second double. Press Enter to go again\n");
@@ -607,7 +617,7 @@ let rec propose_deal player asked_player game buyer seller props =
             propose_price player asked_player buyer seller prop
           else (
             ANSITerminal.print_string [ ANSITerminal.red ]
-              (input ^ "cannot be transfered\n");
+              (input ^ " cannot be transfered\n");
             propose_deal player asked_player game buyer seller props)
         else (
           ANSITerminal.print_string [ ANSITerminal.red ]
@@ -686,6 +696,7 @@ let rec end_of_turn player game =
    ^ ": enter\n\
       's' to print the remaining players' current stats,\n\
       'b' to check if houses can be built on any properties,\n\
+      'h' to sell houses from your properties,\n\
       'm' to mortgage a property,\n\
       'u' to unmortgage a property,\n\
       \'d' to make deals with other players,\n\
@@ -703,6 +714,9 @@ let rec end_of_turn player game =
           to evenly build houses until no prompts to build show up.\n\
           If no prompts show up, you cannot currently build houses\n\n");
       check_build player (get_properties player);
+      end_of_turn player game
+  | "h" ->
+      sell_buildings player game;
       end_of_turn player game
   | "m" ->
       mortgage_property player game;
