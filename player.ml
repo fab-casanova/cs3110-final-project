@@ -9,9 +9,10 @@ type t = {
   mutable jailed : int;
   mutable jail_free : string list;
   mutable doubles : int;
+  real_player : bool;
 }
 
-let create_player player_name start =
+let create_t is_real player_name start =
   {
     name = player_name;
     properties = [];
@@ -21,7 +22,14 @@ let create_player player_name start =
     jailed = 0;
     jail_free = [];
     doubles = 0;
+    real_player = is_real;
   }
+
+let create_player = create_t true
+
+let create_ai = create_t false
+
+let is_real_player player = player.real_player
 
 let get_name player = player.name
 
@@ -139,7 +147,7 @@ let roll_dice () =
   else if debug_jail then (15, 15)
   else (
     Random.self_init ();
-    (1 + Random.int 5, 1 + Random.int 5))
+    (1 + Random.int 6, 1 + Random.int 6))
 
 let util_rent player =
   let utils_owned = num_of_util player in

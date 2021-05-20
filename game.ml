@@ -16,8 +16,11 @@ type t = {
 
 let rec pp_players_helper = function
   | [] -> ""
-  | [ h ] -> get_name h
-  | h :: t -> get_name h ^ ", " ^ pp_players_helper t
+  | [ h ] -> get_name h ^ if is_real_player h then "" else " (AI)"
+  | h :: t ->
+      get_name h
+      ^ (if is_real_player h then ", " else " (AI PLAYER), ")
+      ^ pp_players_helper t
 
 let pp_players game = "Players: " ^ pp_players_helper game.player_list
 
@@ -89,30 +92,6 @@ let shuffle_deck () =
   let shuffled_with_weights = List.sort compare cards_with_weights in
   List.map snd shuffled_with_weights
 
-let draw_card deck game =
-  let check_chance_shuffle cur_deck =
-    if cur_deck = [] then game.chance_deck <- shuffle_deck ()
-  in
-  let check_com_chest_shuffle cur_deck =
-    if cur_deck = [] then game.community_chest_deck <- shuffle_deck ()
-  in
-  match deck with
-  | "chance" -> (
-      check_chance_shuffle game.chance_deck;
-      match game.chance_deck with
-      | [] -> -1
-      | h :: t ->
-          game.chance_deck <- t;
-          h)
-  | "community chest" -> (
-      check_com_chest_shuffle game.community_chest_deck;
-      match game.community_chest_deck with
-      | [] -> -1
-      | h :: t ->
-          game.community_chest_deck <- t;
-          h)
-  | _ -> -1
-
 let cash_out_pot game player =
   update_player_money player game.money_pot;
   game.money_pot <- 0
@@ -139,6 +118,20 @@ let get_property_of_name name game =
 let get_start_pos game = List.hd game.board
 
 let num_players game = List.length game.player_list
+
+let has_player_named name game =
+  let lst = List.filter (fun x -> get_name x = name) game.player_list in
+  List.length lst > 0
+
+let acceptable_default_name game is_ai =
+  let prefix = if is_ai then "ai" else "player" in
+  let rec aux i =
+    let attempted_name = prefix ^ string_of_int i in
+    if not (has_player_named attempted_name game) then attempted_name
+    else aux (i + 1)
+  in
+  let default = prefix ^ string_of_int (1 + num_players game) in
+  if not (has_player_named default game) then default else aux 1
 
 let current_player_name game = game.current_player
 

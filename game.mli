@@ -76,6 +76,11 @@ val get_players : t -> Player.t list
 (** [find_player name lst] is the player of a given [name] in the [game] *)
 val find_player : string -> t -> Player.t
 
+(** [acceptable_default_name game is_ai] returns a default name of the form
+    "playern" iff [not is_ai] or "ain", where n is the lowest integer which
+    creates a name that is not taken in [game] *)
+val acceptable_default_name : t -> bool -> string
+
 (** [get_owner prop game] is the player who owns [prop] in the [game] *)
 val get_owner : Property.t -> t -> Player.t
 

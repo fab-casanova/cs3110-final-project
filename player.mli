@@ -4,8 +4,15 @@
 type t
 
 (** [create_player player_name start] is a player with the name [player_name]
-    and initializes their position at [start] *)
+    and initial position [start] *)
 val create_player : string -> Property.t -> t
+
+(** [create_ai ai_name start] is an AI player with the name [ai_name] and
+    initial position [start] *)
+val create_ai : string -> Property.t -> t
+
+(** [is_real_player player] is true iff [player] is not an AI player *)
+val is_real_player : t -> bool
 
 (** [get_name player] is the name of [player] *)
 val get_name : t -> string

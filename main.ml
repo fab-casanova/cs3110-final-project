@@ -11,6 +11,10 @@ let win_message game =
       Your parents must be proud :)\n\n\
       Bye!\n\n")
 
+let landed_heads () =
+  Random.self_init ();
+  Random.int 2 = 1
+
 let rec auction_helper highest_bidder prop bid_price player_list =
   match player_list with
   | [] -> ()
@@ -35,10 +39,22 @@ let rec auction_helper highest_bidder prop bid_price player_list =
         ANSITerminal.print_string [ ANSITerminal.blue ]
           (get_name h
          ^ ": enter your bid value, enter 0 if you would not like to bid\n");
-        let input = read_line () in
-        let new_bid = try int_of_string input with _ -> -1 in
-        if new_bid > bid_price && new_bid < player_money h then
-          auction_helper h prop new_bid (t @ [ h ])
+
+        let new_bid =
+          if is_real_player h then
+            let input = read_line () in
+            try int_of_string input with _ -> -1
+          else if player_money h >= bid_price + 50 && landed_heads () then
+            bid_price + 50
+          else 0
+        in
+        if new_bid > bid_price && new_bid <= player_money h then (
+          if not (is_real_player h) then (
+            ANSITerminal.print_string [ ANSITerminal.white ]
+              ("AI " ^ get_name h ^ " placed a bid of ");
+            ANSITerminal.print_string [ ANSITerminal.yellow ]
+              ("$" ^ string_of_int new_bid ^ "\n"));
+          auction_helper h prop new_bid (t @ [ h ]))
         else if new_bid <> 0 then (
           ANSITerminal.print_string [ ANSITerminal.red ]
             (if new_bid <= bid_price && new_bid > 0 then
@@ -47,13 +63,16 @@ let rec auction_helper highest_bidder prop bid_price player_list =
               on this property, please try again\n"
             else "\nInvalid bid, please try again\n");
           auction_helper highest_bidder prop bid_price player_list)
-        else auction_helper highest_bidder prop bid_price (t @ [ h ]))
+        else (
+          if not (is_real_player h) then
+            ANSITerminal.print_string [ ANSITerminal.red ]
+              ("AI " ^ get_name h ^ " did not place a bid\n");
+          auction_helper highest_bidder prop bid_price (t @ [ h ])))
       else auction_helper highest_bidder prop bid_price (t @ [ h ])
 
 let auction prop game =
   auction_helper (current_player game) prop 0 (get_players game)
 
-(* TODO: add remaining properties comment, money gained from selling comment *)
 let rec buy_prompt game player pos =
   ANSITerminal.print_string [ ANSITerminal.blue ]
     (get_name player ^ ": you currently have ");
@@ -65,7 +84,12 @@ let rec buy_prompt game player pos =
     ("$" ^ string_of_int (purchase_price pos));
   ANSITerminal.print_string [ ANSITerminal.blue ]
     "? Type 'y' if yes, 'n' if no (note: typing 'n' will start an auction)\n";
-  match read_line () with
+  let input =
+    if is_real_player player then read_line ()
+    else if landed_heads () then "y"
+    else "n"
+  in
+  match input with
   | "y" ->
       buy_property player pos;
       ANSITerminal.print_string [ ANSITerminal.green ]
@@ -75,7 +99,7 @@ let rec buy_prompt game player pos =
   | "n" ->
       ANSITerminal.print_string [ ANSITerminal.yellow ]
         ("\n" ^ prop_name pos ^ " was not bought\nTime to auction!");
-      auction pos game (*TODO: prompt an auction if prop is not bought*)
+      auction pos game
   | _ ->
       print_endline "Please respond  with 'y' or 'n'";
       buy_prompt game player pos
@@ -87,7 +111,12 @@ let rec build_prompt player prop =
     ("$" ^ string_of_int (house_cost prop));
   ANSITerminal.print_string [ ANSITerminal.blue ]
     ".\nType 'y' to build a house here, and 'n' to pass.\n";
-  match read_line () with
+  let input =
+    if is_real_player player then read_line ()
+    else if landed_heads () then "y"
+    else "n"
+  in
+  match input with
   | "y" ->
       upgrade_property prop;
       update_player_money player (-1 * house_cost prop);
@@ -97,12 +126,6 @@ let rec build_prompt player prop =
   | _ ->
       print_endline "Please respond with 'y' or 'n'";
       build_prompt player prop
-
-let rec check_build_old player game = function
-  | [] -> ()
-  | h :: t ->
-      build_prompt player h;
-      check_build_old player game t
 
 let rec check_build player game props =
   if List.length props = 0 then (
@@ -153,6 +176,14 @@ let rec auction_all_props old_props game =
       auction h game;
       auction_all_props t game
 
+let end_career player pos game =
+  let owned = is_owned pos in
+  let old_props = get_properties player in
+  bankruptcy player pos game;
+  if not (last_one_standing game) then (
+    if not owned then auction_all_props old_props game)
+  else win_message game
+
 let rec mortgage_property player game is_end_of_turn =
   let props = mortgageable_props player in
   if List.length props > 0 then (
@@ -162,7 +193,11 @@ let rec mortgage_property player game is_end_of_turn =
     ANSITerminal.print_string [ ANSITerminal.blue ]
       (get_name player
      ^ ": what property would you like to mortgage? Enter '' to exit\n");
-    let input = read_line () in
+    let input =
+      if is_real_player player then read_line ()
+      else if landed_heads () then prop_name (List.hd props)
+      else ""
+    in
     if input = "" then ()
     else if owns_property_of_name player input game then
       let prop = get_property_of_name input game in
@@ -205,7 +240,11 @@ let rec unmortgage_property player game is_end_of_turn =
       (get_name player
      ^ ": what property would you like to unmortgage? Enter 'q' to exit\n");
 
-    let input = read_line () in
+    let input =
+      if is_real_player player then read_line ()
+      else if landed_heads () then prop_name (List.hd props)
+      else "q"
+    in
     if input = "q" then ()
     else if owns_property_of_name player input game then
       let prop = get_property_of_name input game in
@@ -245,7 +284,11 @@ let rec sell_buildings player game is_end_of_turn =
     ANSITerminal.print_string [ ANSITerminal.blue ]
       ("\n" ^ get_name player
      ^ ": what property do you want to sell buildings on? Enter 'q' to quit\n");
-    let input = read_line () in
+    let input =
+      if is_real_player player then read_line ()
+      else if landed_heads () then prop_name (List.hd props)
+      else "q"
+    in
     if input = "q" then ()
     else if owns_property_of_name player input game then (
       let prop = get_property_of_name input game in
@@ -278,7 +321,11 @@ let transfer_properties player owner game =
     ANSITerminal.print_string [ ANSITerminal.blue ]
       ("Transferrable props: " ^ pp_property_list props ^ "\n" ^ get_name player
      ^ ": what property do you want to sell?\n");
-    let input = read_line () in
+    let input =
+      if is_real_player player then read_line ()
+      else if landed_heads () then prop_name (List.hd props)
+      else "q"
+    in
     if owns_property_of_name player input game then
       let prop = get_property_of_name input game in
       if player = owner && List.mem prop props then (
@@ -288,7 +335,7 @@ let transfer_properties player owner game =
           ^ ".\n\
             \  Enter 'y' to go through with this action, anything else to \
              forgo this action.\n");
-        match read_line () with
+        match if is_real_player player then read_line () else "y" with
         | "y" ->
             update_player_money player (get_value prop);
             return_prop_to_bank player prop;
@@ -302,9 +349,8 @@ let transfer_properties player owner game =
           ^ ".\n\
             \  Enter 'y' to go through with this action, anything else to \
              forgo this action.\n");
-        match read_line () with
+        match if is_real_player player then read_line () else "y" with
         | "y" ->
-            (* TELEPORT HERE *)
             swap_owner player owner prop;
             update_player_money player (get_value prop);
             check_monopoly owner prop;
@@ -314,7 +360,16 @@ let transfer_properties player owner game =
     else print_string "Can't transfer this property\n")
   else print_string "No properties to transfer"
 
-let rec collect_nonmonetary_payment player receiver rent_owed game =
+let ai_collect_action () =
+  match
+    Random.self_init ();
+    Random.int 3
+  with
+  | 0 -> "mortgage"
+  | 1 -> "sell"
+  | _ -> "transfer"
+
+let rec collect_nonmonetary_payment player receiver rent_owed game limit =
   print_assets player;
   ANSITerminal.print_string [ ANSITerminal.blue ]
     ("Player must pay $" ^ string_of_int rent_owed ^ "\n");
@@ -323,38 +378,56 @@ let rec collect_nonmonetary_payment player receiver rent_owed game =
     update_player_money player (-1 * rent_owed);
     if receiver <> player then update_player_money receiver rent_owed
     else add_to_pot game rent_owed)
+  else if limit >= 50 && not (is_real_player player) then (
+    ANSITerminal.print_string [ ANSITerminal.red ]
+      ("AI " ^ get_name player
+     ^ " has run out of turns and has automatically gone bankrupt \n");
+    hand_over_all_properties player receiver;
+    bankruptcy player (get_position player) game;
+    if last_one_standing game then win_message game)
   else (
+    if not (is_real_player player) then
+      ANSITerminal.print_string [ ANSITerminal.blue ]
+        (string_of_int (50 - limit) ^ " turn(s) left for the AI\n");
     ANSITerminal.print_string [ ANSITerminal.blue ]
       "\nWould you like to mortgage, sell buildings, or transfer properties?\n";
     ANSITerminal.print_string [ ANSITerminal.blue ] "> ";
-    match read_line () with
+    match
+      if is_real_player player then read_line () else ai_collect_action ()
+    with
     | "mortgage properties" | "mortgage" ->
         mortgage_property player game false;
-        collect_nonmonetary_payment player receiver rent_owed game
+        collect_nonmonetary_payment player receiver rent_owed game (limit + 1)
     | "sell buildings" | "sell" ->
         sell_buildings player game false;
-        collect_nonmonetary_payment player receiver rent_owed game
+        collect_nonmonetary_payment player receiver rent_owed game (limit + 1)
     | "transfer properties" | "transfer" ->
         transfer_properties player receiver game;
-        collect_nonmonetary_payment player receiver rent_owed game
+        collect_nonmonetary_payment player receiver rent_owed game (limit + 1)
     | _ ->
         ANSITerminal.print_string [ ANSITerminal.blue ]
           "\nInvalid input, please try again\n";
-        collect_nonmonetary_payment player receiver rent_owed game)
+        collect_nonmonetary_payment player receiver rent_owed game (limit + 1))
+
+let end_career player pos dues game =
+  let owned =
+    is_owned pos
+    && dues = calculate_dues pos game
+    && get_owner pos game <> player
+  in
+  let old_props = get_properties player in
+  bankruptcy player pos game;
+  if not (last_one_standing game) then (
+    if not owned then auction_all_props old_props game)
+  else win_message game
 
 let check_status player pos dues game =
   match player_status dues player with
   | 0 -> collect_dues player pos dues game
   | 1 ->
       let owner = if is_owned pos then get_owner pos game else player in
-      collect_nonmonetary_payment player owner dues game
-  | _ ->
-      let owned = is_owned pos in
-      let old_props = get_properties player in
-      bankruptcy player pos game;
-      if not (last_one_standing game) then (
-        if not owned then auction_all_props old_props game)
-      else win_message game
+      collect_nonmonetary_payment player owner dues game 0
+  | _ -> end_career player pos dues game
 
 let rec current_property_effects game player =
   let pos = get_position player in
@@ -447,7 +520,8 @@ and draw_card game =
     | 0 ->
         update_player_money (Option.get giver) (-1 * amount);
         update_player_money (Option.get receiver) amount
-    | 1 -> collect_nonmonetary_payment player (Option.get receiver) amount game
+    | 1 ->
+        collect_nonmonetary_payment player (Option.get receiver) amount game 0
     | _ ->
         let old_props = get_properties (Option.get giver) in
         if not (is_none receiver) then (
@@ -503,7 +577,9 @@ let rec play_a_turn game =
         | _ ->
             ANSITerminal.print_string [ ANSITerminal.red ]
               "Rolled a second double. Press Enter to go again\n");
-        match read_line () with _ -> play_a_turn game))
+        if is_real_player player then
+          match read_line () with _ -> play_a_turn game
+        else play_a_turn game))
 
 let attempt_escape player game =
   ANSITerminal.print_string [ ANSITerminal.blue ]
@@ -563,14 +639,32 @@ let rec jail_prompt player game =
     ANSITerminal.print_string [ ANSITerminal.red ] "\n\n";
     attempt_escape player game)
 
+let ai_barter ai buyer prop =
+  if ai = buyer then
+    string_of_int (min (purchase_price prop - 100) (player_money buyer))
+  else string_of_int (min (purchase_price prop + 100) (player_money buyer))
+
+let ai_respond () =
+  match
+    Random.self_init ();
+    Random.int 3
+  with
+  | 0 -> "y"
+  | 1 -> "b"
+  | _ -> "n"
+
 let rec propose_price player asked_player buyer seller prop =
   let buyer_max = player_money buyer in
-  ANSITerminal.print_string [ ANSITerminal.blue ]
-    (get_name player ^ ": how much would you like to "
-    ^ (if player = buyer then "buy " else "sell ")
-    ^ prop_name prop ^ " for?\nPlease enter a nonnegative number (at most $"
-    ^ string_of_int buyer_max ^ "), enter 'n' if you want to cancel\n");
-  let input = read_line () in
+  if is_real_player player then
+    ANSITerminal.print_string [ ANSITerminal.blue ]
+      (get_name player ^ ": how much would you like to "
+      ^ (if player = buyer then "buy " else "sell ")
+      ^ prop_name prop ^ " for?\nPlease enter a nonnegative number (at most $"
+      ^ string_of_int buyer_max ^ "), enter 'n' if you want to cancel\n");
+  let input =
+    if is_real_player player then read_line () else ai_barter player buyer prop
+  in
+
   match input with
   | "n" -> ()
   | _ -> (
@@ -586,14 +680,15 @@ let rec propose_price player asked_player buyer seller prop =
            ^ string_of_int buyer_max ^ "\n");
           propose_price player asked_player buyer seller prop)
         else (
-          ANSITerminal.print_string [ ANSITerminal.blue ]
-            (get_name player ^ ": would you like to propose "
-            ^ (if player = buyer then "buying " else "selling ")
-            ^ prop_name prop ^ " for ");
-          ANSITerminal.print_string [ ANSITerminal.yellow ] ("$" ^ input);
-          ANSITerminal.print_string [ ANSITerminal.blue ]
-            "?\nEnter 'y' to confirm, anything else to choose another price\n";
-          match read_line () with
+          if is_real_player player then (
+            ANSITerminal.print_string [ ANSITerminal.blue ]
+              (get_name player ^ ": would you like to propose "
+              ^ (if player = buyer then "buying " else "selling ")
+              ^ prop_name prop ^ " for ");
+            ANSITerminal.print_string [ ANSITerminal.yellow ] ("$" ^ input);
+            ANSITerminal.print_string [ ANSITerminal.blue ]
+              "?\nEnter 'y' to confirm, anything else to choose another price\n");
+          match if is_real_player player then read_line () else "y" with
           | "y" -> barter_respond player asked_player buyer seller prop desired
           | _ -> propose_price player asked_player buyer seller prop)
       with _ ->
@@ -613,7 +708,7 @@ and barter_respond player asked_player buyer seller prop price =
     "?\n\
      Enter 'y' to accept, 'b' to barter and propose a new price, or 'n' to \
      reject the deal\n";
-  match read_line () with
+  match if is_real_player asked_player then read_line () else ai_respond () with
   | "y" ->
       ANSITerminal.print_string [ ANSITerminal.green ]
         (get_name player ^ " has "
@@ -628,7 +723,11 @@ and barter_respond player asked_player buyer seller prop price =
       update_player_money seller price;
       check_monopoly buyer prop;
       remove_monopoly seller prop (* TELEPORT HERE*)
-  | "b" -> propose_price asked_player player buyer seller prop
+  | "b" ->
+      if not (is_real_player asked_player) then
+        ANSITerminal.print_string [ ANSITerminal.magenta ]
+          ("AI " ^ get_name asked_player ^ " has decided to barter\n");
+      propose_price asked_player player buyer seller prop
   | "n" ->
       ANSITerminal.print_string [ ANSITerminal.red ]
         (get_name asked_player ^ " has rejected the deal on " ^ prop_name prop
@@ -728,6 +827,7 @@ let rec deal_prompt player game =
         "Invalid player name, please enter one of the other player names\n";
       deal_prompt player game)
 
+(* MODIFY END OF TURN FOR AI *)
 let rec end_of_turn player game =
   ANSITerminal.print_string [ ANSITerminal.green ]
     (get_name player
@@ -741,6 +841,7 @@ let rec end_of_turn player game =
       'end' to move on.\n");
   let input = read_line () in
   if input <> "end" then
+    (*TODO: CHANGE BACK TO "end" *)
     match input with
     | "stats" ->
         print_game_status game;
@@ -772,9 +873,10 @@ let rec end_of_turn player game =
 
 let rec current_turn game =
   if not (last_one_standing game) then (
-    ANSITerminal.print_string [ ANSITerminal.green ]
-      ("\nCurrent player: " ^ get_name (current_player game));
     let curr = current_player game in
+    ANSITerminal.print_string [ ANSITerminal.green ]
+      ("\nCurrent player: " ^ get_name curr
+      ^ if is_real_player curr then "" else " (AI PLAYER)");
     if not (in_jail curr) then
       (* print_endline " NOT IN JAIL";*)
       play_a_turn game
@@ -812,15 +914,33 @@ let rec current_turn game =
         current_turn game)
   else win_message game
 
+let ranking = function
+  | 1 -> "1st"
+  | 2 -> "2nd"
+  | 3 -> "3rd"
+  | n -> string_of_int n ^ "th"
+
 let rec addl_player game =
-  let old_num = num_players game in
-  let default_name = "player" ^ string_of_int (old_num + 1) in
   ANSITerminal.print_string [ ANSITerminal.blue ]
-    ("\n Please give " ^ default_name
-   ^ " a name \n Entering nothing will default to " ^ default_name ^ "\n");
+    "\n\
+     Add a real player or an AI player?\n\
+     Enter 'ai' for an AI player, anything else for a real player\n";
+  let is_ai = read_line () = "ai" in
+  let old_num = num_players game in
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    ("\n Please give the next "
+    ^ (if is_ai then "AI" else "player")
+    ^ " a name \n Entering nothing will yield the default name\n");
   let str = read_line () in
   let new_plyr =
-    create_player (if str = "" then default_name else str) (get_start_pos game)
+    if is_ai then
+      create_ai
+        (if str = "" then acceptable_default_name game true else str)
+        (get_start_pos game)
+    else
+      create_player
+        (if str = "" then acceptable_default_name game false else str)
+        (get_start_pos game)
   in
   add_a_player game new_plyr;
   if old_num = num_players game then
@@ -865,7 +985,7 @@ let first_player game =
 
 let rec main () =
   ANSITerminal.print_string [ ANSITerminal.green ]
-    "\nWelcome to our 3110 Group Project: Monopoly\n\nUsing standard board\n";
+    "\nWelcome to our 3110 Group Project: Monopoly\n";
 
   let board = Standard_board.standard_board in
   let the_game = create_game board in
