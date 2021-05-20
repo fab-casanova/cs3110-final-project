@@ -143,6 +143,15 @@ val print_assets : t -> unit
     cash and bankrupt *)
 val player_status : int -> t -> int
 
+(* [landed heads ()] is whether a coin landed on heads *)
+val landed_heads : unit -> bool
+
+(* [three_sided_die ()] is [0], [1], or [2] with equal probability *)
+val three_sided_die : unit -> int
+
+(** [random_property player] is a randomly-chosen property owned by [player] *)
+val random_property : t -> Property.t
+
 (** [return_prop_to_bank player prop] removes [prop] from [player]'s list of
     properties, sets the owner of [prop] to the empty string (means it's now
     owned by the bank), and resets the stage of [prop] back to Zero *)

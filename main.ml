@@ -4,16 +4,17 @@ open Game
 open Cards
 
 let win_message game =
+  let curr = current_player game in
   ANSITerminal.print_string [ ANSITerminal.yellow ]
-    ("Congratulations " ^ current_player_name game
-   ^ "!\n\n\
-      You won a poorly-coded children's game.\n\n\
-      Your parents must be proud :)\n\n\
-      Bye!\n\n")
-
-let landed_heads () =
-  Random.self_init ();
-  Random.int 2 = 1
+    (if is_real_player curr then
+     "Congratulations " ^ get_name curr
+     ^ "!\n\n\
+        You won a poorly-coded children's game.\n\n\
+        Your parents must be proud :)\n\n\
+        Bye!\n\n"
+    else
+      "The winner of the game is AI " ^ get_name curr
+      ^ ".\nYou lost to a computer, sad.\n")
 
 let rec auction_helper highest_bidder prop bid_price player_list =
   match player_list with
@@ -96,10 +97,11 @@ let rec buy_prompt game player pos =
         ("\n" ^ get_name player ^ " now owns " ^ prop_name pos ^ "\n");
       ANSITerminal.print_string [ ANSITerminal.cyan ]
         (pp_remaining_properties game player pos)
-  | "n" ->
+  | "n" -> (
       ANSITerminal.print_string [ ANSITerminal.yellow ]
-        ("\n" ^ prop_name pos ^ " was not bought\nTime to auction!");
-      auction pos game
+        ("\n" ^ prop_name pos
+       ^ " was not bought\nTime to auction! Press Enter to begin\n");
+      match read_line () with _ -> auction pos game)
   | _ ->
       print_endline "Please respond  with 'y' or 'n'";
       buy_prompt game player pos
@@ -227,7 +229,8 @@ let rec mortgage_property player game is_end_of_turn =
       ANSITerminal.print_string [ ANSITerminal.red ]
         "\nInvalid property name. Please enter a valid property\n";
       mortgage_property player game is_end_of_turn))
-  else print_string "No properties to mortgage\n"
+  else
+    ANSITerminal.print_string [ ANSITerminal.red ] "No properties to mortgage\n"
 
 let rec unmortgage_property player game is_end_of_turn =
   let props = unmortgageable_props player in
@@ -361,10 +364,7 @@ let transfer_properties player owner game =
   else print_string "No properties to transfer"
 
 let ai_collect_action () =
-  match
-    Random.self_init ();
-    Random.int 3
-  with
+  match three_sided_die () with
   | 0 -> "mortgage"
   | 1 -> "sell"
   | _ -> "transfer"
@@ -577,9 +577,8 @@ let rec play_a_turn game =
         | _ ->
             ANSITerminal.print_string [ ANSITerminal.red ]
               "Rolled a second double. Press Enter to go again\n");
-        if is_real_player player then
-          match read_line () with _ -> play_a_turn game
-        else play_a_turn game))
+        (*if is_real_player player then*)
+        match read_line () with _ -> play_a_turn game))
 
 let attempt_escape player game =
   ANSITerminal.print_string [ ANSITerminal.blue ]
@@ -599,10 +598,9 @@ let attempt_escape player game =
 
 let ai_jail player =
   if num_jail_free_cards player > 0 then "use"
-  else
-    match Random.int 2 with
-    | 0 when player_money player >= 50 && time_left player > 1 -> "pay"
-    | _ -> "roll"
+  else if landed_heads () && player_money player >= 50 && time_left player > 1
+  then "pay"
+  else "roll"
 
 let rec jail_prompt player game =
   if
@@ -652,13 +650,7 @@ let ai_barter ai buyer prop =
   else string_of_int (min (purchase_price prop + 100) (player_money buyer))
 
 let ai_respond () =
-  match
-    Random.self_init ();
-    Random.int 3
-  with
-  | 0 -> "y"
-  | 1 -> "b"
-  | _ -> "n"
+  match three_sided_die () with 0 -> "y" | 1 -> "b" | _ -> "n"
 
 let rec propose_price player asked_player buyer seller prop =
   let buyer_max = player_money buyer in
@@ -743,22 +735,29 @@ and barter_respond player asked_player buyer seller prop price =
 
 let rec propose_deal player asked_player game buyer seller props =
   if List.length props > 0 then (
+    let action = if player = buyer then "buy" else "sell" in
     ANSITerminal.print_string [ ANSITerminal.blue ]
       (get_name seller ^ "'s transferable properties: ");
     ANSITerminal.print_string [ ANSITerminal.cyan ] (pp_property_list props);
     ANSITerminal.print_string [ ANSITerminal.blue ]
       ("\n" ^ get_name player
-     ^ ": which property from this list would you like to "
-      ^ (if player = buyer then "buy" else "sell")
-      ^ "?\nEnter '' to go back\n");
-    let input = read_line () in
+     ^ ": which property from this list would you like to " ^ action
+     ^ "?\nEnter '' to go back\n");
+    let input =
+      if is_real_player player then read_line ()
+      else prop_name (random_property seller)
+    in
     match input with
     | "" -> ()
     | _ ->
         if owns_property_of_name seller input game then
           let prop = get_property_of_name input game in
-          if can_transfer seller prop then
-            propose_price player asked_player buyer seller prop
+          if can_transfer seller prop then (
+            if not (is_real_player player) then
+              ANSITerminal.print_string [ ANSITerminal.cyan ]
+                ("AI " ^ get_name player ^ " would like to " ^ action ^ " "
+               ^ input ^ "\n");
+            propose_price player asked_player buyer seller prop)
           else (
             ANSITerminal.print_string [ ANSITerminal.red ]
               (input ^ " cannot be transfered\n");
@@ -771,22 +770,30 @@ let rec propose_deal player asked_player game buyer seller props =
     ANSITerminal.print_string [ ANSITerminal.red ]
       (get_name asked_player ^ " does not have any transferable properties")
 
+let ai_deal cond =
+  match cond with
+  | true, true -> (
+      match three_sided_die () with 0 -> "b" | 1 -> "s" | _ -> "")
+  | true, _ -> if landed_heads () then "b" else ""
+  | _ -> if landed_heads () then "s" else ""
+
 let rec start_deal player asked_player game =
   let tprops1 = transferable_props player in
   let tprops2 = transferable_props asked_player in
   let props1exist = List.length tprops1 > 0 in
   let props2exist = List.length tprops2 > 0 in
+  let cond = (props2exist, props1exist) in
   if props1exist || props2exist then (
     let msg =
-      match (props2exist, props1exist) with
+      match cond with
       | true, true -> "buy ('b') a property from or sell ('s') a property to "
-      | true, false -> "buy ('b') a property from "
+      | true, _ -> "buy ('b') a property from "
       | _ -> "sell ('s') a property to "
     in
     ANSITerminal.print_string [ ANSITerminal.blue ]
       (get_name player ^ ": would you like to " ^ msg ^ get_name asked_player
      ^ "?\nEnter '' to go back\n");
-    let input = read_line () in
+    let input = if is_real_player player then read_line () else ai_deal cond in
     match input with
     | "b" -> propose_deal player asked_player game player asked_player tprops2
     | "s" -> propose_deal player asked_player game asked_player player tprops1
@@ -807,10 +814,13 @@ let rec deal_prompt player game =
     (get_name player
    ^ ": which player would you like to make a deal with?\nEnter '' to go back\n"
     );
-  let s = read_line () in
+  let s = if is_real_player player then read_line () else "random_player" in
   if String.length s > 0 then (
     try
-      let other_player = find_player s game in
+      let other_player =
+        if is_real_player player then find_player s game
+        else random_other_player player game
+      in
       if player <> other_player then (
         ANSITerminal.print_string [ ANSITerminal.yellow ]
           ("Attempting a deal with " ^ get_name other_player ^ "\n");
@@ -822,9 +832,20 @@ let rec deal_prompt player game =
         ANSITerminal.print_string [ ANSITerminal.blue ]
           ("\n" ^ get_name player
          ^ ": make more deals? 'y' for yes, anything else for no\n");
-        match read_line () with
-        | "y" | "yes" -> deal_prompt player game
-        | _ -> ())
+        match
+          if is_real_player player then read_line ()
+          else if three_sided_die () = 2 then "y"
+          else ""
+        with
+        | "y" | "yes" ->
+            if not (is_real_player player) then
+              ANSITerminal.print_string [ ANSITerminal.blue ]
+                "AI is attempting another deal\n";
+            deal_prompt player game
+        | _ ->
+            if not (is_real_player player) then
+              ANSITerminal.print_string [ ANSITerminal.red ]
+                "AI is not attempting another deal\n")
       else (
         ANSITerminal.print_string [ ANSITerminal.red ]
           "Cannot make a deal with yourself, choose another player\n";
@@ -834,49 +855,75 @@ let rec deal_prompt player game =
         "Invalid player name, please enter one of the other player names\n";
       deal_prompt player game)
 
+let ai_end_of_turn lim =
+  if lim >= 10 then "end"
+  else (
+    Random.self_init ();
+    match Random.int 12 with
+    | 0 | 1 -> "build"
+    | 2 -> "sell"
+    | 3 | 4 -> "mortgage"
+    | 5 -> "unmortgage"
+    | 6 | 7 | 8 -> "deal"
+    | _ -> "end")
+
 (* MODIFY END OF TURN FOR AI *)
-let rec end_of_turn player game =
-  ANSITerminal.print_string [ ANSITerminal.green ]
-    (get_name player
-   ^ ": enter\n\
-      'stats' to print the remaining players' current stats,\n\
-      'build' to check if houses can be built on any properties,\n\
-      'sell' to sell houses from your properties,\n\
-      'mortgage' to mortgage a property,\n\
-      'unmortgage' to unmortgage a property,\n\
-      'deal' to make deals with other players,\n\
-      'end' to move on.\n");
-  let input = read_line () in
-  if input <> "end" then
-    (*TODO: CHANGE BACK TO "end" *)
-    match input with
-    | "stats" ->
-        print_game_status game;
-        end_of_turn player game
-    | "build" ->
-        ANSITerminal.print_string [ ANSITerminal.blue ]
-          ("Checking which of " ^ get_name player
-         ^ "'s properties can be built on.\n");
-        let props = buildable_props player in
-        if List.length props > 0 then check_build player game props
-        else
-          ANSITerminal.print_string [ ANSITerminal.red ]
-            "No houses can be built at this time\n";
-        end_of_turn player game
-    | "sell" ->
-        sell_buildings player game true;
-        (*TELEPORT*)
-        end_of_turn player game
-    | "mortgage" ->
-        mortgage_property player game true;
-        end_of_turn player game
-    | "unmortgage" ->
-        unmortgage_property player game true;
-        end_of_turn player game
-    | "deal" ->
-        deal_prompt player game;
-        end_of_turn player game
-    | _ -> end_of_turn player game
+let rec end_of_turn player game lim =
+  if is_real_player player then
+    ANSITerminal.print_string [ ANSITerminal.green ]
+      (get_name player
+     ^ ": enter\n\
+        'stats' to print the remaining players' current stats,\n\
+        'build' to check if houses can be built on any properties,\n\
+        'sell' to sell houses from your properties,\n\
+        'mortgage' to mortgage a property,\n\
+        'unmortgage' to unmortgage a property,\n\
+        'deal' to make deals with other players,\n\
+        'end' to move on.\n")
+  else (
+    ANSITerminal.print_string [ ANSITerminal.green ]
+      ("AI " ^ get_name player ^ " has "
+      ^ string_of_int (10 - lim)
+      ^ " actions left\nPress Enter to let AI perform action\n");
+    match read_line () with _ -> ());
+  match if is_real_player player then read_line () else ai_end_of_turn lim with
+  | "stats" ->
+      if not (is_real_player player) then
+        ANSITerminal.print_string [ ANSITerminal.green ] "AI is checking stats";
+      print_game_status game;
+      end_of_turn player game (lim + 1)
+  | "build" ->
+      ANSITerminal.print_string [ ANSITerminal.blue ]
+        ("Checking which of " ^ get_name player
+       ^ "'s properties can be built on.\n");
+      let props = buildable_props player in
+      if List.length props > 0 then check_build player game props
+      else
+        ANSITerminal.print_string [ ANSITerminal.red ]
+          "No houses can be built at this time\n";
+      end_of_turn player game (lim + 1)
+  | "sell" ->
+      sell_buildings player game true;
+      (*TELEPORT*)
+      end_of_turn player game (lim + 1)
+  | "mortgage" ->
+      mortgage_property player game true;
+      end_of_turn player game (lim + 1)
+  | "unmortgage" ->
+      unmortgage_property player game true;
+      end_of_turn player game (lim + 1)
+  | "deal" ->
+      deal_prompt player game;
+      end_of_turn player game (lim + 1)
+  | "end" ->
+      if not (is_real_player player) then
+        ANSITerminal.print_string [ ANSITerminal.red ]
+          ("AI " ^ get_name player ^ " has ended their turn")
+  | _ -> end_of_turn player game lim
+
+let ai_forfeit () =
+  Random.self_init ();
+  if Random.int 100 = 50 then "forfeit" else ""
 
 let rec current_turn game =
   if not (last_one_standing game) then (
@@ -896,12 +943,12 @@ let rec current_turn game =
         ANSITerminal.print_string [ ANSITerminal.blue ]
           (string_of_int (time_left curr)
           ^ " turn(s) left in jail for " ^ get_name curr ^ "\n")));
-    end_of_turn curr game;
+    end_of_turn curr game 0;
     ANSITerminal.print_string [ ANSITerminal.green ]
       ("\nContinue playing? Enter 'f' to forfeit, 'q' to quit the entire game\n"
      ^ "anything else to start the next turn.\n");
-    match read_line () with
-    | "f" ->
+    match if is_real_player curr then read_line () else ai_forfeit () with
+    | "forfeit" ->
         ANSITerminal.print_string [ ANSITerminal.red ]
           (get_name curr ^ " has forfeited. \n Removing " ^ get_name curr
          ^ "\n\n");
@@ -913,17 +960,11 @@ let rec current_turn game =
             (pp_players game ^ "\n\n");
           current_turn game)
         else win_message game
-    | "q" -> ANSITerminal.print_string [ ANSITerminal.green ] "Bye!\n\n"
+    | "quit" -> ANSITerminal.print_string [ ANSITerminal.green ] "Bye!\n\n"
     | _ ->
         move_to_next_player game;
         current_turn game)
   else win_message game
-
-let ranking = function
-  | 1 -> "1st"
-  | 2 -> "2nd"
-  | 3 -> "3rd"
-  | n -> string_of_int n ^ "th"
 
 let rec addl_player game =
   ANSITerminal.print_string [ ANSITerminal.blue ]

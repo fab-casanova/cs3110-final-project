@@ -23,10 +23,6 @@ val print_game_status : t -> unit
 (** [create_gameboard lst] creates a gameboard out of a [lst] of properties *)
 val create_gameboard : Property.t list -> gameboard
 
-(** [current_player_name game] is the name of the player whose turn it is in the
-    [game] *)
-val current_player_name : t -> string
-
 (** [current_player game] is the current player whose turn it is in the [game] *)
 val current_player : t -> Player.t
 
@@ -73,8 +69,12 @@ val get_prop_at_index : int -> t -> Property.t
 (** [get_players game] is the list of players in the [game] *)
 val get_players : t -> Player.t list
 
-(** [find_player name lst] is the player of a given [name] in the [game] *)
+(** [find_player name game] is the player of a given [name] in the [game] *)
 val find_player : string -> t -> Player.t
+
+(** [random_other_player game] is a randomly-chosen player in the [game] that is
+    not [player] *)
+val random_other_player : Player.t -> t -> Player.t
 
 (** [acceptable_default_name game is_ai] returns a default name of the form
     "playern" iff [not is_ai] or "ain", where n is the lowest integer which

@@ -203,6 +203,22 @@ let player_status dues player =
   else if not (is_bankrupt dues player) then 1
   else 2
 
+let landed_heads () =
+  Random.self_init ();
+  Random.int 2 = 1
+
+let three_sided_die () =
+  Random.self_init ();
+  Random.int 3
+
+let random_property player =
+  let lst = player.properties in
+  let rec aux = function
+    | [] -> aux lst
+    | h :: t -> if landed_heads () then h else aux t
+  in
+  aux lst
+
 let no_houses_on_monopoly player prop =
   let monopoly =
     List.find_all (fun x -> get_type x = get_type prop) player.properties

@@ -30,6 +30,14 @@ let pp_other_players player game =
   ^ (if List.length remaining_list > 1 then "s: " else ": ")
   ^ pp_players_helper remaining_list
 
+let random_other_player player game =
+  let lst = game.player_list in
+  let rec aux = function
+    | [] -> aux lst
+    | h :: t -> if landed_heads () && h <> player then h else aux t
+  in
+  aux lst
+
 let last_one_standing game = List.length game.player_list <= 1
 
 let rec p_aux = function
