@@ -16,7 +16,7 @@ type t = {
 
 let rec pp_players_helper = function
   | [] -> ""
-  | [ h ] -> get_name h ^ if is_real_player h then "" else " (AI)"
+  | [ h ] -> get_name h ^ if is_real_player h then "" else " (AI PLAYER)"
   | h :: t ->
       get_name h
       ^ (if is_real_player h then ", " else " (AI PLAYER), ")
