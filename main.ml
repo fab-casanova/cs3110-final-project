@@ -597,6 +597,13 @@ let attempt_escape player game =
   else
     ANSITerminal.print_string [ ANSITerminal.yellow ] "Did not roll doubles!\n"
 
+let ai_jail player =
+  if num_jail_free_cards player > 0 then "use"
+  else
+    match Random.int 2 with
+    | 0 when player_money player >= 50 && time_left player > 1 -> "pay"
+    | _ -> "roll"
+
 let rec jail_prompt player game =
   if
     num_jail_free_cards player > 0
@@ -612,7 +619,7 @@ let rec jail_prompt player game =
         else "")
       ^ "attempt to roll doubles (roll) to escape jail? Type 'no' to remain in \
          jail\n");
-    match read_line () with
+    match if is_real_player player then read_line () else ai_jail player with
     | "pay" ->
         if player_money player < 50 then (
           ANSITerminal.print_string [ ANSITerminal.red ] "\nNot enough money\n";
@@ -625,7 +632,6 @@ let rec jail_prompt player game =
           update_player_money player (-50);
           un_jail player)
     | "y" | "roll" -> attempt_escape player game
-    | "remain" | "n" | "no" -> ()
     | "use" | "use card" ->
         if num_jail_free_cards player > 0 then (
           remove_jail_free_card player;
@@ -634,6 +640,7 @@ let rec jail_prompt player game =
           ANSITerminal.print_string [ ANSITerminal.red ]
             "\nDoesn't own get out of jail free card\n";
           jail_prompt player game)
+    | "remain" | "n" | "no" -> ()
     | _ -> jail_prompt player game)
   else (
     ANSITerminal.print_string [ ANSITerminal.red ] "\n\n";
@@ -883,8 +890,6 @@ let rec current_turn game =
     else (
       ANSITerminal.print_string [ ANSITerminal.red ]
         ("\n" ^ get_name curr ^ " is in jail\n");
-      (* (let pos = get_position curr in print_endline (get_name curr ^ " is at:
-         " ^ prop_name pos ^ " (" ^ prop_space_type pos ^ ")")); *)
       jail_prompt curr game;
       if in_jail curr then (
         served_a_turn curr;
