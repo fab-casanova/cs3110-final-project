@@ -1,4 +1,4 @@
-MODULES= property player game main standard_board cards json_reader
+MODULES= property player game main cards json_reader
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)

@@ -251,7 +251,7 @@ let num_players_test name game out =
 
 (*Pending*)
 let current_player_name_test name game out =
-  name >:: fun _ -> assert_equal out (current_player_name game)
+  name >:: fun _ -> assert_equal out (get_name (current_player game))
 
 let game_tests =
   [
