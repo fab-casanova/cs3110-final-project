@@ -1,4 +1,4 @@
-MODULES= property player game main standard_board cards
+MODULES= property player game main standard_board cards json_reader
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
@@ -25,12 +25,12 @@ docs: docs-public docs-private
 	
 docs-public: build
 	mkdir -p _doc.public
-	ocamlfind ocamldoc -I _build -package ANSITerminal \
+	ocamlfind ocamldoc -I _build -package ANSITerminal,yojson \
 		-html -stars -d _doc.public $(MLIS)
 
 docs-private: build
 	mkdir -p _doc.private
-	ocamlfind ocamldoc -I _build -package ANSITerminal \
+	ocamlfind ocamldoc -I _build -package ANSITerminal,yojson \
 		-html -stars -d _doc.private \
 		-inv-merge-ml-mli -m A $(MLIS) $(MLS)
 
