@@ -4,17 +4,31 @@ open Player
 open Game
 open Cards
 
-(*Player Done*)
-(*Property Done*)
-(*Game Done*)
-(*Cards Done*)
-(*Main*)
+(* Throughout the project, the main method of testing we employed was play
+   testing. This is because the project is a board game, and unit testing isn't
+   enough to ensure that such a complex game works well. Almost every function
+   is interconnected, so testing soley inidividually wouldn't ensure proper
+   functionality. It's also very hard to write unit tests for some aspects of
+   the game because of it's complexity. We created special decks and rigged dice
+   rolls to help us test directly whether certain tiles and cards worked.
+   However, to test the most complex parts of the game, we needed do a full
+   playthrough the game and make sure it never crashed, while tracking the
+   results.
 
-(*Template*)
-(*let funct_test name inp1 inp2 inp3 out = name >:: fun _ -> assert_equal out
-  (funct inp1 inp2 inp3)*)
+   Despite these issues, we still used unit testing to test individual functions
+   that weren't heavily reliant on other functions. We used black box testing to
+   create our unit tests. These tests helped ensure the proper output resulted
+   directly. We translated the rules of monopoly into specific values to compare
+   the outputs (e.g. 0-40 indexes, building basic houses, specifc property test
+   etc.).
 
-(* Code for testing *)
+   Our testing approach demonstrates the correctness of our system because it
+   ensures that many individual components of our system work correctly. Since
+   there are numerous interconnected functions, we needed to test the program as
+   we played through the entire game. Through rigorous playtesting, we were also
+   able to ensure that all these individual components are able to work together
+   to create a bugless game.*)
+
 let property_test =
   create_buyable_card "property" "Green" [| 10; 20; 30; 40; 50; 60 |] 500 100
 
@@ -36,10 +50,6 @@ let get_name_test name player out =
 let get_properties_test name player out =
   name >:: fun _ -> assert_equal out (get_properties player)
 
-(* Skipped *)
-let num_doubles_test name player out =
-  name >:: fun _ -> assert_equal out (num_doubles player)
-
 let player_money_test name player out =
   name >:: fun _ -> assert_equal out (player_money player)
 
@@ -55,15 +65,8 @@ let time_left_test name player out =
 let sum_dice_test name dice out =
   name >:: fun _ -> assert_equal out (sum_dice dice)
 
-(*Skipped*)
-let roll_dice_test name out = name >:: fun _ -> assert_equal out (roll_dice ())
-
 let has_monopoly_test name player prop out =
   name >:: fun _ -> assert_equal out (has_monopoly player prop)
-
-(* Skipped *)
-let calculate_owned_rent_test name prop owner out =
-  name >:: fun _ -> assert_equal out (calculate_owned_rent prop owner)
 
 let is_building_evenly_test name props prop is_building out =
   name >:: fun _ -> assert_equal out (is_building_evenly props prop is_building)
@@ -110,8 +113,8 @@ let player_tests =
     has_monopoly_test "basic has monopoly test" player_test property_test false;
     is_building_evenly_test "basic building evenly test" [ property_test ]
       property_test true true;
-    can_build_houses_hotel_test "basic can biuld houses test" player_test
-      property_test true;
+    can_build_houses_hotel_test "basic can build houses test" player_test
+      property_test false;
     out_of_cash_test "basic out of cash test" 0 player_test false;
     net_worth_test "basic net worth test" player_test 1500;
     is_bankrupt_test "basic is bankrupt test" 0 player_test false;
@@ -230,7 +233,6 @@ let property_tests =
 
 (* Game functions *)
 
-(* Pending *)
 let last_one_standing_test name game out =
   name >:: fun _ -> assert_equal out (last_one_standing game)
 
@@ -249,9 +251,20 @@ let get_start_pos_test name game out =
 let num_players_test name game out =
   name >:: fun _ -> assert_equal out (num_players game)
 
-(*Pending*)
-let current_player_name_test name game out =
-  name >:: fun _ -> assert_equal out (get_name (current_player game))
+let still_in_game_test name player game out =
+  name >:: fun _ -> assert_equal out (still_in_game player game)
+
+let get_players_test name game out =
+  name >:: fun _ -> assert_equal out (get_players game)
+
+let get_index_test name game prop out =
+  name >:: fun _ -> assert_equal out (get_index game prop)
+
+let get_prop_at_index_test name index game out =
+  name >:: fun _ -> assert_equal out (get_prop_at_index index game)
+
+let calculate_dues_test name prop game out =
+  name >:: fun _ -> assert_equal out (calculate_dues prop game)
 
 let game_tests =
   [
@@ -263,53 +276,15 @@ let game_tests =
       game_test property_test;
     get_start_pos_test "basic get start position test" game_test property_test;
     num_players_test "basic player number test" game_test 0;
+    still_in_game_test "basic still in game test" player_test game_test false;
+    get_players_test "basic get players test" game_test [];
+    get_index_test "basic get index test" game_test property_test 0;
+    get_prop_at_index_test "basic get property at index test" 0 game_test
+      property_test;
+    calculate_dues_test "basic calculate dues test" property_test game_test 10;
   ]
 
-let still_in_game_test name player game out =
-  name >:: fun _ -> assert_equal out (still_in_game player game)
-
-let get_players_test name game out =
-  name >:: fun _ -> assert_equal out (get_players game)
-
-let find_player_test name name_input lst out =
-  name >:: fun _ -> assert_equal out (find_player name_input lst)
-
-let get_owner_test name prop game out =
-  name >:: fun _ -> assert_equal out (get_owner prop game)
-
-let get_jail_test name game out =
-  name >:: fun _ -> assert_equal out (get_jail game)
-
-let current_player_test name game out =
-  name >:: fun _ -> assert_equal out (current_player game)
-
-let get_index_test name game prop out =
-  name >:: fun _ -> assert_equal out (get_index game prop)
-
-let get_prop_at_index_test name index game out =
-  name >:: fun _ -> assert_equal out (get_prop_at_index index game)
-
-let calculate_dues_test name prop game out =
-  name >:: fun _ -> assert_equal out (calculate_dues prop game)
-
-let get_deck_test name card_type game out =
-  name >:: fun _ -> assert_equal out (get_deck card_type game)
-
-(* game_tests goes here (might be somewhere else) *)
-
-(*Card functions*)
-
-let get_card_test name card_type card_id out =
-  name >:: fun _ -> assert_equal out (get_card card_type card_id)
-
-let card_text_test name card out =
-  name >:: fun _ -> assert_equal out (card_text card)
-
-let card_effect_test name card game out =
-  name >:: fun _ -> assert_equal out (card_effect card game)
-
-let card_tests = []
-
-let suite = "test suite" >::: List.flatten [ property_tests; game_tests ]
+let suite =
+  "test suite" >::: List.flatten [ property_tests; game_tests; player_tests ]
 
 let _ = run_test_tt_main suite

@@ -277,6 +277,7 @@ let rec unmortgage_property player game is_end_of_turn =
   else print_string "No properties to unmortgage\n"
 
 let rec sell_buildings player game is_end_of_turn =
+  (*TELEPORT*)
   let props = sellable_bldg_props player in
   if List.length props > 0 then (
     ANSITerminal.print_string [ ANSITerminal.blue ]
@@ -575,6 +576,7 @@ let rec play_a_turn game =
         | _ ->
             ANSITerminal.print_string [ ANSITerminal.red ]
               "Rolled a second double. Press Enter to go again\n");
+        (*if is_real_player player then*)
         match read_line () with _ -> play_a_turn game))
 
 let attempt_escape player game =
@@ -718,7 +720,7 @@ and barter_respond player asked_player buyer seller prop price =
       update_player_money buyer (-1 * price);
       update_player_money seller price;
       check_monopoly buyer prop;
-      remove_monopoly seller prop
+      remove_monopoly seller prop (* TELEPORT HERE*)
   | "b" ->
       if not (is_real_player asked_player) then
         ANSITerminal.print_string [ ANSITerminal.magenta ]
@@ -865,6 +867,7 @@ let ai_end_of_turn lim =
     | 6 | 7 | 8 -> "deal"
     | _ -> "end")
 
+(* MODIFY END OF TURN FOR AI *)
 let rec end_of_turn player game lim =
   if is_real_player player then
     ANSITerminal.print_string [ ANSITerminal.green ]
@@ -901,6 +904,7 @@ let rec end_of_turn player game lim =
       end_of_turn player game (lim + 1)
   | "sell" ->
       sell_buildings player game true;
+      (*TELEPORT*)
       end_of_turn player game (lim + 1)
   | "mortgage" ->
       mortgage_property player game true;
@@ -927,7 +931,9 @@ let rec current_turn game =
     ANSITerminal.print_string [ ANSITerminal.green ]
       ("\nCurrent player: " ^ get_name curr
       ^ if is_real_player curr then "" else " (AI PLAYER)");
-    if not (in_jail curr) then play_a_turn game
+    if not (in_jail curr) then
+      (* print_endline " NOT IN JAIL";*)
+      play_a_turn game
     else (
       ANSITerminal.print_string [ ANSITerminal.red ]
         ("\n" ^ get_name curr ^ " is in jail\n");

@@ -6,4 +6,9 @@ Run [make build] on the terminal to build the program.
 Play game:
 Run [make play] on the terminal to start the game.
 
+Create Documentation:
+Run [make docs] to create public and private documentation.
 
+Open Documentation:
+Public: Run [open _doc.public/index.html] to open public documentation
+Private: Run [open _doc.private/index.html] to open private documentation
