@@ -1,2 +1,4 @@
-(* The main.mli file is deliberately empty. Its functions are never called
-   outside of [make play]. *)
+(** Runs the game
+
+    The main.mli file is deliberately empty, as its functions are never called
+    outside of this module. *)
