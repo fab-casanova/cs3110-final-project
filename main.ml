@@ -942,8 +942,9 @@ let rec current_turn game =
           ^ " turn(s) left in jail for " ^ get_name curr ^ "\n")));
     end_of_turn curr game 0;
     ANSITerminal.print_string [ ANSITerminal.green ]
-      ("\nContinue playing? Enter 'f' to forfeit, 'q' to quit the entire game\n"
-     ^ "anything else to start the next turn.\n");
+      ("\n\
+        Continue playing? Enter 'forfeit' to forfeit, 'quit' to quit the \
+        entire game\n" ^ "anything else to start the next turn.\n");
     match if is_real_player curr then read_line () else ai_forfeit () with
     | "forfeit" ->
         ANSITerminal.print_string [ ANSITerminal.red ]
