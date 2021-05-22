@@ -210,9 +210,16 @@ let three_sided_die () =
   Random.int 3
 
 let rec random_elt lst =
+  let len = List.length lst in
   let rec aux = function
-    | [] -> random_elt lst
-    | h :: t -> if landed_heads () then h else random_elt t
+    | [ h ] -> h
+    | h :: t ->
+        if
+          Random.self_init ();
+          Random.int len = 0
+        then h
+        else random_elt t
+    | [] -> failwith "Impossible branch"
   in
   aux lst
 

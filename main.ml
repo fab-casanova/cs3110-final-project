@@ -642,9 +642,11 @@ let rec jail_prompt player game =
     attempt_escape player game)
 
 let ai_barter ai buyer prop =
-  if ai = buyer then
-    string_of_int (min (purchase_price prop - 100) (player_money buyer))
-  else string_of_int (min (purchase_price prop + 100) (player_money buyer))
+  let pprice =
+    if ai = buyer then purchase_price prop - 100 else purchase_price prop + 100
+  in
+  let tentative = min pprice (player_money buyer) in
+  string_of_int (max 0 tentative)
 
 let ai_respond () =
   match three_sided_die () with 0 -> "y" | 1 -> "b" | _ -> "n"
@@ -733,6 +735,7 @@ and barter_respond player asked_player buyer seller prop price =
 let rec propose_deal player asked_player game buyer seller props =
   if List.length props > 0 then (
     let action = if player = buyer then "buy" else "sell" in
+
     ANSITerminal.print_string [ ANSITerminal.blue ]
       (get_name seller ^ "'s transferable properties: ");
     ANSITerminal.print_string [ ANSITerminal.cyan ] (pp_property_list props);
@@ -787,11 +790,11 @@ let rec start_deal player asked_player game =
       | true, _ -> "buy ('b') a property from "
       | _ -> "sell ('s') a property to "
     in
-
     ANSITerminal.print_string [ ANSITerminal.blue ]
       (get_name player ^ ": would you like to " ^ msg ^ get_name asked_player
      ^ "?\nEnter '' to go back\n");
     let input = if is_real_player player then read_line () else ai_deal cond in
+    print_endline input;
     match input with
     | "b" -> propose_deal player asked_player game player asked_player tprops2
     | "s" -> propose_deal player asked_player game asked_player player tprops1

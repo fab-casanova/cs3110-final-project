@@ -154,7 +154,8 @@ val landed_heads : unit -> bool
 (* [three_sided_die ()] is [0], [1], or [2] with equal probability *)
 val three_sided_die : unit -> int
 
-(** [random_elt lst] is a random element of  list [lst] *)
+(** [random_elt lst] is a random element of nonempty list [lst]
+    Requires: [lst] is nonempty *)
 val random_elt : 'a list -> 'a
 
 
