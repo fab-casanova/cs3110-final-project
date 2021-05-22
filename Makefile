@@ -16,7 +16,7 @@ test:
 	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST) -runner sequential
 
 zip:
-	zip monopoly.zip *.ml* *.txt _tags .merlin .ocamlformat .ocamlinit LICENSE Makefile
+	zip monopoly.zip *.ml* *.txt *.json _tags .merlin .ocamlformat .ocamlinit LICENSE Makefile
 
 play:
 	$(OCAMLBUILD) -tag 'debug' $(MAIN) && OCAMLRUNPARAM=b ./$(MAIN)
